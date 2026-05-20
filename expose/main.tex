@@ -1,0 +1,130 @@
+% !TeX spellcheck = en_US
+\documentclass[AIRstudentexpose%      style
+              ,optBiber%              bibliography tool
+              ,optBibstyleAlphabetic% bibliography style
+              ,optEnglish%            language
+              %,optTikzExternalize%   compiles faster for large tikz images
+              ]{AIRlatex}%
+%
+% Set paths
+\graphicspath{{figures/}}%
+\addbibresource{source/literature.bib}%
+%
+\begin{document}%
+% Titlepage
+% ---------
+%\AIRstudentexposeTitlePageBachelorsThesis{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{Your Supervisor}{\AIRutilsToday}%
+%\AIRstudentexposeTitlePageSemesterThesis{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{Your Supervisor}{\AIRutilsToday}%
+\AIRstudentexposeTitlePageMastersThesis{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{\AIRnamesProfKnoll}{\AIRutilsToday}%
+%\AIRstudentexposeTitlePageIDP{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{Your Supervisor}{\AIRutilsToday}%
+%
+% Contents
+% --------
+% REMARKS
+% An expose is a document in which you define the topic of your thesis at an early stage and develop a realistic work-
+% plan. It should make clear what what topics will be addressed and what problems are to be solved (and where necessary
+% which challenges are excluded). Your concept paper can be approximately 3 to 4 pages long, depending on the topic,
+% style and preliminary work it might also be longer.
+%
+% ANMERKUNGEN
+% Ein Exposé („Konzeptpapier“) ist ein Dokument, in dem Sie zu einem frühen Zeitpunkt das Thema Ihrer Abschlussarbeit
+% eingrenzen und einen realistischen Arbeitsplan entwickeln. Es sollte klar werden welche Probleme in der Arbeit
+% gelöst werden und welche Fragestellungen addressiert werden sollen (und ggf. welche vom Rahmen der Arbeit aus-
+% geschlossen sind). Das Exposé sollte 3 bis 4 Seiten umgfassen, je nach Thema, Formattierung oder bereits bestehenden
+% Vorarbeiten vorliegen kann es auch länger ausfallen.
+%
+\section{\AIRlangGerEng{Aufgabenstellung}{Topic}}%
+% REMARKS
+% Concisely describe (no more than one page) the issue that you want to work on. The relevance of the topic should be
+% apparent.
+%
+% ANMERKUNGEN
+% Beschreiben Sie prägnant (nicht mehr als eine Seite) die Fragestellung, die Sie bearbeiten möchten. Erkennbar sollte
+% die Relevanz des Themas sein.
+%
+\blindtext%
+%
+%
+\section{\AIRlangGerEng{Lösungsansatz}{Approach}}%
+% REMARKS
+% Give an overview on the approach you want to use for addressing your topic. Include references to literature when
+% explaining your proposal.
+%
+% ANMERKUNGEN
+% Geben Sie einen Überblick über den angedachten Lösungsweg Ihrer Fragestellung. Erklären und untermauern Sie Ihren
+% Vorschlag mit entsprechenden Quellenangaben.
+%
+Citation: \cite{choset2005principles, thrun2005probabilistic}\par%
+Reference: \cref{fig:MyImage}\par%
+Figures:\par%
+\begin{figure}[htb]%
+    \centering%
+    %
+    % Including .png
+    \includegraphics[width=40mm]{figures/ImagePNG.png}%
+    %
+    \hspace*{5mm}%
+    %
+    % Including .pdf
+    \includegraphics[width=40mm]{figures/ImagePDF.pdf}\par%
+    %
+    % Including .tikz
+    \begingroup%
+        %\AIRtikzExternalizeSkipNext%
+        \resizebox{40mm}{!}{\input{figures/ImageTIKZ.tikz}}%
+    \endgroup%
+    %
+    \hspace*{5mm}%
+    %
+    % Including .pdf_tex
+    \begingroup%
+        \def\svgwidth{40mm}%
+        \fontsize{25}{25}\selectfont%
+        \input{figures/ImagePDFTEX.pdf_tex}%
+    \endgroup%
+    %
+    \caption{\AIRlangGerEng{Beschreibung des Bilds}{Image description}.}%
+    \label{fig:MyImage}%
+\end{figure}%
+\Blindtext%
+%
+%
+\section{\AIRlangGerEng{Arbeitsplan und benötigte Ressourcen}{Work Plan and necessary Resources}}%
+% REMARKS
+% Demonstrate how you plan to proceed with your scientific project to achieve the goal. Try to create a timeframe for
+% your thesis now. Consider by what time frame and conditions you are bound and where you are dependent on your
+% supervisor. To demonstrate your working plan you may create a “Gantt chart”. Describe which methods you will use to
+% evaluate your results and why these methods are suitable. Describe which resources (e.g. experimental
+% resources) you will need for your task.
+%
+% ANMERKUNGEN
+% Versuchen Sie, bereits jetzt einen Zeitplan für Ihre Abschlussarbeit zu erstellen. Überlegen Sie, an welche
+% terminlichen Rahmenbedingungen Sie gebunden sind und an welchen Stellen es Abhängigkeiten von Ihrem Betreuer gibt.
+% Sie können Ihren Zeitplan in einer ein sog. „Gantt-Chart“ illustrieren. Beschreiben Sie auch, Ergebnisse evaluieren
+% wollen und warum diese Methoden geeignet sind. Beschreiben Sie, welche Ressourcen (z.B. experimentelle) Sie für Ihre
+% Aufgabe benötigen.
+%
+%
+\Blindtext%
+%
+\begin{figure*}[!htb]%
+    \centering%
+    \AIRlangGerEng{\input{figures/zeitplan.tikz}}{\input{figures/timeschedule.tikz}}%
+    \caption{\AIRlangGerEng{Zeitplan}{Time schedule}.}%
+\end{figure*}%
+%
+% References
+\section{\AIRlangGerEng{Literatur}{Literature}}%
+% REMARKS
+% List of used literature.
+%
+% ANMERKUNGEN
+% Auflistung der verwendeten Literatur
+{%
+    %\sloppy% "Word"-like typesetting in order to improve breaking lines with long URLs/DOIs
+    \printbibliography[heading=none]%
+}%
+%
+%
+%
+\end{document}%
