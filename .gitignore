@@ -1,1 +1,16 @@
 /README.pdf
+
+# LaTeX build artifacts (only .tex and .pdf are tracked for the remote)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.out
+*.toc
+*.run.xml
+*.synctex.gz
+*.upa
+*.upb
+*.fls
+*.fdb_latexmk
