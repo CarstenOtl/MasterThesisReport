@@ -1,0 +1,405 @@
+@article{Handa2024,
+   abstract = {Recent work has demonstrated the ability of deep reinforcement learning (RL) algorithms to learn complex robotic behaviours in simulation, including in the domain of multi-fingered manipulation. However, such models can be challenging to transfer to the real world due to the gap between simulation and reality. In this paper, we present our techniques to train a) a policy that can perform robust dexterous manipulation on an anthropomorphic robot hand and b) a robust pose estimator suitable for providing reliable real-time information on the state of the object being manipulated. Our policies are trained to adapt to a wide range of conditions in simulation. Consequently, our vision-based policies significantly outperform the best vision policies in the literature on the same reorientation task and are competitive with policies that are given privileged state information via motion capture systems. Our work reaffirms the possibilities of sim-to-real transfer for dexterous manipulation in diverse kinds of hardware and simulator setups, and in our case, with the Allegro Hand and Isaac Gym GPU-based simulation. Furthermore, it opens up possibilities for researchers to achieve such results with commonly-available, affordable robot hands and cameras. Videos of the resulting policy and supplementary information, including experiments and demos, can be found at https://dextreme.org/},
+   author = {Ankur Handa and Arthur Allshire and Viktor Makoviychuk and Aleksei Petrenko and Ritvik Singh and Jingzhou Liu and Denys Makoviichuk and Karl Van Wyk and Alexander Zhurkevich and Balakumar Sundaralingam and Yashraj Narang and Jean-Francois Lafleche and Dieter Fox and Gavriel State},
+   month = {1},
+   title = {DeXtreme: Transfer of Agile In-hand Manipulation from Simulation to Reality},
+   url = {https://arxiv.org/pdf/2210.13702},
+   year = {2024}
+}
+@article{Lin2025,
+   abstract = {Learning generalizable robot manipulation policies, especially for complex multi-fingered humanoids, remains a significant challenge. Existing approaches primarily rely on extensive data collection and imitation learning, which are expensive, labor-intensive, and difficult to scale. Sim-to-real reinforcement learning (RL) offers a promising alternative, but has mostly succeeded in simpler state-based or single-hand setups. How to effectively extend this to vision-based, contact-rich bimanual manipulation tasks remains an open question. In this paper, we introduce a practical sim-to-real RL recipe that trains a humanoid robot to perform three challenging dexterous manipulation tasks: grasp-and-reach, box lift and bimanual handover. Our method features an automated real-to-sim tuning module, a generalized reward formulation based on contact and object goals, a divide-and-conquer policy distillation framework, and a hybrid object representation strategy with modality-specific augmentation. We demonstrate high success rates on unseen objects and robust, adaptive policy behaviors -- highlighting that vision-based dexterous manipulation via sim-to-real RL is not only viable, but also scalable and broadly applicable to real-world humanoid manipulation tasks.},
+   author = {Toru Lin and Kartik Sachdev and Linxi Fan and Jitendra Malik and Yuke Zhu},
+   month = {9},
+   title = {Sim-to-Real Reinforcement Learning for Vision-Based Dexterous Manipulation on Humanoids},
+   year = {2025}
+}
+@article{Huang2025,
+   abstract = {Dexterous hand manipulation in real-world scenarios presents considerable challenges due to its demands for both dexterity and precision. While imitation learning approaches have thoroughly examined these challenges, they still require a significant number of expert demonstrations and are limited by a constrained performance upper bound. In this paper, we propose a novel and efficient Imitation-Bootstrapped Online Reinforcement Learning (IBORL) method tailored for robotic dexterous hand manipulation in real-world environments. Specifically, we pretrain the policy using a limited set of expert demonstrations and subsequently finetune this policy through direct reinforcement learning in the real world. To address the catastrophic forgetting issues that arise from the distribution shift between expert demonstrations and real-world environments, we design a regularization term that balances the exploration of novel behaviors with the preservation of the pretrained policy. Our experiments with real-world tasks demonstrate that our method significantly outperforms existing approaches, achieving an almost 100\% success rate and a 23\% improvement in cycle time. Furthermore, by finetuning with online reinforcement learning, our method surpasses expert demonstrations and uncovers superior policies. Our code and empirical results are available in https://hggforget.github.io/iborl.github.io/.},
+   author = {Dongchi Huang and Tianle Zhang and Yihang Li and Ling Zhao and Jiayi Li and Zhirui Fang and Chunhe Xia and Lusong Li and Xiaodong He},
+   month = {3},
+   title = {Dexterous Hand Manipulation via Efficient Imitation-Bootstrapped Online Reinforcement Learning},
+   year = {2025}
+}
+@article{Koczy2025,
+   abstract = {We present a framework for learning dexterous in-hand manipulation with multifingered hands using visuomotor diffusion policies. Our system enables complex in-hand manipulation tasks, such as unscrewing a bottle lid with one hand, by leveraging a fast and responsive teleoperation setup for the four-fingered Allegro Hand. We collect high-quality expert demonstrations using an augmented reality (AR) interface that tracks hand movements and applies inverse kinematics and motion retargeting for precise control. The AR headset provides real-time visualization, while gesture controls streamline teleoperation. To enhance policy learning, we introduce a novel demonstration outlier removal approach based on HDBSCAN clustering and the Global-Local Outlier Score from Hierarchies (GLOSH) algorithm, effectively filtering out low-quality demonstrations that could degrade performance. We evaluate our approach extensively in real-world settings and provide all experimental videos on the project website: https://dex-manip.github.io/},
+   author = {Piotr Koczy and Michael C. Welle and Danica Kragic},
+   month = {3},
+   title = {Learning Dexterous In-Hand Manipulation with Multifingered Hands via Visuomotor Diffusion},
+   year = {2025}
+}
+@article{Luo2025,
+   abstract = {<p>Robotic manipulation remains one of the most difficult challenges in robotics, with approaches ranging from classical model-based control to modern imitation learning. Although these methods have enabled substantial progress, they often require extensive manual design, struggle with performance, and demand large-scale data collection. These limitations hinder their real-world deployment at scale, where reliability, speed, and robustness are essential. Reinforcement learning (RL) offers a powerful alternative by enabling robots to autonomously acquire complex manipulation skills through interaction. However, realizing the full potential of RL in the real world remains challenging because of issues of sample efficiency and safety. We present a human-in-the-loop, vision-based RL system that achieved strong performance on a wide range of dexterous manipulation tasks, including precise assembly, dynamic manipulation, and dual-arm coordination. These tasks reflect realistic industrial tolerances, with small but critical variations in initial object placements that demand sophisticated reactive control. Our method integrates demonstrations, human corrections, sample-efficient RL algorithms, and system-level design to directly learn RL policies in the real world. Within 1 to 2.5 hours of real-world training, our approach outperformed other baselines by improving task success by 2×, achieving near-perfect success rates, and executing 1.8× faster on average. Through extensive experiments and analysis, our results suggest that RL can learn a wide range of complex vision-based manipulation policies directly in the real world within practical training times. We hope that this work will inspire a new generation of learned robotic manipulation techniques, benefiting both industrial applications and research advancements.</p>},
+   author = {Jianlan Luo and Charles Xu and Jeffrey Wu and Sergey Levine},
+   doi = {10.1126/scirobotics.ads5033},
+   issn = {2470-9476},
+   issue = {105},
+   journal = {Science Robotics},
+   month = {8},
+   title = {Precise and dexterous robotic manipulation via human-in-the-loop reinforcement learning},
+   volume = {10},
+   year = {2025}
+}
+@article{Tang2024,
+   abstract = {Reinforcement learning (RL), particularly its combination with deep neural networks referred to as deep RL (DRL), has shown tremendous promise across a wide range of applications, suggesting its potential for enabling the development of sophisticated robotic behaviors. Robotics problems, however, pose fundamental difficulties for the application of RL, stemming from the complexity and cost of interacting with the physical world. This article provides a modern survey of DRL for robotics, with a particular focus on evaluating the real-world successes achieved with DRL in realizing several key robotic competencies. Our analysis aims to identify the key factors underlying those exciting successes, reveal underexplored areas, and provide an overall characterization of the status of DRL in robotics. We highlight several important avenues for future work, emphasizing the need for stable and sample-efficient real-world RL paradigms, holistic approaches for discovering and integrating various competencies to tackle complex long-horizon, open-world tasks, and principled development and evaluation procedures. This survey is designed to offer insights for both RL practitioners and roboticists toward harnessing RL's power to create generally capable real-world robotic systems.},
+   author = {Chen Tang and Ben Abbatematteo and Jiaheng Hu and Rohan Chandra and Roberto Martín-Martín and Peter Stone},
+   month = {9},
+   title = {Deep Reinforcement Learning for Robotics: A Survey of Real-World Successes},
+   year = {2024}
+}
+@article{Weinberg2024,
+   abstract = {Human dexterity is an invaluable capability for precise manipulation of objects in complex tasks. The capability of robots to similarly grasp and perform in-hand manipulation of objects is critical for their use in the ever changing human environment, and for their ability to replace manpower. In recent decades, significant effort has been put in order to enable in-hand manipulation capabilities to robotic systems. Initial robotic manipulators followed carefully programmed paths, while later attempts provided a solution based on analytical modeling of motion and contact. However, these have failed to provide practical solutions due to inability to cope with complex environments and uncertainties. Therefore, the effort has shifted to learning-based approaches where data is collected from the real world or through a simulation, during repeated attempts to complete various tasks. The vast majority of learning approaches focused on learning data-based models that describe the system to some extent or Reinforcement Learning (RL). RL, in particular, has seen growing interest due to the remarkable ability to generate solutions to problems with minimal human guidance. In this survey paper, we track the developments of learning approaches for in-hand manipulations and, explore the challenges and opportunities. This survey is designed both as an introduction for novices in the field with a glossary of terms as well as a guide of novel advances for advanced practitioners.},
+   author = {Abraham Itzhak Weinberg and Alon Shirizly and Osher Azulay and Avishai Sintov},
+   doi = {10.3389/frobt.2024.1455431},
+   issn = {2296-9144},
+   journal = {Frontiers in robotics and AI},
+   pages = {1455431},
+   pmid = {39563696},
+   title = {Survey of learning-based approaches for robotic in-hand manipulation.},
+   volume = {11},
+   year = {2024}
+}
+@article{Lin2024,
+   abstract = {Manipulating objects with two multi-fingered hands has been a long-standing challenge in robotics, due to the contact-rich nature of many manipulation tasks and the complexity inherent in coordinating a high-dimensional bimanual system. In this work, we share novel insights into physical modeling, real-time perception, and reward design that enable policies trained in simulation using deep reinforcement learning (RL) to be effectively and efficiently transferred to the real world. Specifically, we consider the problem of twisting lids of various bottle-like objects with two hands, demonstrating policies with generalization capabilities across a diverse set of unseen objects as well as dynamic and dexterous behaviors. To the best of our knowledge, this is the first sim-to-real RL system that enables such capabilities on bimanual multi-fingered hands.},
+   author = {Toru Lin and Zhao-Heng Yin and Haozhi Qi and Pieter Abbeel and Jitendra Malik},
+   month = {10},
+   title = {Twisting Lids Off with Two Hands},
+   year = {2024}
+}
+@article{Grauman2024,
+   abstract = {We present Ego-Exo4D, a diverse, large-scale multimodal multiview video dataset and benchmark challenge. Ego-Exo4D centers around simultaneously-captured egocentric and exocentric video of skilled human activities (e.g., sports, music, dance, bike repair). 740 participants from 13 cities worldwide performed these activities in 123 different natural scene contexts, yielding long-form captures from 1 to 42 minutes each and 1,286 hours of video combined. The multimodal nature of the dataset is unprecedented: the video is accompanied by multichannel audio, eye gaze, 3D point clouds, camera poses, IMU, and multiple paired language descriptions -- including a novel "expert commentary" done by coaches and teachers and tailored to the skilled-activity domain. To push the frontier of first-person video understanding of skilled human activity, we also present a suite of benchmark tasks and their annotations, including fine-grained activity understanding, proficiency estimation, cross-view translation, and 3D hand/body pose. All resources are open sourced to fuel new research in the community. Project page: http://ego-exo4d-data.org/},
+   author = {Kristen Grauman and Andrew Westbury and Lorenzo Torresani and Kris Kitani and Jitendra Malik and Triantafyllos Afouras and Kumar Ashutosh and Vijay Baiyya and Siddhant Bansal and Bikram Boote and Eugene Byrne and Zach Chavis and Joya Chen and Feng Cheng and Fu-Jen Chu and Sean Crane and Avijit Dasgupta and Jing Dong and Maria Escobar and Cristhian Forigua and Abrham Gebreselasie and Sanjay Haresh and Jing Huang and Md Mohaiminul Islam and Suyog Jain and Rawal Khirodkar and Devansh Kukreja and Kevin J Liang and Jia-Wei Liu and Sagnik Majumder and Yongsen Mao and Miguel Martin and Effrosyni Mavroudi and Tushar Nagarajan and Francesco Ragusa and Santhosh Kumar Ramakrishnan and Luigi Seminara and Arjun Somayazulu and Yale Song and Shan Su and Zihui Xue and Edward Zhang and Jinxu Zhang and Angela Castillo and Changan Chen and Xinzhu Fu and Ryosuke Furuta and Cristina Gonzalez and Prince Gupta and Jiabo Hu and Yifei Huang and Yiming Huang and Weslie Khoo and Anush Kumar and Robert Kuo and Sach Lakhavani and Miao Liu and Mi Luo and Zhengyi Luo and Brighid Meredith and Austin Miller and Oluwatumininu Oguntola and Xiaqing Pan and Penny Peng and Shraman Pramanick and Merey Ramazanova and Fiona Ryan and Wei Shan and Kiran Somasundaram and Chenan Song and Audrey Southerland and Masatoshi Tateno and Huiyu Wang and Yuchen Wang and Takuma Yagi and Mingfei Yan and Xitong Yang and Zecheng Yu and Shengxin Cindy Zha and Chen Zhao and Ziwei Zhao and Zhifan Zhu and Jeff Zhuo and Pablo Arbelaez and Gedas Bertasius and David Crandall and Dima Damen and Jakob Engel and Giovanni Maria Farinella and Antonino Furnari and Bernard Ghanem and Judy Hoffman and C. V. Jawahar and Richard Newcombe and Hyun Soo Park and James M. Rehg and Yoichi Sato and Manolis Savva and Jianbo Shi and Mike Zheng Shou and Michael Wray},
+   month = {9},
+   title = {Ego-Exo4D: Understanding Skilled Human Activity from First- and Third-Person Perspectives},
+   year = {2024}
+}
+@article{Zhu2025,
+   abstract = {robosuite is a simulation framework for robot learning powered by the MuJoCo physics engine. It offers a modular design for creating robotic tasks as well as a suite of benchmark environments for reproducible research. This paper discusses the key system modules and the benchmark environments of our new release robosuite v1.5.},
+   author = {Yuke Zhu and Josiah Wong and Ajay Mandlekar and Roberto Martín-Martín and Abhishek Joshi and Kevin Lin and Abhiram Maddukuri and Soroush Nasiriany and Yifeng Zhu},
+   month = {1},
+   title = {robosuite: A Modular Simulation Framework and Benchmark for Robot Learning},
+   year = {2025}
+}
+@article{Chen2021,
+   abstract = {In-hand object reorientation has been a challenging problem in robotics due to high dimensional actuation space and the frequent change in contact state between the fingers and the objects. We present a simple model-free framework that can learn to reorient objects with both the hand facing upwards and downwards. We demonstrate the capability of reorienting over 2000 geometrically different objects in both cases. The learned policies show strong zero-shot transfer performance on new objects. We provide evidence that these policies are amenable to real-world operation by distilling them to use observations easily available in the real world. The videos of the learned policies are available at: https://taochenshh.github.io/projects/in-hand-reorientation.},
+   author = {Tao Chen and Jie Xu and Pulkit Agrawal},
+   month = {11},
+   title = {A System for General In-Hand Object Re-Orientation},
+   year = {2021}
+}
+@inproceedings{Kumar2016,
+   author = {Vikash Kumar and Emanuel Todorov and Sergey Levine},
+   doi = {10.1109/ICRA.2016.7487156},
+   isbn = {978-1-4673-8026-3},
+   booktitle = {2016 IEEE International Conference on Robotics and Automation (ICRA)},
+   month = {5},
+   pages = {378-383},
+   publisher = {IEEE},
+   title = {Optimal control with learned local models: Application to dexterous manipulation},
+   year = {2016}
+}
+@article{Nagabandi2019,
+   abstract = {Dexterous multi-fingered hands can provide robots with the ability to flexibly perform a wide range of manipulation skills. However, many of the more complex behaviors are also notoriously difficult to control: Performing in-hand object manipulation, executing finger gaits to move objects, and exhibiting precise fine motor skills such as writing, all require finely balancing contact forces, breaking and reestablishing contacts repeatedly, and maintaining control of unactuated objects. Learning-based techniques provide the appealing possibility of acquiring these skills directly from data, but current learning approaches either require large amounts of data and produce task-specific policies, or they have not yet been shown to scale up to more complex and realistic tasks requiring fine motor skills. In this work, we demonstrate that our method of online planning with deep dynamics models (PDDM) addresses both of these limitations; we show that improvements in learned dynamics models, together with improvements in online model-predictive control, can indeed enable efficient and effective learning of flexible contact-rich dexterous manipulation skills -- and that too, on a 24-DoF anthropomorphic hand in the real world, using just 4 hours of purely real-world data to learn to simultaneously coordinate multiple free-floating objects. Videos can be found at https://sites.google.com/view/pddm/},
+   author = {Anusha Nagabandi and Kurt Konoglie and Sergey Levine and Vikash Kumar},
+   month = {9},
+   title = {Deep Dynamics Models for Learning Dexterous Manipulation},
+   year = {2019}
+}
+@inproceedings{BicchiKumar2000,
+   author = {A. Bicchi and V. Kumar},
+   doi = {10.1109/ROBOT.2000.844081},
+   isbn = {0-7803-5886-4},
+   booktitle = {Proceedings 2000 ICRA. Millennium Conference. IEEE International Conference on Robotics and Automation. Symposia Proceedings (Cat. No.00CH37065)},
+   pages = {348-353},
+   publisher = {IEEE},
+   title = {Robotic grasping and contact: a review}
+}
+@article{Rstel2025,
+   abstract = {In-hand manipulation and grasping are fundamental yet often separately addressed tasks in robotics. For deriving in-hand manipulation policies, reinforcement learning has recently shown great success. However, the derived controllers are not yet useful in real-world scenarios because they often require a human operator to place the objects in suitable initial (grasping) states. Finding stable grasps that also promote the desired in-hand manipulation goal is an open problem. In this work, we propose a method for bridging this gap by leveraging the critic network of a reinforcement learning agent trained for in-hand manipulation to score and select initial grasps. Our experiments show that this method significantly increases the success rate of in-hand manipulation without requiring additional training. We also present an implementation of a full grasp manipulation pipeline on a real-world system, enabling autonomous grasping and reorientation even of unwieldy objects.},
+   author = {Lennart Röstel and Dominik Winkelbauer and Johannes Pitz and Leon Sievers and Berthold Bäuml},
+   doi = {10.1109/ICRA55743.2025.11127792},
+   month = {5},
+   title = {Composing Dextrous Grasping and In-hand Manipulation via Scoring with a Reinforcement Learning Critic},
+   year = {2025}
+}
+@article{Nagabandi2017,
+   abstract = {Model-free deep reinforcement learning algorithms have been shown to be capable of learning a wide range of robotic skills, but typically require a very large number of samples to achieve good performance. Model-based algorithms, in principle, can provide for much more efficient learning, but have proven difficult to extend to expressive, high-capacity models such as deep neural networks. In this work, we demonstrate that medium-sized neural network models can in fact be combined with model predictive control (MPC) to achieve excellent sample complexity in a model-based reinforcement learning algorithm, producing stable and plausible gaits to accomplish various complex locomotion tasks. We also propose using deep neural network dynamics models to initialize a model-free learner, in order to combine the sample efficiency of model-based approaches with the high task-specific performance of model-free methods. We empirically demonstrate on MuJoCo locomotion tasks that our pure model-based approach trained on just random action data can follow arbitrary trajectories with excellent sample efficiency, and that our hybrid algorithm can accelerate model-free learning on high-speed benchmark tasks, achieving sample efficiency gains of 3-5x on swimmer, cheetah, hopper, and ant agents. Videos can be found at https://sites.google.com/view/mbmf},
+   author = {Anusha Nagabandi and Gregory Kahn and Ronald S. Fearing and Sergey Levine},
+   month = {12},
+   title = {Neural Network Dynamics for Model-Based Deep Reinforcement Learning with Model-Free Fine-Tuning},
+   year = {2017}
+}
+@article{Jiang2025,
+   abstract = {This paper tackles the challenge of learning multi-goal dexterous hand manipulation tasks using model-based Reinforcement Learning. We propose Goal-Conditioned Probabilistic Model Predictive Control (GC-PMPC) by designing probabilistic neural network ensembles to describe the high-dimensional dexterous hand dynamics and introducing an asynchronous MPC policy to meet the control frequency requirements in real-world dexterous hand systems. Extensive evaluations on four simulated Shadow Hand manipulation scenarios with randomly generated goals demonstrate GC-PMPC's superior performance over state-of-the-art baselines. It successfully drives a cable-driven Dexterous hand, DexHand 021 with 12 Active DOFs and 5 tactile sensors, to learn manipulating a cubic die to three goal poses within approximately 80 minutes of interactions, demonstrating exceptional learning efficiency and control performance on a cost-effective dexterous hand platform.},
+   author = {Yingzhuo Jiang and Wenjun Huang and Rongdun Lin and Chenyang Miao and Tianfu Sun and Yunduan Cui},
+   month = {4},
+   title = {Multi-Goal Dexterous Hand Manipulation using Probabilistic Model-based Reinforcement Learning},
+   year = {2025}
+}
+@article{Kober2013,
+   abstract = {<p>Reinforcement learning offers to robotics a framework and set of tools for the design of sophisticated and hard-to-engineer behaviors. Conversely, the challenges of robotic problems provide both inspiration, impact, and validation for developments in reinforcement learning. The relationship between disciplines has sufficient promise to be likened to that between physics and mathematics. In this article, we attempt to strengthen the links between the two research communities by providing a survey of work in reinforcement learning for behavior generation in robots. We highlight both key challenges in robot reinforcement learning as well as notable successes. We discuss how contributions tamed the complexity of the domain and study the role of algorithms, representations, and prior knowledge in achieving these successes. As a result, a particular focus of our paper lies on the choice between model-based and model-free as well as between value-function-based and policy-search methods. By analyzing a simple problem in some detail we demonstrate how reinforcement learning approaches may be profitably applied, and we note throughout open questions and the tremendous potential for future research.</p>},
+   author = {Jens Kober and J. Andrew Bagnell and Jan Peters},
+   doi = {10.1177/0278364913495721},
+   issn = {0278-3649},
+   issue = {11},
+   journal = {The International Journal of Robotics Research},
+   month = {9},
+   pages = {1238-1274},
+   title = {Reinforcement learning in robotics: A survey},
+   volume = {32},
+   year = {2013}
+}
+@article{Janner2021,
+   abstract = {Designing effective model-based reinforcement learning algorithms is difficult because the ease of data generation must be weighed against the bias of model-generated data. In this paper, we study the role of model usage in policy optimization both theoretically and empirically. We first formulate and analyze a model-based reinforcement learning algorithm with a guarantee of monotonic improvement at each step. In practice, this analysis is overly pessimistic and suggests that real off-policy data is always preferable to model-generated on-policy data, but we show that an empirical estimate of model generalization can be incorporated into such analysis to justify model usage. Motivated by this analysis, we then demonstrate that a simple procedure of using short model-generated rollouts branched from real data has the benefits of more complicated model-based algorithms without the usual pitfalls. In particular, this approach surpasses the sample efficiency of prior model-based methods, matches the asymptotic performance of the best model-free algorithms, and scales to horizons that cause other model-based methods to fail entirely.},
+   author = {Michael Janner and Justin Fu and Marvin Zhang and Sergey Levine},
+   month = {11},
+   title = {When to Trust Your Model: Model-Based Policy Optimization},
+   year = {2021}
+}
+@article{Chen2025,
+   abstract = {<p>We present a novel contact model, termed Offset Geometric Contact (OGC), for guaranteed penetration-free simulation of codimensional objects with minimal computational overhead. Our method is based on constructing a volumetric shape by offsetting each face along its normal direction, ensuring orthogonal contact forces, thus allows large contact radius without artifacts. We compute vertex-specific displacement bounds to guarantee penetration-free simulation, which improves convergence and avoids the need for expensive continuous collision detection. Our method relies solely on massively parallel local operations, avoiding global synchronization and enabling efficient GPU implementation. Experiments demonstrate real-time, large-scale simulations with performance more than two orders of magnitude faster than prior methods while maintaining consistent computational budgets.</p>},
+   author = {Anka He Chen and Jerry Hsu and Ziheng Liu and Miles Macklin and Yin Yang and Cem Yuksel},
+   doi = {10.1145/3731205},
+   issn = {0730-0301},
+   issue = {4},
+   journal = {ACM Transactions on Graphics},
+   month = {8},
+   pages = {1-21},
+   title = {Offset Geometric Contact},
+   volume = {44},
+   year = {2025}
+}
+@article{Feng2024,
+   abstract = {We introduce DexGanGrasp, a dexterous grasping synthesis method that generates and evaluates grasps with single view in real time. DexGanGrasp comprises a Conditional Generative Adversarial Networks (cGANs)-based DexGenerator to generate dexterous grasps and a discriminator-like DexEvalautor to assess the stability of these grasps. Extensive simulation and real-world expriments showcases the effectiveness of our proposed method, outperforming the baseline FFHNet with an 18.57\% higher success rate in real-world evaluation. We further extend DexGanGrasp to DexAfford-Prompt, an open-vocabulary affordance grounding pipeline for dexterous grasping leveraging Multimodal Large Language Models (MLLMs) and Vision Language Models (VLMs), to achieve task-oriented grasping with successful real-world deployments.},
+   author = {Qian Feng and David S. Martinez Lema and Mohammadhossein Malmir and Hang Li and Jianxiang Feng and Zhaopeng Chen and Alois Knoll},
+   month = {11},
+   title = {DexGANGrasp: Dexterous Generative Adversarial Grasping Synthesis for Task-Oriented Manipulation},
+   year = {2024}
+}
+@article{Wan2023,
+   abstract = {We propose a novel, object-agnostic method for learning a universal policy for dexterous object grasping from realistic point cloud observations and proprioceptive information under a table-top setting, namely UniDexGrasp++. To address the challenge of learning the vision-based policy across thousands of object instances, we propose Geometry-aware Curriculum Learning (GeoCurriculum) and Geometry-aware iterative Generalist-Specialist Learning (GiGSL) which leverage the geometry feature of the task and significantly improve the generalizability. With our proposed techniques, our final policy shows universal dexterous grasping on thousands of object instances with 85.4\% and 78.2\% success rate on the train set and test set which outperforms the state-of-the-art baseline UniDexGrasp by 11.7\% and 11.3\%, respectively.},
+   author = {Weikang Wan and Haoran Geng and Yun Liu and Zikang Shan and Yaodong Yang and Li Yi and He Wang},
+   month = {4},
+   title = {UniDexGrasp++: Improving Dexterous Grasping Policy Learning via Geometry-aware Curriculum and Iterative Generalist-Specialist Learning},
+   year = {2023}
+}
+@article{Chen2024,
+   abstract = {This work tackles the problem of task-oriented dexterous hand pose synthesis, which involves generating a static hand pose capable of applying a task-specific set of wrenches to manipulate objects. Unlike previous approaches that focus solely on force-closure grasps, which are unsuitable for non-prehensile manipulation tasks (\textit\{e.g.\}, turning a knob or pressing a button), we introduce a unified framework covering force-closure grasps, non-force-closure grasps, and a variety of non-prehensile poses. Our key idea is a novel optimization objective quantifying the disparity between the Task Wrench Space (TWS, the desired wrenches predefined as a task prior) and the Grasp Wrench Space (GWS, the achievable wrenches computed from the current hand pose). By minimizing this objective, gradient-based optimization algorithms can synthesize task-oriented hand poses without additional human demonstrations. Our specific contributions include 1) a fast, accurate, and differentiable technique for estimating the GWS boundary; 2) a task-oriented objective function based on the disparity between the estimated GWS boundary and the provided TWS boundary; and 3) an efficient implementation of the synthesis pipeline that leverages CUDA accelerations and supports large-scale paralleling. Experimental results on 10 diverse tasks demonstrate a 72.6\% success rate in simulation. Furthermore, real-world validation for 4 tasks confirms the effectiveness of synthesized poses for manipulation. Notably, despite being primarily tailored for task-oriented hand pose synthesis, our pipeline can generate force-closure grasps 50 times faster than DexGraspNet while maintaining comparable grasp quality. Project page: https://pku-epic.github.io/TaskDexGrasp/.},
+   author = {Jiayi Chen and Yuxing Chen and Jialiang Zhang and He Wang},
+   month = {4},
+   title = {Task-Oriented Dexterous Hand Pose Synthesis Using Differentiable Grasp Wrench Boundary Estimator},
+   year = {2024}
+}
+@article{Petrenko2023,
+   abstract = {In this work, we propose algorithms and methods that enable learning dexterous object manipulation using simulated one- or two-armed robots equipped with multi-fingered hand end-effectors. Using a parallel GPU-accelerated physics simulator (Isaac Gym), we implement challenging tasks for these robots, including regrasping, grasp-and-throw, and object reorientation. To solve these problems we introduce a decentralized Population-Based Training (PBT) algorithm that allows us to massively amplify the exploration capabilities of deep reinforcement learning. We find that this method significantly outperforms regular end-to-end learning and is able to discover robust control policies in challenging tasks. Video demonstrations of learned behaviors and the code can be found at https://sites.google.com/view/dexpbt},
+   author = {Aleksei Petrenko and Arthur Allshire and Gavriel State and Ankur Handa and Viktor Makoviychuk},
+   month = {5},
+   title = {DexPBT: Scaling up Dexterous Manipulation for Hand-Arm Systems with Population Based Training},
+   year = {2023}
+}
+@article{Pitz2024,
+   abstract = {In-hand manipulation with multi-fingered hands is a challenging problem that recently became feasible with the advent of deep reinforcement learning methods. While most contributions to the task brought improvements in robustness and generalization, this paper addresses the critical performance measure of the speed at which an in-hand manipulation can be performed. We present reinforcement learning policies that can perform in-hand reorientation significantly faster than previous approaches for the complex setting of goal-conditioned reorientation in SO(3) with permanent force closure and tactile feedback only (i.e., using the hand's torque and position sensors). Moreover, we show how policies can be trained to be speed-adjustable, allowing for setting the average orientation speed of the manipulated object during deployment. To this end, we present suitable and minimalistic reinforcement learning objectives for time-optimal and speed-adjustable in-hand manipulation, as well as an analysis based on extensive experiments in simulation. We also demonstrate the zero-shot transfer of the learned policies to the real DLR-Hand II with a wide range of target speeds and the fastest dextrous in-hand manipulation without visual inputs.},
+   author = {Johannes Pitz and Lennart Röstel and Leon Sievers and Berthold Bäuml},
+   month = {11},
+   title = {Learning Time-Optimal and Speed-Adjustable Tactile In-Hand Manipulation},
+   year = {2024}
+}
+@article{Pitz2024,
+   abstract = {Reorienting diverse objects with a multi-fingered hand is a challenging task. Current methods in robotic in-hand manipulation are either object-specific or require permanent supervision of the object state from visual sensors. This is far from human capabilities and from what is needed in real-world applications. In this work, we address this gap by training shape-conditioned agents to reorient diverse objects in hand, relying purely on tactile feedback (via torque and position measurements of the fingers' joints). To achieve this, we propose a learning framework that exploits shape information in a reinforcement learning policy and a learned state estimator. We find that representing 3D shapes by vectors from a fixed set of basis points to the shape's surface, transformed by its predicted 3D pose, is especially helpful for learning dexterous in-hand manipulation. In simulation and real-world experiments, we show the reorientation of many objects with high success rates, on par with state-of-the-art results obtained with specialized single-object agents. Moreover, we show generalization to novel objects, achieving success rates of $\sim$90\% even for non-convex shapes.},
+   author = {Johannes Pitz and Lennart Röstel and Leon Sievers and Darius Burschka and Berthold Bäuml},
+   month = {8},
+   title = {Learning a Shape-Conditioned Agent for Purely Tactile In-Hand Manipulation of Various Objects},
+   year = {2024}
+}
+@inproceedings{Tang2023,
+   author = {Ling Tang and Yan-Bin Jia},
+   doi = {10.1109/ICRA48891.2023.10161139},
+   isbn = {979-8-3503-2365-8},
+   booktitle = {2023 IEEE International Conference on Robotics and Automation (ICRA)},
+   month = {5},
+   pages = {5269-5275},
+   publisher = {IEEE},
+   title = {Robotic Fastening with a Manual Screwdriver},
+   year = {2023}
+}
+@inproceedings{Tang2024,
+   author = {Ling Tang and Yan-Bin Jia and Yuechuan Xue},
+   doi = {10.1109/ICRA57147.2024.10610831},
+   isbn = {979-8-3503-8457-4},
+   booktitle = {2024 IEEE International Conference on Robotics and Automation (ICRA)},
+   month = {5},
+   pages = {13883-13890},
+   publisher = {IEEE},
+   title = {Robotic Manipulation of Hand Tools: The Case of Screwdriving},
+   year = {2024}
+}
+@inproceedings{Xue2023,
+   author = {Yuechuan Xue and Ling Tang and Yan-Bin Jia},
+   doi = {10.1109/IROS55552.2023.10342156},
+   isbn = {978-1-6654-9190-7},
+   booktitle = {2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+   month = {10},
+   pages = {8784-8791},
+   publisher = {IEEE},
+   title = {Dynamic Finger Gaits via Pivoting and Adapting Contact Forces},
+   year = {2023}
+}
+@inproceedings{Manyar2023,
+   author = {Omey M. Manyar and Santosh V Narayan and Rohin Lengade and Satyandra K. Gupta},
+   doi = {10.1109/IROS55552.2023.10342151},
+   isbn = {978-1-6654-9190-7},
+   booktitle = {2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+   month = {10},
+   pages = {2993-3000},
+   publisher = {IEEE},
+   title = {Physics-Informed Learning to Enable Robotic Screw-Driving Under Hole Pose Uncertainties},
+   year = {2023}
+}
+@article{Singh2025,
+   abstract = {One of the most important, yet challenging, skills for a dexterous robot is grasping a diverse range of objects. Much of the prior work has been limited by speed, generality, or reliance on depth maps and object poses. In this paper, we introduce DextrAH-RGB, a system that can perform dexterous arm-hand grasping end-to-end from RGB image input. We train a privileged fabric-guided policy (FGP) in simulation through reinforcement learning that acts on a geometric fabric controller to dexterously grasp a wide variety of objects. We then distill this privileged FGP into a RGB-based FGP strictly in simulation using photorealistic tiled rendering. To our knowledge, this is the first work that is able to demonstrate robust sim2real transfer of an end2end RGB-based policy for complex, dynamic, contact-rich tasks such as dexterous grasping. DextrAH-RGB is competitive with depth-based dexterous grasping policies, and generalizes to novel objects with unseen geometry, texture, and lighting conditions in the real world. Videos of our system grasping a diverse range of unseen objects are available at \url\{https://dextrah-rgb.github.io/\}.},
+   author = {Ritvik Singh and Arthur Allshire and Ankur Handa and Nathan Ratliff and Karl Van Wyk},
+   month = {2},
+   title = {DextrAH-RGB: Visuomotor Policies to Grasp Anything with Dexterous Hands},
+   year = {2025}
+}
+@article{Ratliff2023,
+   abstract = {Most dynamics functions are not well-aligned to task requirements. Controllers, therefore, often invert the dynamics and reshape it into something more useful. The learning community has found that these controllers, such as Operational Space Control (OSC), can offer important inductive biases for training. However, OSC only captures straight line end-effector motion. There's a lot more behavior we could and should be packing into these systems. Earlier work [15][16][19] developed a theory that generalized these ideas and constructed a broad and flexible class of second-order dynamical systems which was simultaneously expressive enough to capture substantial behavior (such as that listed above), and maintained the types of stability properties that make OSC and controllers like it a good foundation for policy design and learning. This paper, motivated by the empirical success of the types of fabrics used in [20], reformulates the theory of fabrics into a form that's more general and easier to apply to policy learning problems. We focus on the stability properties that make fabrics a good foundation for policy synthesis. Fabrics create a fundamentally stable medium within which a policy can operate; they influence the system's behavior without preventing it from achieving tasks within its constraints. When a fabrics is geometric (path consistent) we can interpret the fabric as forming a road network of paths that the system wants to follow at constant speed absent a forcing policy, giving geometric intuition to its role as a prior. The policy operating over the geometric fabric acts to modulate speed and steers the system from one road to the next as it accomplishes its task. We reformulate the theory of fabrics here rigorously and develop theoretical results characterizing system behavior and illuminating how to design these systems, while also emphasizing intuition throughout.},
+   author = {Nathan Ratliff and Karl Van Wyk},
+   month = {9},
+   title = {Fabrics: A Foundationally Stable Medium for Encoding Prior Experience},
+   year = {2023}
+}
+@article{Kedia2026,
+   abstract = {The ability to manipulate tools significantly expands the set of tasks a robot can perform. Yet, tool manipulation represents a challenging class of dexterity, requiring grasping thin objects, in-hand object rotations, and forceful interactions. Since collecting teleoperation data for these behaviors is challenging, sim-to-real reinforcement learning (RL) is a promising alternative. However, prior approaches typically require substantial engineering effort to model objects and tune reward functions for each task. In this work, we propose SimToolReal, taking a step towards generalizing sim-to-real RL policies for tool manipulation. Instead of focusing on a single object and task, we procedurally generate a large variety of tool-like object primitives in simulation and train a single RL policy with the universal goal of manipulating each object to random goal poses. This approach enables SimToolReal to perform general dexterous tool manipulation at test-time without any object or task-specific training. We demonstrate that SimToolReal outperforms prior retargeting and fixed-grasp methods by 37\% while matching the performance of specialist RL policies trained on specific target objects and tasks. Finally, we show that SimToolReal generalizes across a diverse set of everyday tools, achieving strong zero-shot performance over 120 real-world rollouts spanning 24 tasks, 12 object instances, and 6 tool categories.},
+   author = {Kushal Kedia and Tyler Ga Wei Lum and Jeannette Bohg and C. Karen Liu},
+   month = {2},
+   title = {SimToolReal: An Object-Centric Policy for Zero-Shot Dexterous Tool Manipulation},
+   year = {2026}
+}
+@article{Lum2024,
+   abstract = {A pivotal challenge in robotics is achieving fast, safe, and robust dexterous grasping across a diverse range of objects, an important goal within industrial applications. However, existing methods often have very limited speed, dexterity, and generality, along with limited or no hardware safety guarantees. In this work, we introduce DextrAH-G, a depth-based dexterous grasping policy trained entirely in simulation that combines reinforcement learning, geometric fabrics, and teacher-student distillation. We address key challenges in joint arm-hand policy learning, such as high-dimensional observation and action spaces, the sim2real gap, collision avoidance, and hardware constraints. DextrAH-G enables a 23 motor arm-hand robot to safely and continuously grasp and transport a large variety of objects at high speed using multi-modal inputs including depth images, allowing generalization across object geometry. Videos at https://sites.google.com/view/dextrah-g.},
+   author = {Tyler Ga Wei Lum and Martin Matak and Viktor Makoviychuk and Ankur Handa and Arthur Allshire and Tucker Hermans and Nathan D. Ratliff and Karl Van Wyk},
+   month = {10},
+   title = {DextrAH-G: Pixels-to-Action Dexterous Arm-Hand Grasping with Geometric Fabrics},
+   year = {2024}
+}
+@article{ChiZhang2026,
+   abstract = {Learning dexterous manipulation is challenging due
+to high-dimensional action spaces and complex contact dynamics.
+In addition, safety-unaware exploration during learning can lead
+to hardware damage, unstable interactions, and hazardous contact
+events, posing a significant barrier to real-world deployment. To
+address this challenge, we propose a safety-aware online policy
+distillation framework that transfers reinforcement learning (RL)
+teacher policies to a vision-based student policy. Our approach
+introduces a teacher-intervened mixed rollout mechanism that
+integrates teacher--student action disagreement with a learned
+Q-value--based risk predictor to detect high-risk states and
+proactively trigger teacher takeover. This design enables safer
+exploration while preserving the benefits of online interactive
+imitation learning. Experiments on grasp-and-lift tasks show
+that our method significantly improves training safety, reducing
+unsafe episodes by up to 80\% during the early stages of training
+compared with vanilla DAgger-based distillation. Meanwhile, the
+distilled student policy achieves comparable lift success rates
+and demonstrates robustness suitable for real-world robotic
+deployment.},
+   author = {Chi Zhang},
+   month = {3},
+   title = {DexSafeDagger: Safer Policy Distillation from RGB Observations Using Q-Value Failure Prediction--Guided Teacher Intervention},
+   year = {2026}
+}
+@article{Zhang2016,
+   abstract = {One way to approach end-to-end autonomous driving is to learn a policy function that maps from a sensory input, such as an image frame from a front-facing camera, to a driving action, by imitating an expert driver, or a reference policy. This can be done by supervised learning, where a policy function is tuned to minimize the difference between the predicted and ground-truth actions. A policy function trained in this way however is known to suffer from unexpected behaviours due to the mismatch between the states reachable by the reference policy and trained policy functions. More advanced algorithms for imitation learning, such as DAgger, addresses this issue by iteratively collecting training examples from both reference and trained policies. These algorithms often requires a large number of queries to a reference policy, which is undesirable as the reference policy is often expensive. In this paper, we propose an extension of the DAgger, called SafeDAgger, that is query-efficient and more suitable for end-to-end autonomous driving. We evaluate the proposed SafeDAgger in a car racing simulator and show that it indeed requires less queries to a reference policy. We observe a significant speed up in convergence, which we conjecture to be due to the effect of automated curriculum learning.},
+   author = {Jiakai Zhang and Kyunghyun Cho},
+   month = {5},
+   title = {Query-Efficient Imitation Learning for End-to-End Autonomous Driving},
+   year = {2016}
+}
+@article{Ross2011,
+   abstract = {Sequential prediction problems such as imitation learning, where future observations depend on previous predictions (actions), violate the common i.i.d. assumptions made in statistical learning. This leads to poor performance in theory and often in practice. Some recent approaches provide stronger guarantees in this setting, but remain somewhat unsatisfactory as they train either non-stationary or stochastic policies and require a large number of iterations. In this paper, we propose a new iterative algorithm, which trains a stationary deterministic policy, that can be seen as a no regret algorithm in an online learning setting. We show that any such no regret algorithm, combined with additional reduction assumptions, must find a policy with good performance under the distribution of observations it induces in such sequential settings. We demonstrate that this new approach outperforms previous approaches on two challenging imitation learning problems and a benchmark sequence labeling problem.},
+   author = {Stephane Ross and Geoffrey J. Gordon and J. Andrew Bagnell},
+   month = {3},
+   title = {A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning},
+   year = {2011}
+}
+@article{Haddadin2017,
+   author = {Sami Haddadin and Alessandro De Luca and Alin Albu-Schaffer},
+   doi = {10.1109/TRO.2017.2723903},
+   issn = {1552-3098},
+   issue = {6},
+   journal = {IEEE Transactions on Robotics},
+   month = {12},
+   pages = {1292-1312},
+   title = {Robot Collisions: A Survey on Detection, Isolation, and Identification},
+   volume = {33},
+   year = {2017}
+}
+@inproceedings{Nguyen1986,
+   author = {V.-D. Nguyen},
+   doi = {10.1109/ROBOT.1986.1087483},
+   booktitle = {Proceedings. 1986 IEEE International Conference on Robotics and Automation},
+   pages = {1368-1373},
+   publisher = {IEEE},
+   title = {Constructing force-closure grasps},
+   year = {1986}
+}
+@article{Wu2022,
+   abstract = {To fully utilize the versatility of a multi-fingered dexterous robotic hand for executing diverse object grasps, one must consider the rich physical constraints introduced by hand-object interaction and object geometry. We propose an integrative approach of combining a generative model and a bilevel optimization (BO) to plan diverse grasp configurations on novel objects. First, a conditional variational autoencoder trained on merely six YCB objects predicts the finger placement directly from the object point cloud. The prediction is then used to seed a nonconvex BO that solves for a grasp configuration under collision, reachability, wrench closure, and friction constraints. Our method achieved an 86.7\% success over 120 real world grasping trials on 20 household objects, including unseen and challenging geometries. Through quantitative empirical evaluations, we confirm that grasp configurations produced by our pipeline are indeed guaranteed to satisfy kinematic and dynamic constraints. A video summary of our results is available at youtu.be/9DTrImbN99I.},
+   author = {Albert Wu and Michelle Guo and C. Karen Liu},
+   month = {12},
+   title = {Learning Diverse and Physically Feasible Dexterous Grasps with Generative Model and Bilevel Optimization},
+   year = {2022}
+}
+@article{Wang2023,
+   abstract = {Robotic dexterous grasping is the first step to enable human-like dexterous object manipulation and thus a crucial robotic technology. However, dexterous grasping is much more under-explored than object grasping with parallel grippers, partially due to the lack of a large-scale dataset. In this work, we present a large-scale robotic dexterous grasp dataset, DexGraspNet, generated by our proposed highly efficient synthesis method that can be generally applied to any dexterous hand. Our method leverages a deeply accelerated differentiable force closure estimator and thus can efficiently and robustly synthesize stable and diverse grasps on a large scale. We choose ShadowHand and generate 1.32 million grasps for 5355 objects, covering more than 133 object categories and containing more than 200 diverse grasps for each object instance, with all grasps having been validated by the Isaac Gym simulator. Compared to the previous dataset from Liu et al. generated by GraspIt!, our dataset has not only more objects and grasps, but also higher diversity and quality. Via performing cross-dataset experiments, we show that training several algorithms of dexterous grasp synthesis on our dataset significantly outperforms training on the previous one. To access our data and code, including code for human and Allegro grasp synthesis, please visit our project page: https://pku-epic.github.io/DexGraspNet/.},
+   author = {Ruicheng Wang and Jialiang Zhang and Jiayi Chen and Yinzhen Xu and Puhao Li and Tengyu Liu and He Wang},
+   month = {3},
+   title = {DexGraspNet: A Large-Scale Robotic Dexterous Grasp Dataset for General Objects Based on Simulation},
+   year = {2023}
+}
+@article{Kedia2026,
+   abstract = {The ability to manipulate tools significantly expands the set of tasks a robot can perform. Yet, tool manipulation represents a challenging class of dexterity, requiring grasping thin objects, in-hand object rotations, and forceful interactions. Since collecting teleoperation data for these behaviors is challenging, sim-to-real reinforcement learning (RL) is a promising alternative. However, prior approaches typically require substantial engineering effort to model objects and tune reward functions for each task. In this work, we propose SimToolReal, taking a step towards generalizing sim-to-real RL policies for tool manipulation. Instead of focusing on a single object and task, we procedurally generate a large variety of tool-like object primitives in simulation and train a single RL policy with the universal goal of manipulating each object to random goal poses. This approach enables SimToolReal to perform general dexterous tool manipulation at test-time without any object or task-specific training. We demonstrate that SimToolReal outperforms prior retargeting and fixed-grasp methods by 37\% while matching the performance of specialist RL policies trained on specific target objects and tasks. Finally, we show that SimToolReal generalizes across a diverse set of everyday tools, achieving strong zero-shot performance over 120 real-world rollouts spanning 24 tasks, 12 object instances, and 6 tool categories.},
+   author = {Kushal Kedia and Tyler Ga Wei Lum and Jeannette Bohg and C. Karen Liu},
+   month = {2},
+   title = {SimToolReal: An Object-Centric Policy for Zero-Shot Dexterous Tool Manipulation},
+   year = {2026}
+}
+@article{Narang2022,
+   abstract = {Robotic assembly is one of the oldest and most challenging applications of robotics. In other areas of robotics, such as perception and grasping, simulation has rapidly accelerated research progress, particularly when combined with modern deep learning. However, accurately, efficiently, and robustly simulating the range of contact-rich interactions in assembly remains a longstanding challenge. In this work, we present Factory, a set of physics simulation methods and robot learning tools for such applications. We achieve real-time or faster simulation of a wide range of contact-rich scenes, including simultaneous simulation of 1000 nut-and-bolt interactions. We provide $60$ carefully-designed part models, 3 robotic assembly environments, and 7 robot controllers for training and testing virtual robots. Finally, we train and evaluate proof-of-concept reinforcement learning policies for nut-and-bolt assembly. We aim for Factory to open the doors to using simulation for robotic assembly, as well as many other contact-rich applications in robotics. Please see https://sites.google.com/nvidia.com/factory for supplementary content, including videos.},
+   author = {Yashraj Narang and Kier Storey and Iretiayo Akinola and Miles Macklin and Philipp Reist and Lukasz Wawrzyniak and Yunrong Guo and Adam Moravanszky and Gavriel State and Michelle Lu and Ankur Handa and Dieter Fox},
+   month = {5},
+   title = {Factory: Fast Contact for Robotic Assembly},
+   year = {2022}
+}
+@article{Chen2023,
+   abstract = {Many real-world manipulation tasks consist of a series of subtasks that are significantly different from one another. Such long-horizon, complex tasks highlight the potential of dexterous hands, which possess adaptability and versatility, capable of seamlessly transitioning between different modes of functionality without the need for re-grasping or external tools. However, the challenges arise due to the high-dimensional action space of dexterous hand and complex compositional dynamics of the long-horizon tasks. We present Sequential Dexterity, a general system based on reinforcement learning (RL) that chains multiple dexterous policies for achieving long-horizon task goals. The core of the system is a transition feasibility function that progressively finetunes the sub-policies for enhancing chaining success rate, while also enables autonomous policy-switching for recovery from failures and bypassing redundant stages. Despite being trained only in simulation with a few task objects, our system demonstrates generalization capability to novel object shapes and is able to zero-shot transfer to a real-world robot equipped with a dexterous hand. Code and videos are available at https://sequential-dexterity.github.io},
+   author = {Yuanpei Chen and Chen Wang and Li Fei-Fei and C. Karen Liu},
+   month = {10},
+   title = {Sequential Dexterity: Chaining Dexterous Policies for Long-Horizon Manipulation},
+   year = {2023}
+}
+@article{Noseworthy2025,
+   abstract = {We present FORGE, a method for sim-to-real transfer of force-aware manipulation policies in the presence of significant pose uncertainty. During simulation-based policy learning, FORGE combines a force threshold mechanism with a dynamics randomization scheme to enable robust transfer of the learned policies to the real robot. At deployment, FORGE policies, conditioned on a maximum allowable force, adaptively perform contact-rich tasks while avoiding aggressive and unsafe behaviour, regardless of the controller gains. Additionally, FORGE policies predict task success, enabling efficient termination and autonomous tuning of the force threshold. We show that FORGE can be used to learn a variety of robust contact-rich policies, including the forceful insertion of snap-fit connectors. We further demonstrate the multistage assembly of a planetary gear system, which requires success across three assembly tasks: nut threading, insertion, and gear meshing. Project website can be accessed at https://noseworm.github.io/forge/.},
+   author = {Michael Noseworthy and Bingjie Tang and Bowen Wen and Ankur Handa and Chad Kessens and Nicholas Roy and Dieter Fox and Fabio Ramos and Yashraj Narang and Iretiayo Akinola},
+   month = {1},
+   title = {FORGE: Force-Guided Exploration for Robust Contact-Rich Manipulation under Uncertainty},
+   year = {2025}
+}
+@article{Tang2023,
+   abstract = {Robotic assembly is a longstanding challenge, requiring contact-rich interaction and high precision and accuracy. Many applications also require adaptivity to diverse parts, poses, and environments, as well as low cycle times. In other areas of robotics, simulation is a powerful tool to develop algorithms, generate datasets, and train agents. However, simulation has had a more limited impact on assembly. We present IndustReal, a set of algorithms, systems, and tools that solve assembly tasks in simulation with reinforcement learning (RL) and successfully achieve policy transfer to the real world. Specifically, we propose 1) simulation-aware policy updates, 2) signed-distance-field rewards, and 3) sampling-based curricula for robotic RL agents. We use these algorithms to enable robots to solve contact-rich pick, place, and insertion tasks in simulation. We then propose 4) a policy-level action integrator to minimize error at policy deployment time. We build and demonstrate a real-world robotic assembly system that uses the trained policies and action integrator to achieve repeatable performance in the real world. Finally, we present hardware and software tools that allow other researchers to reproduce our system and results. For videos and additional details, please see http://sites.google.com/nvidia.com/industreal .},
+   author = {Bingjie Tang and Michael A. Lin and Iretiayo Akinola and Ankur Handa and Gaurav S. Sukhatme and Fabio Ramos and Dieter Fox and Yashraj Narang},
+   month = {5},
+   title = {IndustReal: Transferring Contact-Rich Assembly Tasks from Simulation to Reality},
+   year = {2023}
+}
+@techReport{ForgeSupplementary2025,
+   title = {FORGE: Supplementary Material}
+}
+@book{Pfanne2022,
+   abstract = {This book introduces a novel model-based dexterous manipulation framework, which, thanks to its precision and versatility, significantly advances the capabilities of robotic hands compared to the previous state of the art. This is achieved by combining a novel grasp state estimation algorithm, the first to integrate information from tactile sensing, proprioception and vision, with an impedance-based in-hand object controller, which enables leading manipulation capabilities, including finger gaiting. The developed concept is implemented on one of the most advanced robotic manipulators, the DLR humanoid robot David, and evaluated in a range of challenging real-world manipulation scenarios and tasks. This book greatly benefits researchers in the field of robotics that study robotic hands and dexterous manipulation topics, as well as developers and engineers working on industrial automation applications involving grippers and robotic manipulators. Introduction -- Related work -- Grasp modeling -- Grasp state estimation -- Impedance-based object control -- Conclusion.},
+   author = {Martin. Pfanne},
+   isbn = {9783031069666},
+   publisher = {Springer},
+   title = {In-hand object localization and control : enabling dexterous manipulation with robotic hands},
+   year = {2022}
+}
