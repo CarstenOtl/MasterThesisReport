@@ -14,3 +14,6 @@
 *.upb
 *.fls
 *.fdb_latexmk
+
+# IDE settings
+.vscode/
