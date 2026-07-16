@@ -6224,6 +6224,7 @@
             \AIRlangGerEng{Matr.nr.}{Matr.no.}: & #4\\%
             E-Mail: & #5\\%
             \AIRlangSupervisor: & #6\\%
+            \ifdefined\AIRindustrialSupervisor\AIRlangGerEng{Industriebetreuer/in}{Industrial supervisor}: & \AIRindustrialSupervisor\\\fi%
             \AIRlangGerEng{Institut}{Institute}: & \AIRlangChair\\%
             \AIRlangGerEng{Titel}{Title}: & #2\\%
             \large\AIRlangDate: & #7\\%

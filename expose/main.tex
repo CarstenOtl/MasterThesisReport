@@ -20,7 +20,14 @@
 % ---------
 %\AIRstudentexposeTitlePageBachelorsThesis{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{Your Supervisor}{\AIRutilsToday}%
 %\AIRstudentexposeTitlePageSemesterThesis{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{Your Supervisor}{\AIRutilsToday}%
-\AIRstudentexposeTitlePageMastersThesis{\AIRlangGerEng{SimThreadReal: Sim-to-Real-Übertragung von Gewindeverbindungen mit einer geschickten Hand durch kraftgeführte In-Hand-Manipulation}{SimThreadReal: Sim-to-Real Threaded Fastening with a Dexterous Hand through Force-Guided In-Hand Manipulation}}{Carsten Oertel}{03723658}{carsten.oertel@tum.de}{\AIRnamesProfKnoll}{\AIRutilsToday}%
+% Industrial supervisor (Agile Robots), shown as an extra row in the formalities table below
+\newcommand{\AIRindustrialSupervisor}{M.Sc. Antonio Gonzales Marin (Agile Robots)}
+% Agile Robots logo, placed to the left of the TUM logo on the cover page (matched to the 1cm TUM logo height)
+\AIRlayoutPutAtNorthEast{3.3cm}{\AIRlayoutHeaderSize}{\includegraphics[height=\AIRlayoutHeaderSize]{figures/Agile_Robots_logo.png}}%
+\AIRstudentexposeTitlePageMastersThesis{\AIRlangGerEng{%
+%SimThreadReal: Sim-to-Real-Übertragung von Gewindeverbindungen mit einer geschickten Hand durch kraftgeführte In-Hand-Manipulation%
+}{%
+SimThreadReal: Sim-to-Real Threaded Fastening with a Dexterous Hand through Force-Guided In-Hand Manipulation}}{Carsten Oertel}{03723658}{carsten.oertel@tum.de}{\AIRnamesProfKnoll}{\AIRutilsToday}%
 %\AIRstudentexposeTitlePageIDP{Provisional Title}{Your Name}{03600000}{your.name@tum.de}{Your Supervisor}{\AIRutilsToday}%
 %
 % Contents
@@ -31,131 +38,150 @@
 % which challenges are excluded). Your concept paper can be approximately 3 to 4 pages long, depending on the topic,
 % style and preliminary work it might also be longer.
 %
-\section{\AIRlangGerEng{Aufgabenstellung}{Topic}}%
+\section{\AIRlangGerEng{%
+%Aufgabenstellung%
+}{%
+Topic}}%
 % REMARKS
 % Concisely describe (no more than one page) the issue that you want to work on. The relevance of the topic should be
 % apparent.
 %
 \AIRlangGerEng{%
-Das Schrauben einer Mutter auf einen Bolzen gehört zu den häufigsten Vorgängen der industriellen Montage und ist zugleich schwer zu automatisieren: Die Bauteile fügen sich über eine Gewindegeometrie im Submillimeterbereich, der Fortschritt wird von schwer messbaren Reibungs- und Kontaktkräften bestimmt, und der Erfolg koppelt einen stabilen Griff des Verbindungselements an eine kontrollierte Drehbewegung des gegriffenen Teils. Ein System, das diese Aufgabe ohne bauteilspezifische Vorrichtungen ausführen soll, muss daher den Griff selbst herstellen und halten, den Kontakt durch diesen Griff wahrnehmen und das Greifen mit einer feinen, drehgekoppelten Manipulation koordinieren.%
+%Robotern eine menschenähnliche Geschicklichkeit zu verleihen, ist ein langjähriges Ziel der Robotik, und einer ihrer überzeugendsten Belege ist die Fähigkeit, die Objekte und Werkzeuge einer für menschliche Hände gebauten Welt zu greifen und zu manipulieren~\cite{BicchiKumar2000}. Ein wirklich universeller Roboter sollte nicht für jede Aufgabe auf einen spezialisierten Endeffektor angewiesen sein: Eine mehrfingrige Hand verspricht, Objekte unterschiedlicher Form aufzunehmen, zu halten und umzuorientieren sowie eben jene Werkzeuge und Teile zu führen, die Menschen täglich handhaben. Lernverfahren haben begonnen, dieses Versprechen in einsetzbare Fertigkeiten zu überführen, und insbesondere die geschickte In-Hand-Manipulation hat sich in den letzten Jahren rasch weiterentwickelt~\cite{Weinberg2024}. Einige der anspruchsvollsten dieser Fertigkeiten liegen in der mechanischen Montage, in der ein fester Griff eines Bauteils an eine feine, kontaktreiche Bewegung gekoppelt werden muss, die es mit einem anderen fügt.%
+}{%
+Endowing robots with human-like dexterity is a long-standing goal of robotics, and one of its most compelling proofs is the ability to grasp and manipulate the objects and tools of a world built for human hands~\cite{BicchiKumar2000}. A truly general-purpose robot should not rely on a task-specific end-effector for every job: a multi-fingered hand promises to pick up objects of varying shape, hold and reorient them, and wield the very implements and parts that people handle every day. Learning has begun to turn this promise into working skills, and dexterous in-hand manipulation in particular has advanced rapidly in recent years~\cite{Weinberg2024}. Some of the most demanding of these skills lie in mechanical assembly, where a firm grasp of a part must be coupled to a fine, contact-rich motion that joins it to another.%
+}%
+%
+\par%
+\AIRlangGerEng{%
+%Das Schrauben einer Mutter auf einen Bolzen gehört zu den häufigsten Vorgängen der industriellen Montage und ist zugleich schwer zu automatisieren: Die Bauteile fügen sich über eine Gewindegeometrie im Submillimeterbereich, der Fortschritt wird von schwer messbaren Reibungs- und Kontaktkräften bestimmt, und der Erfolg koppelt einen stabilen Griff des Verbindungselements an eine kontrollierte Drehbewegung des gegriffenen Teils. Ein System, das diese Aufgabe ohne bauteilspezifische Vorrichtungen ausführen soll, muss daher den Griff selbst herstellen und halten, den Kontakt durch diesen Griff wahrnehmen und das Greifen mit einer feinen, drehgekoppelten Manipulation koordinieren.%
 }{%
 Threading a nut onto a bolt is one of the most common operations in industrial assembly, yet it remains hard to automate: the parts mate through sub-millimetre thread geometry, progress is governed by friction and contact forces that are difficult to sense, and success couples a stable grasp of the fastener to a controlled turning motion of the grasped part. A system meant to perform this task without part-specific fixturing must therefore acquire and hold the grasp itself, sense contact through that grasp, and coordinate grasping with fine, rotation-coupled manipulation.%
 }%
 %
 \par%
 \AIRlangGerEng{%
-Reinforcement Learning (RL) in hochauflösender GPU-Simulation hat kontaktreiche Montage jüngst lernbar gemacht, und das Mutternschrauben wurde als eine solche Aufgabe demonstriert~\cite{Narang2022,Noseworthy2025}. Diese gelernten Systeme greifen jedoch mit einem Parallelgreifer und starten jede Episode mit einem bereits gehaltenen Verbindungselement: Die Policy lernt stets nur, ein vorab gegriffenes Teil zu drehen, und muss den Griff weder selbst herstellen noch aktiv halten. Griffbildung und -erhalt sind damit aus dem Lernproblem ausgeklammert.%
+%Reinforcement Learning (RL) in hochauflösender GPU-Simulation hat kontaktreiche Montage jüngst lernbar gemacht, und das Mutternschrauben wurde als eine solche Aufgabe demonstriert~\cite{Narang2022,Noseworthy2025}. Diese gelernten Systeme greifen jedoch mit einem Parallelgreifer und starten jede Episode mit einem bereits gehaltenen Verbindungselement: Die Policy lernt stets nur, ein vorab gegriffenes Teil zu drehen, und muss den Griff weder selbst herstellen noch aktiv halten. Griffbildung und -erhalt sind damit aus dem Lernproblem ausgeklammert.%
 }{%
 Reinforcement learning (RL) in high-fidelity GPU simulation has recently made contact-rich assembly learnable, and nut threading has been demonstrated among such tasks~\cite{Narang2022,Noseworthy2025}. These learned systems, however, act with a parallel-jaw gripper and begin each episode from a fastener that is already held: the policy only ever learns to turn a pre-pinched part and never has to acquire, or actively maintain, the grasp itself. Grasp acquisition and maintenance are thus left outside the learning problem.%
 }%
 %
 \par%
 \AIRlangGerEng{%
-Mehrfingrige, geschickte Hände versprechen dagegen eine deutlich allgemeinere Manipulation. Gelernte Fertigkeiten umfassen inzwischen die Umorientierung in der Hand~\cite{Chen2021,Handa2024}, den Werkzeuggebrauch~\cite{Kedia2026} und beidhändige Aufgaben wie das Aufdrehen von Deckeln~\cite{Lin2024}; auch robotisches Verschrauben mit geführten Schraubendrehern wurde untersucht~\cite{Tang2023,Manyar2023}. Zugleich sind geschickte Hände wegen ihrer vielen Freiheitsgrade und des reichen, intermittierenden und schwer messbaren Finger--Objekt-Kontakts deutlich schwerer zu regeln als Greifer~\cite{BicchiKumar2000,Weinberg2024}. Die Schnittmenge beider -- eine mehrfingrige Hand, die eine kontaktreiche Fügeaufgabe ausführt, den Griff bildet und anschließend die Drehung vollzieht -- ist daher weitgehend unerforscht: Nach Kenntnis des Autors existiert keine gelernte Policy, die auf einem Arm-Hand-System sowohl einen mehrfingrigen Griff des Verbindungselements herstellt als auch das anschließende Schrauben ausführt.%
+%Mehrfingrige, geschickte Hände versprechen dagegen eine deutlich allgemeinere Manipulation. Gelernte Fertigkeiten umfassen inzwischen die Umorientierung in der Hand~\cite{Chen2021,Handa2024}, den Werkzeuggebrauch~\cite{Kedia2026} und beidhändige Aufgaben wie das Aufdrehen von Deckeln~\cite{Lin2024}; auch robotisches Verschrauben mit geführten Schraubendrehern wurde untersucht~\cite{Tang2023,Manyar2023}. Zugleich sind geschickte Hände wegen ihrer vielen Freiheitsgrade und des reichen, intermittierenden und schwer messbaren Finger--Objekt-Kontakts deutlich schwerer zu regeln als Greifer~\cite{BicchiKumar2000,Weinberg2024}. Die Schnittmenge beider, eine mehrfingrige Hand, die eine kontaktreiche Fügeaufgabe ausführt, den Griff bildet und anschließend die Drehung vollzieht, ist daher weitgehend unerforscht: Nach Kenntnis des Autors existiert keine gelernte Policy, die auf einem Arm-Hand-System einen mehrfingrigen Griff des Verbindungselements herstellt und anschließend das Ansetzen des Gewindes sowie den nachfolgenden Schraubprozess ausführt.%
 }{%
-Multi-fingered dexterous hands, by contrast, promise far more general manipulation. Learned skills now span in-hand reorientation~\cite{Chen2021,Handa2024}, tool use~\cite{Kedia2026}, and bimanual tasks such as twisting lids off jars~\cite{Lin2024}, and robotic fastening has been studied with guided screwdrivers~\cite{Tang2023,Manyar2023}. Yet dexterous hands remain markedly harder to control than grippers, precisely because of the many degrees of freedom and the rich, intermittent, hard-to-sense finger--object contact they rely on~\cite{BicchiKumar2000,Weinberg2024}. The intersection of the two -- a multi-fingered hand that performs a contact-rich fastening task, forming the grasp and then executing the turn -- is therefore largely unexplored: to the author's knowledge, no learned policy both acquires a multi-finger grasp of a fastener and performs the subsequent threading on an arm--hand system.%
+Multi-fingered dexterous hands, by contrast, promise far more general manipulation. Learned skills now span in-hand reorientation~\cite{Chen2021,Handa2024}, tool use~\cite{Kedia2026}, and bimanual tasks such as twisting lids off jars~\cite{Lin2024}, and robotic fastening has been studied with guided screwdrivers~\cite{Tang2023,Manyar2023}. Yet dexterous hands remain much harder to control than grippers, precisely because of the many degrees of freedom and the rich, intermittent, hard-to-sense finger--object contact they rely on~\cite{BicchiKumar2000,Weinberg2024}. The intersection of the two, a multi-fingered hand that performs a contact-rich fastening task by forming the grasp and then executing the turn, is therefore largely unexplored: to the author's knowledge, no learned policy acquires a multi-finger grasp of a fastener and then carries out the thread start and the subsequent threading process on an arm--hand system.%
 }%
 %
 \par%
 \AIRlangGerEng{%
-Diese Arbeit zielt darauf ab, einen Teil dieser Lücke zu schließen. Sie verfolgt einen zweistufigen Ansatz, der bewusst allgemein gegenüber der konkreten Hardware bleibt. Zunächst wird in Simulation eine privilegierte Teacher-Policy trainiert, die nach einer auf einem Bolzen aufliegenden Mutter greift, sie mit einer mehrfingrigen Hand fasst und auf den Bolzen schraubt. Anschließend wird dieser Teacher in eine visuelle Student-Policy destilliert, die den privilegierten Simulatorzustand durch RGB- -- und bei Bedarf RGB-D- -- Beobachtungen ersetzt und damit prinzipiell auf reale Hardware übertragbar ist -- nach dem Teacher--Student-Rezept, das der Autor in einer vorangegangenen Semesterarbeit für geschicktes Greifen validiert hat~\cite{Oertel2026}. Gegenüber greiferbasierter Montage kommen eine Annäherungs- und Greifphase, ein seitlicher Griff an einem reibungsarmen Verbindungselement sowie die Anforderung hinzu, dieses in ein enges Erfolgsfenster zu drehen, ohne den Griff zu verlieren. Die Relevanz ist dreifach. Methodisch untersucht die Aufgabe Credit-Assignment über eine gekoppelte Greif-dann-Manipulier-Sequenz, Kontaktwahrnehmung auf einer geschickten Hand sowie die Grenzen visueller Destillation für feine Manipulation. Aus Simulationssicht prüft sie, wie treu GPU-Physik-Engines eingreifenden Gewindekontakt abbilden -- durchdringungsfreie Kontaktsimulation ist dabei selbst ein offenes Forschungsproblem~\cite{Chen2025}. Praktisch ist die Arbeit ein Schritt, Spezialgreifer durch allgemeine geschickte Hände beim Fügen zu ersetzen und langfristig solche Fertigkeiten von der Simulation in die Realität zu übertragen~\cite{Handa2024,Tang2024}.%
+%Diese Arbeit zielt darauf ab, einen Teil dieser Lücke zu schließen. Sie verfolgt einen zweistufigen Ansatz. Zunächst wird in Simulation eine privilegierte Teacher-Policy trainiert, die nach einer auf einem Bolzen aufliegenden Mutter greift, sie mit einer mehrfingrigen Hand fasst und auf den Bolzen schraubt. Anschließend wird dieser Teacher in eine visuelle Student-Policy destilliert, die den privilegierten Simulatorzustand durch RGB- und bei Bedarf RGB-D-Beobachtungen ersetzt und damit prinzipiell auf reale Hardware übertragbar ist, nach dem Teacher--Student-Rezept für geschicktes Greifen~\cite{Singh2025}. Gegenüber greiferbasierter Montage kommen eine Annäherungs- und Greifphase, ein seitlicher Griff an einem reibungsarmen Verbindungselement sowie die Anforderung hinzu, dieses in ein enges Erfolgsfenster zu drehen, ohne den Griff zu verlieren. Die Relevanz ist dreifach. Methodisch untersucht die Aufgabe Credit-Assignment über eine gekoppelte Greif-dann-Manipulier-Sequenz, Kontaktwahrnehmung auf einer geschickten Hand sowie die Grenzen visueller Destillation für feine Manipulation. Aus Simulationssicht prüft sie, wie treu GPU-Physik-Engines eingreifenden Gewindekontakt abbilden. Durchdringungsfreie Kontaktsimulation ist dabei selbst ein offenes Forschungsproblem~\cite{Chen2025}. Praktisch ist die Arbeit ein Schritt, Spezialgreifer durch allgemeine geschickte Hände beim Fügen zu ersetzen und langfristig solche Fertigkeiten von der Simulation in die Realität zu übertragen.%
 }{%
-This thesis aims to close part of that gap. It pursues a two-stage approach that stays deliberately general about the concrete hardware. First, a privileged teacher policy is trained in simulation to reach for a nut resting on a bolt, pinch it with a multi-fingered hand, and thread it onto the bolt. This teacher is then distilled into a vision-based student policy that replaces the privileged simulator state with RGB -- and, where needed, RGB-D -- observations, and is thus in principle transferable to real hardware -- following the teacher--student recipe the author validated for dexterous grasping in a preceding semester thesis~\cite{Oertel2026}. Relative to gripper-based assembly the task adds a reach-and-grasp phase, a side-pinch of a low-friction fastener, and the requirement to turn it down the thread into a tight success window without losing the grip. The relevance is threefold. Methodologically, the task probes credit assignment across a coupled grasp-then-manipulate sequence, contact sensing on a dexterous hand, and the limits of vision-based distillation for fine manipulation. From a simulation standpoint, it stresses how faithfully GPU physics engines represent mating thread contact -- penetration-free contact simulation being an open research problem in its own right~\cite{Chen2025}. Practically, it is a step toward replacing special-purpose grippers with general dexterous hands for fastening, and, in the longer term, toward transferring such skills from simulation to reality~\cite{Handa2024,Tang2024}.%
+This thesis aims to close part of that gap. It pursues a two-stage approach. First, a privileged teacher policy is trained in simulation to reach for a nut resting on a bolt, pinch it with a multi-fingered hand, and thread it onto the bolt. This teacher is then distilled into a vision-based student policy that replaces the privileged simulator state with RGB and, where needed, RGB-D observations, and is thus in principle transferable to real hardware, following the teacher--student recipe for dexterous grasping~\cite{Singh2025}. Relative to gripper-based assembly the task adds a reach-and-grasp phase, a side-pinch of a low-friction fastener, and the requirement to turn it down the thread into a tight success window without losing the grip. The relevance is threefold. Methodologically, the task probes credit assignment across a coupled grasp-then-manipulate sequence, contact sensing on a dexterous hand, and the limits of vision-based distillation for fine manipulation. From a simulation standpoint, it stresses how faithfully GPU physics engines represent mating thread contact, penetration-free contact simulation being an open research problem in its own right~\cite{Chen2025}. Practically, it is a step toward replacing special-purpose grippers with general dexterous hands for fastening, and, in the longer term, toward transferring such skills from simulation to reality.%
 }%
 %
-\subsection{\AIRlangGerEng{Forschungsfragen}{Research questions}}%
+\subsection{\AIRlangGerEng{%
+%Forschungsfragen%
+}{%
+Research questions}}%
 \AIRlangGerEng{%
-Die Arbeit verfolgt fünf Forschungsfragen:%
+%Die Arbeit verfolgt fünf Forschungsfragen:%
 }{%
 The thesis pursues five research questions:%
 }%
 \begin{enumerate}%
-    \item \AIRlangGerEng{Kann eine einzelne PPO-Policy die gekoppelte Fertigkeit ``erst greifen, dann schrauben'' auf einem humanoiden Arm-Hand-System in Simulation erlernen, wenn sie ohne vorgeformten Griff startet?}{Can a single PPO policy learn the coupled grasp-then-thread skill on a humanoid arm--hand system in simulation, starting without a pre-formed grasp?}%
-    \item \AIRlangGerEng{Welche Entscheidungen bei Kontaktmodellierung und Kontaktwahrnehmung machen die Aufgabe überhaupt abbildbar und lernbar -- von der Darstellung der Gewindegeometrie im Physik-Backend bis zu gefilterten Finger--Mutter-Kontaktsignalen anstelle geometrischer Näherungen?}{Which contact-modelling and contact-sensing choices make the task representable and learnable in the first place -- from the physics backend's representation of the mating thread geometry to filtered finger--nut contact signals in place of geometric proxies?}%
-    \item \AIRlangGerEng{Wie muss das Reward strukturiert sein, damit die Policy echtes rotationsgekoppeltes Schrauben ausführt, statt geometrische Fortschrittssignale auszunutzen (Ausrichten-und-Halten, Drücken auf Tiefe ohne Drehung)?}{How must the reward be structured so that the policy performs genuine rotation-coupled threading instead of exploiting geometric progress signals (align-and-hold, pressing to depth without rotation)?}%
-    \item \AIRlangGerEng{Wie gut verallgemeinert die gelernte Fertigkeit über Mutter-/Bolzengrößen (z.\,B. M10 gegenüber M16) und wie weit lassen sich Schraubtiefe und Mehrfachdrehung treiben?}{How well does the learned skill generalize across nut/bolt sizes (e.g.\ M10 versus M16), and how far can threading depth and multi-turn rotation be pushed?}%
-    \item \AIRlangGerEng{Lässt sich der privilegierte Teacher in eine visuelle Student-Policy auf Basis von Stereo-RGB- oder RGB-D-Beobachtungen destillieren, und welches Beobachtungsdesign -- Auflösung, Tiefeninformation, egozentrische gegenüber externer Kameraperspektive -- liefert die für das Schrauben nötige Objektlokalisierung als Grundlage für den Sim-to-Real-Transfer?}{Can the privileged teacher be distilled into a vision-based student policy operating on stereo RGB or RGB-D observations, and which observation design -- resolution, depth information, egocentric versus third-person camera placement -- provides the object localization that threading requires, as the basis for sim-to-real transfer?}%
+    \item \AIRlangGerEng{%
+%Kann eine einzelne PPO-Policy die gekoppelte Fertigkeit ``erst greifen, dann schrauben'' auf einem humanoiden Arm-Hand-System in Simulation erlernen, wenn sie ohne vorgeformten Griff startet?%
+}{%
+Can a single PPO policy learn the coupled grasp-then-thread skill on a humanoid arm--hand system in simulation, starting without a pre-formed grasp?}%
+    \item \AIRlangGerEng{%
+%Welche Entscheidungen bei Kontaktmodellierung und Kontaktwahrnehmung machen die Aufgabe überhaupt abbildbar und lernbar, von der Darstellung der Gewindegeometrie im Physik-Backend bis zu gefilterten Finger--Mutter-Kontaktsignalen anstelle geometrischer Näherungen?%
+}{%
+Which contact-modelling and contact-sensing choices make the task representable and learnable in the first place, from the physics backend's representation of the mating thread geometry to filtered finger--nut contact signals in place of geometric proxies?}%
+    \item \AIRlangGerEng{%
+%Wie muss das Reward strukturiert sein, damit die Policy echtes rotationsgekoppeltes Schrauben ausführt, statt geometrische Fortschrittssignale auszunutzen (Ausrichten-und-Halten, Drücken auf Tiefe ohne Drehung)?%
+}{%
+How must the reward be structured so that the policy performs genuine rotation-coupled threading instead of exploiting geometric progress signals (align-and-hold, pressing to depth without rotation)?}%
+    \item \AIRlangGerEng{%
+%Wie gut verallgemeinert die gelernte Fertigkeit über Mutter-/Bolzengrößen (z.\,B. M10 gegenüber M16) und wie weit lassen sich Schraubtiefe und Mehrfachdrehung treiben?%
+}{%
+How well does the learned skill generalize across nut/bolt sizes (e.g.\ M10 versus M16), and how far can threading depth and multi-turn rotation be pushed?}%
+    \item \AIRlangGerEng{%
+%Lässt sich der privilegierte Teacher in eine visuelle Student-Policy auf Basis von Stereo-RGB- oder RGB-D-Beobachtungen destillieren, und welche Wahl von Auflösung, Tiefeninformation sowie egozentrischer gegenüber externer Kameraperspektive liefert die für das Schrauben nötige Objektlokalisierung als Grundlage für den Sim-to-Real-Transfer?%
+}{%
+Can the privileged teacher be distilled into a vision-based student policy operating on stereo RGB or RGB-D observations, and which choice of resolution, depth information, and egocentric versus third-person camera placement provides the object localization that threading requires, as the basis for sim-to-real transfer?}%
 \end{enumerate}%
 %
 %
-\section{\AIRlangGerEng{Lösungsansatz}{Approach}}%
+\section{\AIRlangGerEng{%
+%Lösungsansatz%
+}{%
+Approach}}%
 % REMARKS
 % Give an overview on the approach you want to use for addressing your topic. Include references to literature when
 % explaining your proposal.
 %
 \AIRlangGerEng{%
-Der Ansatz baut auf einer vendorierten Kopie der IsaacLab-Aufgabe \emph{forge}~\cite{Noseworthy2025} -- ihrerseits auf \emph{factory}~\cite{Narang2022} -- auf und überträgt sie vom Franka-Parallelgreifer auf das KUKA-SHARPA-System. \Cref{fig:overview} skizziert den Aufbau. Die folgenden Unterabschnitte beschreiben Plattform und Roboter, Aufgabe und Regelungsschnittstellen, das Reward- und Kontaktdesign, das Lernverfahren sowie die Destillation in eine visuelle Student-Policy.%
+%Der Ansatz baut auf einer vendorierten Kopie der IsaacLab-Aufgabe \emph{forge}~\cite{Noseworthy2025} auf, die ihrerseits auf \emph{factory}~\cite{Narang2022} beruht, und überträgt sie vom Franka-Parallelgreifer auf einen Roboterarm mit einer fünffingrigen geschickten Roboterhand am Endeffektor. Ergänzend werden geschickte Manipulationsfertigkeiten aus dem SimToolReal-Ansatz~\cite{Kedia2026} einbezogen, der hohe Geschicklichkeit sowie die Fähigkeit zeigt, In-Hand-Manipulation und Finger-Gaiting eigenständig zu erlernen. \Cref{fig:overview} skizziert den Aufbau. Die folgenden Unterabschnitte beschreiben Plattform und Roboter, Aufgabe und Regelungsschnittstellen, das Reward- und Kontaktdesign, das Lernverfahren sowie die Destillation in eine visuelle Student-Policy.%
 }{%
-The approach builds on a vendored copy of the IsaacLab \emph{forge} task~\cite{Noseworthy2025} -- itself built on \emph{factory}~\cite{Narang2022} -- and carries it from the Franka parallel-jaw gripper to the KUKA--SHARPA system. \Cref{fig:overview} sketches the setup. The following subsections describe the platform and robot, the task and its control interfaces, the reward and contact design, the learning method, and the distillation to a vision-based student policy.%
-}%
-%
-\subsection{\AIRlangGerEng{Simulationsplattform und Roboter}{Simulation platform and robot}}%
-\AIRlangGerEng{%
-Trainiert wird in IsaacLab auf Isaac Sim, das kontaktreiche Montage GPU-parallel über viele Umgebungen simuliert. Die Entwicklung begann auf IsaacLab v2.3.2 mit dem PhysX-Backend; inzwischen ist die Aufgabe auf das Newton/MJWarp-Backend von IsaacLab 3.0 migriert. Ausschlaggebend war die Kontakttreue: Unter PhysX ließ sich die als Signed-Distance-Field (SDF) modellierte Mutter ohne Drehung axial durch das Bolzengewinde drücken -- ein Exploit, den die Policy zuverlässig fand -- während echter Gewindeeingriff als Lernsignal nicht zur Verfügung stand. Newtons Kollisionspipeline unterstützt Mesh--Mesh-SDF-Kollider und behandelt das Mutter--Bolzen-Paar mit einem hydroelastischen Druckfeld-Kontaktmodell, sodass die eingreifende Gewindegeometrie physikalisch abgebildet ist. Ergänzend zu dieser High-Fidelity-Linie ist eine zweite Pipeline geplant, die den Gewindeeingriff als kinematische Helix-Zwangsbedingung annähert (im Sinne der vendorierten SimToolReal-Aufgabenlinie~\cite{Kedia2026}) und damit Kontakttreue gegen Simulationsgeschwindigkeit tauscht; beide Pipelines werden parallel entwickelt und verglichen. Der Roboter ist ein KUKA iiwa14 (7~Freiheitsgrade) mit einer linken SHARPA-Hand (22~Fingergelenke). Aktiv sind nur Daumen (5) und Zeigefinger (4), angesteuert über eine niederdimensionale Pinzetten-Synergie; Mittel-, Ring- und kleiner Finger werden weggekrümmt eingefroren, um irrelevante Freiheitsgrade und Selbstkollision zu vermeiden. Die Aufgabe ist als neue Task-Familie \texttt{forge\_kuka} mit eigener Gym-ID realisiert, sodass die ursprünglichen Franka-forge-Aufgaben unverändert bleiben.%
-}{%
-Training runs in IsaacLab on Isaac Sim, which simulates contact-rich assembly across many environments in parallel on the GPU. Development started on IsaacLab v2.3.2 with the PhysX backend; the task has since been migrated to the Newton/MJWarp backend of IsaacLab 3.0. The migration was driven by contact fidelity: under PhysX, the nut, modelled with a signed-distance-field (SDF) collider, could be pressed axially through the bolt thread without rotating -- an exploit the policy reliably discovered -- while genuinely meshing thread contact was not available as a learning signal. Newton's collision pipeline supports mesh--mesh SDF colliders and treats the nut--bolt pair with a hydroelastic pressure-field contact model, so the mating thread geometry is physically represented. Complementary to this high-fidelity line, a second pipeline is planned that approximates the thread mating as a kinematic helical constraint (in the spirit of the vendored SimToolReal task line~\cite{Kedia2026}), trading contact fidelity for simulation speed; the two pipelines are developed in parallel and compared. The robot is a KUKA iiwa14 (7-DoF) arm with a left SHARPA hand (22 finger joints). Only the thumb (5) and index (4) are active, driven through a low-dimensional pinch synergy; the middle, ring, and little fingers are frozen curled away to remove irrelevant degrees of freedom and self-collision clutter. The task is realized as a new \texttt{forge\_kuka} task family with its own gym id, leaving the original Franka forge tasks untouched.%
-}%
-%
-\subsection{\AIRlangGerEng{Aufgabe und Regelung}{Task and control}}%
-\AIRlangGerEng{%
-Die Mutter liegt physisch am Bolzen an und wird durch den Schaft seitlich geführt; die Policy muss sie greifen, um sie drehen zu können. Der 7-DoF-Arm wird von einem aufgabenraumbasierten Impedanzregler (Operational-Space-Control, $\tau = J^{\top}(\Lambda\,\dot{w}^{*} + \mu + p)$) angesteuert, während die Finger positionsgeregelt sind. Ein \emph{statisch an der Flansch-Achse verankerter} Endeffektor-Regelrahmen entkoppelt die Armregelung von der Fingerbewegung, sodass das Greifen die Arm-Jacobi-Matrix nicht stört; erst dieser Rahmen machte einen festen Pinzettengriff lernbar. Der Basis-Aktionsraum umfasst Lageinkremente des Endeffektors (Position und Orientierung) sowie die Fingerfreiheitsgrade des Pinzettengriffs; die Gier-Aktion ist unidirektional auf die Anzugsrichtung abgebildet. Ergänzend untersucht die Arbeit eine objektzentrierte Aktionsschnittstelle: einen Impedanzregler auf Kontaktebene, über den die Policy Inkremente der Mutter selbst kommandiert -- Drehung um die Bolzenachse, Einschraubtiefe und Griffkraft -- und der diese in Fingerspitzenziele umsetzt. Solche objektzentrierten Schnittstellen haben sich für die geschickte Manipulation gegriffener Objekte bewährt~\cite{Pfanne2022,Kedia2026}.%
-}{%
-The nut sits physically on the bolt and is laterally constrained by the shaft, so the policy must grip it in order to turn it. The 7-DoF arm is driven by a task-space impedance controller (operational-space control, $\tau = J^{\top}(\Lambda\,\dot{w}^{*} + \mu + p)$), while the fingers are position-controlled. A \emph{static, flange-anchored} end-effector control frame decouples arm control from finger motion, so gripping does not disturb the arm Jacobian; introducing this frame was what first made a firm pinch learnable. The base action space comprises end-effector pose increments (position and orientation) plus the pinch finger degrees of freedom; the yaw action is mapped unidirectionally to the tightening direction. In addition, the thesis investigates an object-centric action interface: a contact-level impedance controller through which the policy commands increments of the nut itself -- rotation about the bolt axis, insertion depth, and grip force -- and which converts these into fingertip targets. Such object-centric interfaces have proven effective for dexterous manipulation of grasped objects~\cite{Pfanne2022,Kedia2026}.%
-}%
-%
-\subsection{\AIRlangGerEng{Reward-Design und Kontaktwahrnehmung}{Reward design and contact sensing}}%
-\AIRlangGerEng{%
-Das Reward kombiniert das mehrskalige Keypoint-Reward von forge für das Schrauben mit einem gestuften Greif-Shaping -- Annäherung $\rightarrow$ Kontakt $\rightarrow$ senkrechter Seitengriff $\rightarrow$ Drehen -- im Sinne der Komposition von Greifen und In-Hand-Manipulation~\cite{Rstel2025,Chen2023}; den klassischen Hintergrund liefert der Kraftschluss des Griffs~\cite{Nguyen1986}. Zwei Erfahrungen aus den bisherigen Experimenten prägen dieses Design. Erstens müssen die Greif- und Eingriffsterme auf ein \emph{echtes, gefiltertes} Finger--Mutter-Kontaktsignal getort werden: Näherungssignale -- Abstand zum Mutterzentrum, ungefilterte Netto-Kontaktkräfte -- trafen entweder die Geometrie falsch oder wurden durch Finger--Finger-Selbstkontakt verfälscht; der Durchbruch war, die gefilterte paarweise Kontaktkraft (\texttt{force\_matrix\_w}) der Fingerpads gegen den \emph{Starrkörper-Link} der Mutter zu lesen, was den echten Griff vom Selbstkontakt trennt. Zweitens sind rein geometrische Fortschritts- und Erfolgssignale ausnutzbar: Trainierte Policies lernten, die Mutter über dem Bolzen auszurichten und zu halten, sie ohne Drehung auf Tiefe zu drücken oder mit oszillierendem Handgelenk das Dreh-Reward abzuschöpfen -- jeweils ohne zu schrauben. Erfolg wird daher auf gerenderten Replays verifiziert statt allein am geometrischen Erfolgssignal der Umgebung, und eine zentrale Stoßrichtung der Arbeit ist ein rotationsgekoppeltes Abstiegs-Reward, das nur auszahlt, wenn die Mutter gleichzeitig dreht und entsprechend der Gewindesteigung absinkt.%
-}{%
-The reward combines forge's multi-scale keypoint threading reward with a staged grasp shaping -- approach $\rightarrow$ contact $\rightarrow$ perpendicular side-pinch $\rightarrow$ turn -- in the spirit of composing grasping with in-hand manipulation~\cite{Rstel2025,Chen2023}; force closure of the pinch provides the classical background~\cite{Nguyen1986}. Two lessons from the experiments so far shape this design. First, the grasp and engagement terms must be gated on a \emph{real, filtered} finger--nut contact signal: proxy signals -- distance to the nut centre, unfiltered net contact forces -- either mis-matched the geometry or were corrupted by finger--finger self-contact, and the breakthrough was to read the filtered pairwise contact force (\texttt{force\_matrix\_w}) of the finger pads against the nut's \emph{rigid-body link}, which separates the true grip from self-contact. Second, purely geometric progress and success signals are exploitable: trained policies learned to align and hold the nut above the bolt, to press it to depth without rotating, or to oscillate the wrist to farm the turning reward -- all without threading. Success is therefore verified on rendered replays rather than on the environment's geometric success signal alone, and a central thrust of the thesis is a rotation-coupled descent reward that only pays out when the nut simultaneously rotates and descends according to the thread's pitch.%
-}%
-%
-\subsection{\AIRlangGerEng{Lernverfahren und Methodik}{Learning algorithm and methodology}}%
-\AIRlangGerEng{%
-Gelernt wird mit PPO (rl\_games) in einem asymmetrischen Actor-Critic-Aufbau mit privilegiertem Critic-Zustand und LSTM, unter forge-typischer Domänen-Randomisierung (Regelverstärkungen, Schwellwerte, Aktionsglättung, Reibung). Eine begleitende Methodenstudie vergleicht Vanilla-PPO mit der explorationsgemischten SAPO-Variante für das Training des Teachers. Die Entwicklung folgt einem strengen \emph{Experiment-Zyklus}: eine Konfigurationsänderung pro Lauf, ein Commit pro Lauf, dokumentierte Ergebnisse vor dem Commit, sodass \texttt{git checkout} eines Laufs dessen Ergebnis reproduziert. Dieser Ansatz reiht sich in die breitere Linie des RL für Robotik~\cite{Kober2013,Tang2024} und insbesondere des skalierten, geschickten Arm-Hand-Lernens ein~\cite{Petrenko2023,Lum2024,Singh2025}.%
-}{%
-Learning uses PPO (rl\_games) in an asymmetric actor-critic setup with a privileged critic state and an LSTM, under forge-style domain randomization (control gains, thresholds, action smoothing, friction). An accompanying method study compares vanilla PPO with the mixed-exploration SAPO variant for training the teacher. Development follows a strict \emph{experiment cycle}: one configuration change per run, one commit per run, results recorded before committing, so that \texttt{git checkout} of a run reproduces its documented result. This places the work within the broader line of RL for robotics~\cite{Kober2013,Tang2024} and, specifically, scaled dexterous arm--hand learning~\cite{Petrenko2023,Lum2024,Singh2025}.%
-}%
-%
-\subsection{\AIRlangGerEng{Destillation in eine visuelle Student-Policy}{Distillation to a vision-based student policy}}%
-\AIRlangGerEng{%
-Während der privilegierte Teacher simulatorinterne Zustände nutzen darf (exakte Mutterpose, Kontaktkräfte), kann die letztlich eingesetzte Policy nur auf reale Sensorik zurückgreifen. Die Arbeit destilliert den Teacher daher in einen visuellen Student, der den privilegierten Objektzustand durch Stereo-RGB- -- und bei Bedarf RGB-D- -- Beobachtungen plus Propriozeption ersetzt. Die Pipeline folgt der Semesterarbeit des Autors~\cite{Oertel2026}, die einen privilegierten Greif-Teacher für eine 23-DoF Agile Hand auf einem Franka Research~3 in einen Stereo-RGB-Student destillierte (ResNet-Encoder je Ansicht, Cross-Attention-Stereofusion, LSTM und auxiliärer Objektpositions-Loss, nach DextrAH-RGB~\cite{Singh2025}): Sicherheitsbewusste SafeDAgger-Destillation~\cite{Zhang2016} erhielt dort etwa 98\,\% des Teacher-Greiferfolgs (97{,}0\,\% gegenüber 99{,}0\,\%) und dominierte Behavioral Cloning und DAgger~\cite{Ross2011} sowohl bei Aufgabenerfolg als auch Sicherheit; das DexSafeDagger-Framework~\cite{ChiZhang2026} führt diese Linie mit wertbasierter Interventionssteuerung fort. Ob dieses Rezept auf das Schrauben überträgt, ist in einem entscheidenden Punkt offen: In der Semesterarbeit lokalisierte der Stereo-Student Objekte nur auf etwa 1--2~cm bei $320\times240$ Pixeln, während das Schrauben eine Zentrierung auf 2{,}5~mm verlangt. Welches Beobachtungsdesign diese Lücke schließt -- höhere Auflösung, explizite Tiefe (RGB-D), egozentrische gegenüber externer Kameraplatzierung, zusätzliche Hilfssupervision -- ist eine zentrale experimentelle Frage der Arbeit.%
-}{%
-While the privileged teacher may exploit simulator-internal state (the exact nut pose, contact forces), the policy that is ultimately deployed can only rely on real sensors. The thesis therefore distills the teacher into a vision-based student that replaces the privileged object state with stereo RGB -- and, if needed, RGB-D -- observations plus proprioception. The pipeline follows the author's semester thesis~\cite{Oertel2026}, which distilled a privileged grasping teacher for a 23-DoF Agile Hand on a Franka Research~3 into a stereo-RGB student (a ResNet encoder per view, cross-attention stereo fusion, an LSTM, and an auxiliary object-position loss, after DextrAH-RGB~\cite{Singh2025}): safety-aware SafeDAgger distillation~\cite{Zhang2016} retained about 98\,\% of the teacher's grasp success there (97.0\,\% versus 99.0\,\%) and dominated behavioural cloning and DAgger~\cite{Ross2011} on both task success and safety; the DexSafeDagger framework~\cite{ChiZhang2026} continues this line with value-based intervention gating. Whether this recipe carries over to threading is open in one decisive respect: in the semester thesis the stereo student localized objects only to about 1--2~cm at $320\times240$ pixels, whereas threading demands centring within 2.5~mm. Which observation design closes this gap -- higher resolution, explicit depth (RGB-D), egocentric versus third-person camera placement, additional auxiliary supervision -- is a central experimental question of the thesis.%
+The approach builds on a vendored copy of the IsaacLab \emph{forge} task~\cite{Noseworthy2025}, itself built on \emph{factory}~\cite{Narang2022}, and carries it from the Franka parallel-jaw gripper to a robotic arm with a five-fingered dexterous robotic hand at the end-effector. It further draws on the dexterous manipulation skills of the SimToolReal approach~\cite{Kedia2026}, which shows high dexterity along with the ability to learn in-hand manipulation and finger gaiting on its own. \Cref{fig:overview} sketches the setup. The following subsections describe the platform and robot, the task and its control interfaces, the reward and contact design, the learning method, and the distillation to a vision-based student policy.%
 }%
 %
 \begin{figure}[htb]%
     \centering%
-    %
-    % Including .png
-    \includegraphics[width=40mm]{figures/ImagePNG.png}%
-    %
-    \hspace*{5mm}%
-    %
-    % Including .pdf
-    \includegraphics[width=40mm]{figures/ImagePDF.pdf}\par%
-    %
-    % Including .tikz
-    \begingroup%
-        %\AIRtikzExternalizeSkipNext%
-        \resizebox{40mm}{!}{\input{figures/ImageTIKZ.tikz}}%
-    \endgroup%
-    %
-    \hspace*{5mm}%
-    %
-    % Including .pdf_tex
-    \begingroup%
-        \def\svgwidth{40mm}%
-        \fontsize{25}{25}\selectfont%
-        \input{figures/ImagePDFTEX.pdf_tex}%
-    \endgroup%
-    %
-    \caption{\AIRlangGerEng{Systemüberblick (Platzhalterabbildungen): der KUKA iiwa14 mit SHARPA-Hand greift eine M16-Mutter im Daumen-Zeigefinger-Pinzettengriff und schraubt sie auf den stehenden Bolzen, getrieben durch das gestufte Reward ``erst greifen, dann schrauben''.}{System overview (placeholder figures): the KUKA iiwa14 with SHARPA hand pinches an M16 nut with a thumb--index grip and threads it onto the standing bolt, driven by the staged grasp-then-thread reward.}}%
+    \includegraphics[width=90mm]{figures/tg2_env.png}%
+    \caption{\AIRlangGerEng{%
+%Systemüberblick: GPU-parallele IsaacLab-Umgebungen mit dem Arm-Hand-System vor Mutter und Bolzen, angesteuert über das gestufte Reward ``erst greifen, dann schrauben''.%
+}{%
+System overview: GPU-parallel IsaacLab environments with the arm--hand system positioned in front of the nut and bolt, driven by the staged grasp-then-thread reward.}}%
     \label{fig:overview}%
 \end{figure}%
 %
+\subsection{\AIRlangGerEng{%
+%Simulationsplattform und Roboter%
+}{%
+Simulation platform and robot}}%
+\AIRlangGerEng{%
+%Trainiert wird in IsaacLab~\cite{Mittal2023}, das kontaktreiche Montage GPU-parallel über viele Umgebungen simuliert. Die Entwicklung begann auf IsaacLab v2.3.2 mit dem PhysX-Backend: Unter PhysX ließ sich die als Signed-Distance-Field (SDF) modellierte Mutter ohne Drehung axial durch das Bolzengewinde drücken, was die Policy zuverlässig ausnutzte, während echter Gewindeeingriff als Lernsignal nicht zur Verfügung stand. Die Kollisionspipeline behandelt das Mutter--Bolzen-Paar mit einem hydroelastischen Druckfeld-Kontaktmodell, sodass die eingreifende Gewindegeometrie physikalisch abgebildet ist: Mutter und Bolzengewinde nutzen dazu Mesh--Mesh-SDF-Kollider, während Fingerspitzen und die übrigen Roboter-Assets zur Reduktion des Rechenaufwands als konvexe Hüllen modelliert sind.%
+}{%
+Training runs in IsaacLab~\cite{Mittal2023}, which simulates contact-rich assembly across many environments in parallel on the GPU. Development started on IsaacLab v2.3.2 with the PhysX backend: under PhysX, the nut, modelled with a signed-distance-field (SDF) collider, could be pressed axially through the bolt thread without rotating, an exploit the policy reliably discovered, while genuinely meshing thread contact was not available as a learning signal. The collision pipeline treats the nut--bolt pair with a hydroelastic pressure-field contact model, so the mating thread geometry is physically represented: the nut and bolt thread accordingly use mesh--mesh SDF colliders, while the fingertips and the remaining robot assets are modelled as convex hulls to reduce computation.%
+}%
 %
-\section{\AIRlangGerEng{Arbeitsplan und benötigte Ressourcen}{Work Plan and necessary Resources}}%
+\subsection{\AIRlangGerEng{%
+%Aufgabe und Regelung%
+}{%
+Task and control}}%
+\AIRlangGerEng{%
+%Die Mutter wird zu Beginn jeder Episode in einen manuell definierten Pinzettengriff der Hand gesetzt (im Sinne von forges Asset-in-Hand-Initialisierung); die Policy muss diesen Griff während des Schraubens halten. Der 7-DoF-Arm wird von einem aufgabenraumbasierten Impedanzregler (Operational-Space-Control, $\tau = J^{\top}(\Lambda\,\dot{w}^{*} + \mu + p)$) angesteuert, während die Finger über IsaacLabs impliziten Aktuator geführt werden, einen PD-Regler und damit einen gelenkraumbasierten Impedanzregler. Die Impedanzregelung wird der steifen Positionsregelung aus zwei Gründen vorgezogen: Erstens erhöht sie die Sicherheit von Roboter und Umgebung, da das nachgiebige Regelgesetz bei unerwartetem Kontakt nachgibt, statt hindurchzudrücken; zweitens passt sie zu einer kraftbewussten Regelungsstruktur, in der die Policy auf eine vorgegebene maximale Kontaktkraft und die gemessenen Kontaktkräfte konditioniert werden kann, wie im kraftgeführten forge-Ansatz~\cite{Noseworthy2025}. Da das Endeffektor-Ziel relativ zum Bolzenspitzen-Rahmen ausgedrückt wird, führt der Regler die gegriffene Mutter unabhängig von der Spawn-Position von Mutter und Roboter an den Bolzen heran, und die Aktionen der Policy sondieren diese Impedanz, indem sie Verschiebungen des Lageziels statt direkter Drehmomente kommandieren. Der Basis-Aktionsraum umfasst Lageinkremente des Endeffektors (Position und Orientierung) sowie die Fingerfreiheitsgrade des Pinzettengriffs; die Gier-Aktion ist unidirektional auf die Anzugsrichtung abgebildet. Ergänzend untersucht die Arbeit eine objektzentrierte Aktionsschnittstelle: einen Impedanzregler auf Kontaktebene, über den die Policy Inkremente der Mutter selbst kommandiert, nämlich Drehung um die Bolzenachse, Einschraubtiefe und Griffkraft, und der diese in Fingerspitzenziele umsetzt. Solche objektzentrierten Schnittstellen haben sich für die geschickte Manipulation gegriffener Objekte bewährt~\cite{Pfanne2022,Kedia2026}.%
+}{%
+The nut is spawned into a manually defined pinch grip in the hand, following forge's asset-in-hand initialization, and the policy must hold this grip while threading. The 7-DoF arm is driven by a task-space impedance controller (operational-space control, $\tau = J^{\top}(\Lambda\,\dot{w}^{*} + \mu + p)$), while the fingers are driven by IsaacLab's implicit-actuator PD controller, that is, a joint-space impedance controller. Impedance control is preferred over stiff position control for two reasons: first, it improves the safety of the robot and its surroundings, since the compliant law yields on unexpected contact rather than driving through it; second, it fits a force-aware control structure, in which the policy can be conditioned on a commanded maximum contact force and the sensed contact forces, as in the force-guided forge approach~\cite{Noseworthy2025}. Because the end-effector target is expressed relative to the bolt-tip frame, the controller draws the grasped nut toward the bolt regardless of where the nut and robot spawn, and the policy's actions probe this impedance by commanding pose-target offsets rather than direct torques. The base action space comprises end-effector pose increments (position and orientation) plus the pinch finger degrees of freedom; the yaw action is mapped unidirectionally to the tightening direction. In addition, the thesis investigates an object-centric action interface: a contact-level impedance controller through which the policy commands increments of the nut itself, namely rotation about the bolt axis, insertion depth, and grip force, and which converts these into fingertip targets. Such object-centric interfaces have proven effective for dexterous manipulation of grasped objects~\cite{Pfanne2022,Kedia2026}.%
+}%
+%
+\subsection{\AIRlangGerEng{%
+%Lernverfahren und Methodik%
+}{%
+Learning algorithm and methodology}}%
+\AIRlangGerEng{%
+%Gelernt wird mit PPO (rl\_games) in einem asymmetrischen Actor-Critic-Aufbau mit privilegiertem Critic-Zustand und LSTM, unter forge-typischer Domänen-Randomisierung (Regelverstärkungen, Schwellwerte, Aktionsglättung, Reibung). Eine begleitende Methodenstudie vergleicht Vanilla-PPO mit der explorationsgemischten SAPO-Variante für das Training des Teachers.%
+}{%
+Learning uses PPO (rl\_games) in an asymmetric actor-critic setup with a privileged critic state and an LSTM, under forge-style domain randomization (control gains, thresholds, action smoothing, friction). An accompanying method study compares vanilla PPO with the mixed-exploration SAPO variant for training the teacher.%
+}%
+%
+\subsection{\AIRlangGerEng{%
+%Destillation in eine visuelle Student-Policy%
+}{%
+Distillation to a vision-based student policy}}%
+\AIRlangGerEng{%
+%Während der privilegierte Teacher privilegierte Zustände nutzen darf (exakte Mutterpose, Kontaktkräfte), kann die letztlich eingesetzte Policy nur auf reale Sensorik zurückgreifen. Die Arbeit destilliert den Teacher daher in einen visuellen Student, der den privilegierten Objektzustand durch Stereo-RGB- und bei Bedarf RGB-D-Beobachtungen plus Propriozeption ersetzt. Das Rezept orientiert sich an DextrAH-RGB~\cite{Singh2025}, das einen privilegierten, fabric-geführten Greif-Teacher rein in Simulation über photorealistisches Tiled-Rendering in einen durchgängigen RGB-Student destilliert. Die Destillation selbst baut auf der etablierten Linie des interaktiven Imitationslernens auf, von DAgger~\cite{Ross2011} bis zu seiner sicherheitsbewussten Variante SafeDAgger~\cite{Zhang2016}, die Expertenabfragen über ein gelerntes Sicherheitsmaß steuert und so die On-Policy-Datensammlung des Students abfrageeffizienter und sicherer macht. Als Alternative zur vollständig durchgängigen visuomotorischen Destillation könnten Position und Pose der Mutter auch von einem dedizierten Computer-Vision-Modell aus NVIDIAs Isaac-ROS-Pose-Estimation-Pipeline geliefert und der Policy als geschätzte 6-DoF-Pose anstelle des privilegierten Ground-Truth-Werts übergeben werden. In jedem Fall bleibt offen, ob dieses Rezept auf das Schrauben überträgt, und zwar in einem entscheidenden Punkt: Das Schrauben verlangt eine Zentrierung der Mutter auf dem Bolzen auf etwa 2{,}5~mm, eine deutlich engere Toleranz als das Greifen. Welche Kombination aus höherer Auflösung, expliziter Tiefe (RGB-D), egozentrischer gegenüber externer Kameraplatzierung und zusätzlicher Hilfssupervision diese Lokalisierungsgenauigkeit erreicht, ist eine zentrale experimentelle Frage der Arbeit.%
+}{%
+While the privileged teacher may exploit privileged states (the exact nut pose, contact forces), the policy that is ultimately deployed can only rely on real sensors. The thesis therefore distills the teacher into a vision-based student that replaces the privileged object state with stereo RGB and, if needed, RGB-D observations plus proprioception. The recipe follows DextrAH-RGB~\cite{Singh2025}, which distils a privileged, fabric-guided grasping teacher into an end-to-end RGB student entirely in simulation through photorealistic tiled rendering. The distillation itself builds on the established interactive-imitation line, from DAgger~\cite{Ross2011} to its safety-aware variant SafeDAgger~\cite{Zhang2016}, which gates expert queries on a learned safety measure to make the student's on-policy data collection both more query-efficient and safer. As an alternative to fully end-to-end visuomotor distillation, the nut's position and pose could instead be supplied by a dedicated computer-vision model from NVIDIA's Isaac ROS pose-estimation pipeline, feeding the policy an estimated 6-DoF pose in place of the privileged ground truth. Either way, whether this recipe carries over to threading is open in one decisive respect: threading demands centring the nut on the bolt within about 2.5~mm, a far tighter tolerance than grasping. Which combination of higher resolution, explicit depth (RGB-D), egocentric versus third-person camera placement, and additional auxiliary supervision achieves this localization accuracy is a central experimental question of the thesis.%
+}%
+%
+%
+\section{\AIRlangGerEng{%
+%Arbeitsplan und benötigte Ressourcen%
+}{%
+Work Plan and necessary Resources}}%
 % REMARKS
 % Demonstrate how you plan to proceed with your scientific project to achieve the goal. Try to create a timeframe for
 % your thesis now. Consider by what time frame and conditions you are bound and where you are dependent on your
@@ -163,41 +189,59 @@ While the privileged teacher may exploit simulator-internal state (the exact nut
 % evaluate your results and why these methods are suitable. Describe which resources (e.g. experimental
 % resources) you will need for your task.
 %
-\subsection{\AIRlangGerEng{Methodik und Evaluation}{Methodology and evaluation}}%
-\AIRlangGerEng{%
-Primäres Erfolgsmaß ist die Schrauberfolgsrate (Mutter zentriert, auf Zieltiefe gesetzt, korrekt gedreht), wobei jeder Erfolgsanspruch auf gerenderten Replays der trainierten Policy verifiziert wird, da sich das geometrische Erfolgssignal der Umgebung als ausnutzbar erwiesen hat. Sekundär werden die netto akkumulierte Mutterdrehung und die Schraubtiefe (Abstand Mutter--Bolzen), Griffmetriken -- Kontaktrate, Senkrechtigkeit des Griffs, Kontaktkraft und Dauer gehaltenen Kontakts -- sowie die Episodenlänge ausgewertet. Für den destillierten Student kommen der erhaltene Anteil der Teacher-Leistung sowie die aus den visuellen Beobachtungen erreichbare Objektlokalisierungsgenauigkeit (Auflösung, Stereo gegenüber RGB-D, Kameraperspektive) hinzu. Weil jede Konfigurationsänderung in genau einem reproduzierbaren Lauf isoliert ist, lässt sich der Beitrag jeder Entwurfsentscheidung (Kontaktsignal, Griff-Tor, Startpose, Endeffektor-Rahmen, Physik-Backend, Reward-Gewichte) per Ablation belegen. Verglichen wird (i) gegen die vorgegriffene forge-Basislinie, (ii) zwischen den beiden Simulationspipelines und (iii) über Mutter-/Bolzengrößen hinweg, wofür eigene M10-Assets mit SDF-Kollidern erzeugt wurden. In der letzten Experimentierphase ist ein Sim-to-Real-Transfer der Student-Policy mit Hardware-Experimenten auf dem realen KUKA-SHARPA-System vorgesehen, abhängig von der Hardware-Verfügbarkeit.%
+\subsection{\AIRlangGerEng{%
+%Methodik und Evaluation%
 }{%
-The primary success metric is threading success rate (nut centred, seated to target depth, correctly turned), with every success claim verified on rendered replays of the trained policy, since the environment's geometric success signal has proven exploitable. Secondary metrics are net accumulated nut rotation and threading depth (nut--bolt distance), grip quality -- contact rate, grip perpendicularity, contact force, and sustained-contact duration -- and episode length. For the distilled student, the retained fraction of teacher performance and the object-localization accuracy achievable from the visual observations (resolution, stereo versus RGB-D, camera viewpoint) are additionally evaluated. Because every configuration change is isolated in exactly one reproducible run, the contribution of each design decision (contact signal, grip gate, spawn pose, end-effector frame, physics backend, reward weights) can be established by ablation. Comparisons are made (i) against the pre-grasped forge baseline, (ii) between the two simulation pipelines, and (iii) across nut/bolt sizes, for which custom M10 assets with SDF colliders were authored. In the final experimental phase, a sim-to-real transfer of the student policy with hardware experiments on the physical KUKA--SHARPA system is planned, contingent on hardware availability.%
+Methodology and evaluation}}%
+\AIRlangGerEng{%
+%Das Vorhaben gliedert sich in die fünf Arbeitspakete des Gantt-Diagramms (\Cref{fig:schedule}), und die Evaluation ist entlang derselben Phasen organisiert. Die Teacher-Policy (AP1--AP2) wird über einen iterativen Experiment-Zyklus entwickelt, der jeweils genau eine Entwurfsentscheidung ändert, sodass sich der Beitrag jeder Wahl (Kontaktsignal, Griff-Shaping, Startpose, Regelrahmen, Reward-Gewichte) per Ablation isolieren lässt. Primäres Erfolgsmaß ist die Schrauberfolgsrate (Mutter zentriert, auf Zieltiefe gesetzt, korrekt gedreht); sekundär werden netto akkumulierte Mutterdrehung, Schraubtiefe, Episodenlänge und Griffqualität ausgewertet. Der destillierte Student (AP3) wird zusätzlich am erhaltenen Anteil der Teacher-Leistung und an der aus seinen visuellen Beobachtungen erreichbaren Objektlokalisierungsgenauigkeit über Auflösung, Stereo gegenüber RGB-D und Kameraperspektive beurteilt. Durchgehend wird gegen die vorgegriffene forge-Basislinie und über Mutter- und Bolzengrößen hinweg verglichen. Die letzte Experimentierphase (AP4) versucht einen Sim-to-Real-Transfer der Student-Policy mit Hardware-Experimenten, abhängig von der Hardware-Verfügbarkeit, bevor die abschließende Phase der Dokumentation und Verschriftlichung (AP5) folgt.%
+}{%
+The project proceeds in the five work packages of the Gantt chart (\Cref{fig:schedule}), and the evaluation is organized along the same phases. The teacher policy (WP1--WP2) is developed through an iterative experiment cycle that changes one design decision at a time, so that the contribution of each choice (contact signal, grip shaping, spawn pose, control frame, reward weights) can be isolated by ablation. Its primary success metric is the threading success rate (nut centred, seated to target depth, and correctly turned); secondary metrics track net nut rotation, threading depth, episode length, and grip quality. The distilled student (WP3) is judged additionally by the fraction of teacher performance it retains and by the object-localization accuracy its visual observations afford across resolution, stereo versus RGB-D, and camera viewpoint. Throughout, results are compared against the pre-grasped forge baseline and across nut and bolt sizes. The final phase (WP4) attempts a sim-to-real transfer of the student policy with hardware experiments, contingent on hardware availability, before the closing documentation and writing phase (WP5).%
 }%
 %
-\subsection{\AIRlangGerEng{Ressourcen}{Resources}}%
-\AIRlangGerEng{%
-Benötigt werden: Isaac Sim mit IsaacLab in uv-verwalteten Umgebungen (v2.3.2/PhysX für die Basislinie, 3.0 mit Newton/MJWarp-Backend für die Hauptlinie); eine Workstation mit mehreren GPUs -- kontaktreiche Trainingsläufe dauern Stunden bis Tage, und der hydroelastische SDF-Kontakt des Gewindepaars ist rechenintensiv -- mit browserbasierter Ferninspektion laufender Policies; die USD-Assets des KUKA iiwa14 und der SHARPA-Hand sowie die \texttt{forgeUltra}-Codebasis. Für den Sim-to-Real-Teil werden zusätzlich ein physischer KUKA iiwa14 mit SHARPA-Hand und entsprechende Betreuung benötigt.%
+\subsection{\AIRlangGerEng{%
+%Ressourcen%
 }{%
-The work requires: Isaac Sim with IsaacLab in uv-managed environments (v2.3.2/PhysX for the baseline line, 3.0 with the Newton/MJWarp backend for the main line); a multi-GPU workstation -- contact-rich training runs take hours to days, and the hydroelastic SDF contact of the threading pair is computationally heavy -- with browser-based remote inspection of running policies; the USD assets of the KUKA iiwa14 and the SHARPA hand, and the \texttt{forgeUltra} codebase. The sim-to-real part additionally requires a physical KUKA iiwa14 with a SHARPA hand and corresponding supervision.%
+Resources}}%
+\AIRlangGerEng{%
+%Benötigt wird Isaac Sim mit IsaacLab in uv-verwalteten Umgebungen. Kontaktreiche Trainingsläufe dauern Stunden bis Tage, und der hydroelastische SDF-Kontakt des Gewindepaars ist rechenintensiv. Für den Sim-to-Real-Teil werden zusätzlich Zugang zur physischen Roboter-Hardware und entsprechende Betreuung benötigt.%
+}{%
+The work requires Isaac Sim with IsaacLab in uv-managed environments. Contact-rich training runs take hours to days, and the hydroelastic SDF contact of the threading pair is computationally heavy. The sim-to-real part additionally requires access to the physical robot hardware and corresponding supervision.%
 }%
 %
-\subsection{\AIRlangGerEng{Zeitplan}{Schedule}}%
-\AIRlangGerEng{%
-\Cref{fig:schedule} zeigt den geplanten Ablauf in fünf Arbeitspaketen: Recherche und Basisexperimente bis Mitte Juni (AP1), einen Monat für die Implementierung der Teacher-Policy über zwei parallele Simulationspipelines samt vereintem Pick-Place-Screw-Agenten bis Mitte Juli (AP2), Student-Distillation und Transfer auf eigene Assets bis Mitte August (AP3), Hardware-Transfer und Experimente bis zur ersten Septemberwoche (AP4) sowie abschließend weitere Experimente, Dokumentation und Verschriftlichung bis Mitte November (AP5). Die praktische Arbeit begann im Juni~2026, einen Monat vor dem offiziellen Beginn der Masterarbeit am 1.~Juli (gestrichelte Linie); ein optionaler Paper-Zweig (orange) bündelt die letzte Woche zu Verschriftlichung und weiteren Experimenten und zielt auf eine ICRA-2026-Einreichung am 15.~September.%
+\subsection{\AIRlangGerEng{%
+%Zeitplan%
 }{%
-\Cref{fig:schedule} shows the planned sequence in five work packages: research and baseline experiments through mid-June (WP1), one month for implementing the teacher policy via two parallel simulation pipelines and a unified pick-place-screw agent through mid-July (WP2), student distillation and transfer to our own assets through mid-August (WP3), hardware transfer and experimentation through the first week of September (WP4), and finally further experiments, documentation, and writing through mid-November (WP5). Hands-on work began in June~2026, one month ahead of the official thesis start on 1~July (dashed line); an optional paper track (orange) bundles the final week into writing and further experiments, targeting an ICRA~2026 submission on 15~September.%
+Schedule}}%
+\AIRlangGerEng{%
+%\Cref{fig:schedule} zeigt den geplanten Ablauf in fünf Arbeitspaketen: Recherche und Basisexperimente bis Mitte Juni (AP1), einen Monat für die Implementierung der Teacher-Policy über zwei parallele Simulationspipelines samt vereintem Pick-Place-Screw-Agenten bis Mitte Juli (AP2), Student-Distillation und Transfer auf eigene Assets bis Mitte August (AP3), Hardware-Transfer und Experimente bis zur ersten Septemberwoche (AP4) sowie abschließend weitere Experimente, Dokumentation und Verschriftlichung bis Mitte November (AP5). Die praktische Arbeit begann im Juni~2026, einen Monat vor dem offiziellen Beginn der Masterarbeit am 1.~Juli (gestrichelte Linie).%
+}{%
+\Cref{fig:schedule} shows the planned sequence in five work packages: research and baseline experiments through mid-June (WP1), one month for implementing the teacher policy via two parallel simulation pipelines and a unified pick-place-screw agent through mid-July (WP2), student distillation and transfer to our own assets through mid-August (WP3), hardware transfer and experimentation through the first week of September (WP4), and finally further experiments, documentation, and writing through mid-November (WP5). Hands-on work began in June~2026, one month ahead of the official thesis start on 1~July (dashed line).%
 }%
 %
 \begin{landscape}%
     \centering%
     \vspace*{\fill}%
     \begin{adjustbox}{width=\linewidth,height=0.9\textheight,keepaspectratio,center}%
-        \AIRlangGerEng{\input{figures/zeitplan.tikz}}{\input{figures/timeschedule.tikz}}%
+        \AIRlangGerEng{%
+%\input{figures/zeitplan.tikz}%
+}{%
+\input{figures/timeschedule.tikz}}%
     \end{adjustbox}%
     \par\vspace{1.5ex}%
-    \captionof{figure}{\AIRlangGerEng{Zeitplan~2026. Der optionale ICRA-Paper-Zweig ist orange hervorgehoben; die gestrichelte Linie markiert den offiziellen Beginn der Masterarbeit (1.~Juli).}{Time schedule (2026). The optional ICRA paper track is highlighted in orange; the dashed line marks the official thesis start (1~July).}}%
+    \captionof{figure}{\AIRlangGerEng{%
+%Zeitplan~2026. Die gestrichelte Linie markiert den offiziellen Beginn der Masterarbeit (1.~Juli).%
+}{%
+Time schedule (2026). The dashed line marks the official thesis start (1~July).}}%
     \label{fig:schedule}%
     \vspace*{\fill}%
 \end{landscape}%
 %
 % References
-\section{\AIRlangGerEng{Literatur}{Literature}}%
+\section{\AIRlangGerEng{%
+%Literatur%
+}{%
+Literature}}%
 % REMARKS
 % List of used literature.
 {%
