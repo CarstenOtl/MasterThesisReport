@@ -379,6 +379,18 @@ deployment.},
    title = {Sequential Dexterity: Chaining Dexterous Policies for Long-Horizon Manipulation},
    year = {2023}
 }
+@article{Mittal2023,
+   abstract = {We present ORBIT, a unified and modular framework for robot learning powered by NVIDIA Isaac Sim. It offers a modular design to easily and efficiently create robotic environments with photo-realistic scenes, and fast and accurate rigid and soft body simulation. With ORBIT, we provide a suite of benchmark tasks for a variety of robotic platforms, including fixed-base and mobile manipulators, quadrupeds, and humanoids. These tasks encompass a wide range of applications, such as grasping, manipulation, navigation, and locomotion, and are further parameterized to allow easy replication for other robotic embodiments, including in the future contact-rich assembly, dexterous manipulation, and legged locomotion tasks. We also provide reinforcement learning, imitation learning, and motion planning tools for robot learning, addressing sim-to-real transfer via domain randomization, and support for teleoperation for demonstration collection. Furthermore, ORBIT allows loading of physically-accurate 3D models, articulated assets, sensor simulation and randomization from various file formats such as USD, URDF, and MJCF. We present initial results on how ORBIT can be used across different robotic simulation-based learning tasks, and discuss its scope and future roadmap.},
+   author = {Mayank Mittal and Calvin Yu and Qinxi Yu and Jingzhou Liu and Nikita Rudin and David Hoeller and Jia Lin Yuan and Ritvik Singh and Yunrong Guo and Hammad Mazhar and Ajay Mandlekar and Buck Babich and Gavriel State and Marco Hutter and Animesh Garg},
+   month = {1},
+   title = {ORBIT: A Unified Simulation Framework for Interactive Robot Learning Environments},
+   journal = {IEEE Robotics and Automation Letters},
+   volume = {8},
+   number = {6},
+   pages = {3740--3747},
+   doi = {10.1109/LRA.2023.3270034},
+   year = {2023}
+}
 @article{Noseworthy2025,
    abstract = {We present FORGE, a method for sim-to-real transfer of force-aware manipulation policies in the presence of significant pose uncertainty. During simulation-based policy learning, FORGE combines a force threshold mechanism with a dynamics randomization scheme to enable robust transfer of the learned policies to the real robot. At deployment, FORGE policies, conditioned on a maximum allowable force, adaptively perform contact-rich tasks while avoiding aggressive and unsafe behaviour, regardless of the controller gains. Additionally, FORGE policies predict task success, enabling efficient termination and autonomous tuning of the force threshold. We show that FORGE can be used to learn a variety of robust contact-rich policies, including the forceful insertion of snap-fit connectors. We further demonstrate the multistage assembly of a planetary gear system, which requires success across three assembly tasks: nut threading, insertion, and gear meshing. Project website can be accessed at https://noseworm.github.io/forge/.},
    author = {Michael Noseworthy and Bingjie Tang and Bowen Wen and Ankur Handa and Chad Kessens and Nicholas Roy and Dieter Fox and Fabio Ramos and Yashraj Narang and Iretiayo Akinola},
