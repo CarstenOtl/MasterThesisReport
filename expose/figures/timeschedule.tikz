@@ -36,9 +36,6 @@
 	\ganttgroup{\textbf{WP4:} Hardware transfer, experimentation}{11}{13} \\%
 	\ganttbar{Sim-to-real transfer of student policy}{11}{12} \\%
 	\ganttbar{Hardware experiments, ablations}{11}{13} \\%
-	\ganttgroup[group/.append style={fill=TUMOrange}]{\textbf{Paper:} ICRA 2026 (optional)}{13}{14} \\%
-	\ganttbar[bar/.append style={fill=TUMOrange!55}]{Paper writing, further experiments}{13}{14} \\%
-	\ganttmilestone{ICRA submission (Sept 15)}{14} \\%
 	\ganttgroup{\textbf{WP5:} Further experiments, documentation, writing}{15}{22} \\%
 	\ganttbar{Further experiments, ablations}{15}{19} \\%
 	\ganttbar{Documentation, thesis writing, final evaluation}{17}{22}%

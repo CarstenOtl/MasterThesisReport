@@ -36,9 +36,6 @@
 	\ganttgroup{\textbf{AP4:} Hardware-Transfer, Experimente}{11}{13} \\%
 	\ganttbar{Sim-to-Real-Transfer der Student-Policy}{11}{12} \\%
 	\ganttbar{Hardware-Experimente, Ablationen}{11}{13} \\%
-	\ganttgroup[group/.append style={fill=TUMOrange}]{\textbf{Paper:} ICRA 2026 (optional)}{13}{14} \\%
-	\ganttbar[bar/.append style={fill=TUMOrange!55}]{Paper-Verschriftlichung, weitere Experimente}{13}{14} \\%
-	\ganttmilestone{ICRA-Einreichung (15. Sept.)}{14} \\%
 	\ganttgroup{\textbf{AP5:} Weitere Experimente, Dokumentation, Ausarbeitung}{15}{22} \\%
 	\ganttbar{Weitere Experimente, Ablationen}{15}{19} \\%
 	\ganttbar{Dokumentation, Verschriftlichung, finale Evaluation}{17}{22}%
