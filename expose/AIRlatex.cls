@@ -6219,7 +6219,13 @@
     %
     \begingroup%
         \large\noindent%
-        \begin{tabular}{@{}lp{0.84\linewidth}@{}}% %Ensures linebreak for long titles
+        % Size the value column to the space left of the widest label, so long titles wrap inside the rules
+        \ifdefined\AIRindustrialSupervisor%
+            \settowidth{\dimen0}{\AIRlangGerEng{Industriebetreuer/in}{Industrial supervisor}: }%
+        \else%
+            \settowidth{\dimen0}{\AIRlangSupervisor: }%
+        \fi%
+        \begin{tabular}{@{}lp{\dimexpr\linewidth-\dimen0-2\tabcolsep\relax}@{}}% %Ensures linebreak for long titles
             Name: & #3\\%
             \AIRlangGerEng{Matr.nr.}{Matr.no.}: & #4\\%
             E-Mail: & #5\\%
