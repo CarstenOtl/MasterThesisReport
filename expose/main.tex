@@ -12,7 +12,6 @@
 \ExecuteBibliographyOptions{sorting=none}% number references by order of first citation
 %
 % Additional packages
-\usepackage{pdflscape}% rotate individual pages to landscape (also in the PDF viewer)
 \usepackage{adjustbox}% scale a box to fit given max width/height, preserving aspect ratio
 %
 \begin{document}%
@@ -207,23 +206,30 @@ Schedule}}%
 \Cref{fig:schedule} shows the planned sequence in five work packages: research and baseline experiments through mid-June (WP1), one month for implementing the teacher policy via two parallel simulation pipelines and a unified pick-place-screw agent through mid-July (WP2), student distillation and transfer to our own assets through mid-August (WP3), hardware transfer and experimentation through the first week of September (WP4), and finally further experiments, documentation, and writing through mid-November (WP5). Hands-on work began in June~2026, one month ahead of the official thesis start on 1~July (dashed line).%
 }%
 %
-\begin{landscape}%
-    \centering%
-    \vspace*{\fill}%
-    \begin{adjustbox}{width=\linewidth,height=0.9\textheight,keepaspectratio,center}%
-        \AIRlangGerEng{%
+% Rotated 90 deg but NOT a float: placed exactly here, between Sec. 3 and Sec. 4.
+% Only the chart is rotated -- the caption below it stays upright, so it reads
+% without turning the page. Width is capped below \textheight so the block
+% shares the page with the end of Sec. 3 instead of claiming a page of its own.
+\begin{center}%
+\rotatebox{90}{%
+    \begin{minipage}{0.8\textheight}%
+        \centering%
+        \begin{adjustbox}{width=\linewidth,keepaspectratio,center}%
+            \AIRlangGerEng{%
 %\input{figures/zeitplan.tikz}%
 }{%
 \input{figures/timeschedule.tikz}}%
-    \end{adjustbox}%
-    \par\vspace{1.5ex}%
-    \captionof{figure}{\AIRlangGerEng{%
+        \end{adjustbox}%
+    \end{minipage}%
+}%
+\end{center}%
+\vspace{-1.5ex}%
+\captionof{figure}{\AIRlangGerEng{%
 %Zeitplan~2026. Die gestrichelte Linie markiert den offiziellen Beginn der Masterarbeit (1.~Juli).%
 }{%
 Time schedule (2026). The dashed line marks the official thesis start (1~July).}}%
-    \label{fig:schedule}%
-    \vspace*{\fill}%
-\end{landscape}%
+\label{fig:schedule}%
+\clearpage%
 %
 % References
 \section{\AIRlangGerEng{%
