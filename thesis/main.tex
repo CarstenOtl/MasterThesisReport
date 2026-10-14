@@ -1,0 +1,65 @@
+% !TeX spellcheck = en_US
+\documentclass[AIRstudentthesis%      style
+              ,optCharter%            font
+              ,optBlackHeadings%      black sections to reduce number of colored pages
+              ,optBlackRefs%          black references to reduce number of colored pages
+              %,optCMYK%              color model
+              ,optBiber%              bibliography tool
+              ,optBibstyleAlphabetic% bibliography style
+              ,optCenterEquations%    alignment of equations
+              ,optEnglish%            language
+              %,optTikzExternalize%   compiles faster for large tikz images
+              ]{AIRlatex}
+%
+% Load additional LaTeX packages - remove what you do not need
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{booktabs}%
+%
+% Set paths
+\graphicspath{{figures/}}%
+\addbibresource{source/literature.bib}%
+%
+% Define additional commands
+\newcommand{\code}[1]{\texttt{#1}}%
+\newcommand{\degree}[0]{^\circ}%
+%
+\begin{document}%
+% Titlepage
+% ---------
+\frontmatter%
+% Info: separate multiple supervisors by \newline
+%\AIRstudentthesisTitlePageCustomDiplomarbeit{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
+%\AIRstudentthesisTitlePageCustomBachelorsThesis{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
+%\AIRstudentthesisTitlePageCustomSemesterThesis{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
+%\AIRstudentthesisTitlePageCustomIDP{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
+\AIRstudentthesisTitlePageCustomMastersThesis{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
+%
+% Abstract
+% --------
+\include{source/abstract}%
+%
+% Content
+% -------
+\AIRstudentthesisPrintTableOfContents%
+\mainmatter%
+\include{source/chapter01}%
+\include{source/chapter02}%
+\include{source/chapter03}%
+%
+% Appendix
+% --------
+\appendix%
+\include{source/appendix}%
+%
+% References
+% ----------
+{%
+    %\sloppy% "Word"-like typesetting in order to improve breaking lines with long URLs/DOIs
+    \printbibliography[heading=bibintoc]%
+}%
+%
+%
+\end{document}%
+%
+%
