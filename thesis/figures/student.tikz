@@ -1,0 +1,59 @@
+% Student architecture block diagram.
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=8mm, inner sep=3pt, fill=white},
+  inp/.style={box, fill=TUMBlack!30},
+  enc/.style={box, fill=TUMBlue!12},
+  cnd/.style={box, fill=TUMOrange!15},
+  net/.style={box, fill=TUMGreen!15},
+  arr/.style={-{Latex[length=2mm]}, thick},
+  node distance=4mm and 6mm,
+]
+% inputs
+\node[inp] (rgbd) {aligned RGB-D\\$320\times180$};
+\node[inp, below=of rgbd] (prop) {proprioception $\vec{s}_t$\\(29-D)};
+\node[inp, below=of prop] (prog) {progress $p_t\in[0,1]$};
+\node[inp, below=of prog] (phase) {process phase $\vec{e}^{m}_t$\\(one-hot, 3)};
+% encoders
+\node[enc, right=of rgbd] (pc) {back-projection,\\crop, 4096 points};
+\node[enc, right=of pc] (dp3) {PointNet\\64--128--256, max};
+\node[enc, right=of prop, xshift=0mm] (pmlp) {MLP 128--128\\ELU};
+\node[cnd, right=of prog] (pemb) {MLP 1--256--256};
+\node[cnd, right=of phase] (eemb) {MLP 3--256--256};
+% fusion
+\node[cnd, right=of pmlp, xshift=14mm] (fuse) {concat $[\vec{v}_t\;\|\;\text{MLP}(\vec{s}_t)]$\\linear $\rightarrow$ 256, ELU};
+\node[cnd, right=of fuse] (sum) {$\oplus$};
+\node[cnd, right=2mm of sum] (cond) {$\cond_t\in\R^{256}$};
+% velocity network
+\node[net, below=10mm of cond, xshift=-20mm, minimum width=62mm] (tf)
+  {trajectory Transformer: tokens $[\cond_t,\;\lambda,\;\act^{\lambda}_1,\dots,\act^{\lambda}_8]$\\4 layers, 8 heads, width 512, FF 2048, non-causal};
+\node[inp, left=of tf] (noise) {noisy chunk $\Uc^{\lambda}$\\$8\times9$};
+\node[inp, below=of noise] (time) {flow time $\lambda$\\sinusoidal (64)};
+\node[net, right=of tf] (vel) {velocity\\$\vfield\in\R^{8\times9}$};
+\node[net, below=of vel] (ode) {Euler ODE, $N$ steps\\$\rightarrow$ chunk $\Uc_t$};
+\node[net, below=of ode] (ens) {temporal ensemble\\$0.5^{k}$, clip $[-1,1]$};
+% aux
+\node[enc, above=of dp3, xshift=18mm] (aux) {aux. head 64--128--3:\\nut position (training only)};
+% edges
+\draw[arr] (rgbd) -- (pc);
+\draw[arr] (pc) -- (dp3);
+\draw[arr] (dp3) -| node[pos=0.3, above] {$\vec{v}_t$ (64-D)} (fuse.north);
+\draw[arr] (dp3.east) -- ++(4mm,0) |- (aux.west);
+\draw[arr] (prop) -- (pmlp);
+\draw[arr] (pmlp) -- (fuse);
+\draw[arr] (fuse) -- (sum);
+\draw[arr] (prog) -- (pemb);
+\draw[arr] (phase) -- (eemb);
+\draw[arr] (pemb.east) -- ++(6mm,0) -| (sum.south);
+\draw[arr] (eemb.east) -- ++(10mm,0) |- (sum.south west);
+\draw[arr] (sum) -- (cond);
+\draw[arr] (cond.south) |- (tf.east);
+\draw[arr] (noise) -- (tf);
+\draw[arr] (time.east) -| (tf.south west);
+\draw[arr] (tf) -- (vel);
+\draw[arr] (vel) -- (ode);
+\draw[arr] (ode) -- (ens);
+\draw[arr, dashed] (ode.west) -- ++(-6mm,0) |- node[pos=0.75, below, font=\footnotesize] {$N$ iterations} (noise.south east);
+\end{tikzpicture}%
+}

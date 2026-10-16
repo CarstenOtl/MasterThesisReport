@@ -1,186 +1,49 @@
 % !TeX spellcheck = en_US
-\chapter{About TUMlatex}%
+\chapter{Introduction}\label{ch:introduction}%
 
-\section{Introduction}
-This TUMlatex project represents a cooperation of several chairs of the Technical University of Munich to provide a compact and easy-to-use LaTeX package for both, employees and students.
+This chapter motivates learning nut threading with a dexterous hand, defines the cyclic threading problem addressed in this thesis, states the research questions and contributions, and outlines the remaining chapters.
 
-If you are interested in using this package, please read Section~\ref{quick-start-guide}.
+\section{Motivation}\label{sec:motivation}
 
-If you are an advanced LaTeX user and want to contribute to this project, please read Section~\ref{guide-for-developers}.
+Endowing robots with human-like dexterity is a long-standing goal of robotics, and one of its most convincing demonstrations is the ability to handle the parts and tools of a world built for human hands~\cite{BicchiKumar2000}. A multi-fingered hand promises to pick up objects of varying shape, hold and reorient them, and operate the very implements that people use every day. Learning-based methods have begun to realize this promise, and in-hand manipulation in particular has advanced rapidly in recent years~\cite{Weinberg2024,Chen2021,Handa2024}. Among the most demanding of these skills are those of mechanical assembly, where a firm grasp of a part must be coupled to a fine, contact-rich motion that joins it to another part.
 
-If you are responsible for the LaTeX templates of your chair and you are interested in joining this collaboration, please contact the current maintainer Oliver Zobel (\href{mailto:oliver.zobel@tum.de}{oliver.zobel@tum.de}).
+Threading a nut onto a bolt is one of the most common operations in industrial assembly and, at the same time, one of the hardest to automate. The parts mate through sub-millimeter thread geometry, progress is governed by friction and contact forces that are difficult to sense, and success couples a stable grasp of the fastener to a controlled turning motion of the grasped part. Reinforcement learning (RL) in high-fidelity GPU simulation has recently made contact-rich assembly learnable: Factory~\cite{Narang2022} simulates nut-and-bolt engagement with thousands of simultaneous contacts in real time, and FORGE~\cite{Noseworthy2025} and IndustReal~\cite{Tang2023industreal} transfer such policies to physical robots. These systems, however, act with a parallel-jaw gripper and begin each episode with a fastener that is already held. The policy only learns to turn a pre-grasped part; grasp acquisition, grasp maintenance under turning, and the re-grasping that a full thread run-down requires are left outside the learning problem.
 
-\section{Quick-Start-Guide for Beginners}\label{quick-start-guide}
-This project aims to provide an easy-to-use solution for unexperienced or even first-time LaTeX users. As a first step, please read the installation instructions of Section~\ref{installation}.
+A dexterous hand changes the nature of the task. Humans thread nuts in several ways: a single finger suffices for free spinning, a pinch grasp is preferred for controlled threading, and a tripod or power grasp is applied under high resistance~\cite{Feix2016}. With a pinch grasp, one turn is bounded by the range of the wrist and the fingers, so a nut has to be turned, released, re-approached, and grasped again, cycle after cycle, while the nut advances along the bolt by one pitch per revolution. The task is therefore long-horizon and cyclic. Its difficulty does not lie in any single phase but in the transitions between phases: a grasp that is slightly off the intended faces, a release that disturbs the nut, or a return that lands the fingers at the wrong height propagates into the next cycle and compounds over ten or more cycles. Prior learning-based work on dexterous threading has addressed the spinning motion of an already engaged fastener~\cite{Hsieh2026}, and goal-conditioned screwing of furniture parts~\cite{Lum2026}, but not controlled, goal-directed, multi-cycle threading of everyday nuts with learned grasp and re-grasp.
 
-\subsection{Installation}\label{installation}
+\section{Problem Setup}\label{sec:problem-setup}
 
-If you are using TUMlatex for the first time, please pass through the following steps carefully.
+This thesis studies the task of threading a hexagonal nut onto a vertically mounted bolt with a seven-degree-of-freedom Franka Research~3 (FR3) arm equipped with an Inspire RH56DFX five-fingered hand. The nut starts engaged on the bolt by a fraction of a turn. One threading cycle consists of approaching the nut, establishing a pinch grasp between thumb and index finger on two opposing faces, rotating the nut clockwise by a target angle of $60\degree$ while it advances along the thread, holding the target, releasing the nut, and returning the hand to a re-grasp pose. A trial requires ten such cycles in sequence, and the deployed policy must execute them from an aligned RGB-D camera and the robot's proprioception alone, without privileged object state, scripted controllers, or human assistance.
 
-\subsubsection{Setup your LaTeX Environment}\label{setup-environment}
+The skill is learned in simulation and transferred to the physical robot. Simulating threads faithfully is computationally expensive, because engaged threads produce thousands of simultaneous contacts~\cite{Narang2022}; the reinforcement-learning stage of this work therefore uses a simplified thread model that couples a passive revolute joint to a position-controlled prismatic joint while retaining the finger--nut contact forces. The simplification creates a sim-to-real gap in contact and perception that the transfer method must close.
 
-First of all you have to install a LaTeX environment on your PC.
-You may skip this step, if you are using a PC of the university with a pre-installed LaTeX environment (e.g. TUM-PC).
+Two properties of the task shape the method. First, the task is long-horizon and cyclic: a policy must sustain consecutive cycles and is sensitive to errors at phase boundaries. Second, the task is only partially observable at deployment: the nut pose that the simulator exposes to a privileged policy must be inferred from camera images by the deployed policy. The first property favors generating the training signal phase by phase, where each phase is easy to specify; the second favors a teacher--student scheme in which a privileged teacher is distilled into a sensor-based student~\cite{Singh2025,Oertel2026}.
 
-\begin{itemize}
-    \item For \textbf{Windows} users: Please install the newest version of \underline{\href{https://miktex.org/howto/install-miktex}{MiKTeX}} (see below for full installation).
-    \item For \textbf{Mac} users: Please install the newest version of \underline{\href{https://www.tug.org/mactex/}{MacTeX}} (see below for full installation).
-    \item For \textbf{Linux} (Ubuntu, \underline{\href{https://www.tug.org/texlive/}{TeXLive}}) - Option A (outdated version - not recommended): Install the default packages texlive-full and biber via apt-get shipped with your Ubuntu distribution.
-    \item For \textbf{Linux} (Ubuntu, \underline{\href{https://www.tug.org/texlive/}{TeXLive}}) - Option B (\textbf{newest version - recommended}): Download the TUMlatex package of your chair (see Section~\ref{get-tumlatex}), unzip it and run the automatic installer script \code{UbuntuInstallTexliveNewest.sh} as root\\(\code{sudo ./UbuntuInstallTexliveNewest.sh}) located in XXXTools (replace XXX by your chair abbreviation).
-\end{itemize}
+\section{Research Questions}\label{sec:research-questions}
 
-\textit{Note: Without any warranty you may use a different LaTeX environment.}
-
-\vspace{0.3cm}
-
-\textbf{Important:} If the amount of free memory on your PC permits, be sure to install all packages.
-Otherwise it is likely, that you are missing some necessary packages and have to install them on your own.
-
-\begin{itemize}
-    \item For \textbf{Windows} users: Install all packages via the \underline{\href{https://docs.miktex.org/2.9/manual/pkgmgt.html}{MiKTeX Package Manager}}.
-    \item For \textbf{Mac} users: Install the \underline{\href{http://www.tug.org/mactex/mactex-download.html}{Full MacTeX package}}.
-    \item For \textbf{Linux} users: Both options (A and B) mentioned above will install a full installation of TeXLive.
-\end{itemize}
-
-\subsubsection{Optional: Update your LaTeX Environment}
-
-In some cases this is necessary in order to avoid compilation errors due to outdated standard packages. Again you may skip this step if this is not your private PC.
-
-\begin{itemize}
-    \item For Windows users: Please follow \underline{\href{https://miktex.org/howto/update-miktex}{this guide}}.
-    \item For Mac users: You can use the graphical updating tool \underline{\href{http://amaxwell.github.io/tlutility/}{TeX Live Utility}} to update your packages.
-    \item For Linux users: If you chose option B (see Section~\ref{setup-environment}) open a terminal and update the TeXLive package manager and all packages with the command \code{sudo tlmgr update --self --all --reinstall-forcibly-removed}
-\end{itemize}
-
-\subsubsection{Setup your LaTeX Editor}
-
-You can use any editor you like. However, the open-source and cross-platform LaTeX editor \underline{\href{http://www.texstudio.org/}{TeXstudio}} is recommended. In this case you can use the \textbf{auto-completion feature} by copying the provided syntax file (\code{.cwl-file}, shipped within the \code{.zip} file, see Section~\ref{get-tumlatex}) to the folder
-
-\begin{itemize}
-    \item \code{\%APPDATA\%\textbackslash Roaming\textbackslash texstudio\textbackslash completion\textbackslash user} for Windows users or equivalently
-    \item \code{$\sim$/.config/texstudio/} for Linux or Mac users.
-\end{itemize}
-
-Furthermore you may enable the shell-escape option of pdflatex (optional, but neccessary for tikz-externalize to work):
+The exposé of this thesis set out two research questions. The first asked whether a force-aware policy that threads a nut onto a bolt with a dexterous hand--arm system can be learned with proximal policy optimization (PPO) in a privileged simulation without constraining the thread interaction. The second asked whether such a privileged teacher can be distilled into a vision-based student that estimates the object pose with the accuracy required for sub-millimeter thread interaction. Both questions were answered, but not in the form they were posed. Repeated attempts to learn all phases of the cyclic task end to end with a single RL policy on faithfully simulated threads did not produce a threading teacher, because a reward that captures both long-horizon progress and precise transitions between phases could not be designed, and because the unconstrained thread contact admitted exploits such as pressing the nut through the thread. The thesis therefore refines the questions into the four that organize its experiments:
 
 \begin{enumerate}
-    \item Navigate to \textit{Options $\rightarrow$ Configure TeXstudio $\rightarrow$ Commands}
-    \item Change \textit{PdfLaTeX} to \code{pdflatex -synctex=1 -shell-escape -interaction=nonstopmode \%.tex}
+  \item Does a single student trained on complete multi-cycle demonstrations outperform repeated execution of a single-cycle policy (Q1)?
+  \item Which visual representation preserves the geometry needed for repeated re-grasping under viewpoint and axial change, a point-cloud encoder or an image-space encoder (Q2)?
+  \item Does a generative flow-matching action head distill the heterogeneous demonstrations more effectively than deterministic regression with recurrent or Transformer backbones (Q3)?
+  \item Does augmenting simulated demonstrations with sparse human corrections collected during real-world replay close the sim-to-real gap (Q4)?
 \end{enumerate}
 
+\section{Contributions}\label{sec:contributions}
 
-You also should change the default bibliography tool from \textit{bibtex} to \textbf{\textit{biber}}:
+The main contributions of this thesis are the following.
 
 \begin{enumerate}
-    \item Navigate to \textit{Options $\rightarrow$ Configure TeXstudio $\rightarrow$ Build}
-    \item Change \textit{Default Bibliography Tool} to \code{txs:///biber}
+  \item A formulation of long-horizon cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged RL policy for approach, grasp, rotation, and goal reaching with scripted release-and-return controllers. The hybrid teacher generates coherent multi-cycle demonstrations without a monolithic RL teacher.
+  \item A human-corrected sim-to-real demonstration strategy in which simulated demonstrations are replayed on the physical robot and failure-prone segments between grasp and release are selectively overwritten by an operator, so that the demonstration distribution adapts to hardware contact and perception discrepancies.
+  \item A unified visuomotor student distilled by conditional flow matching from point-cloud features of an aligned RGB-D view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. The thesis derives the objective, documents the student as implemented, and places it against online DAgger variants, deterministic regression heads, alternative vision encoders, privileged observations, and two action contracts in a systematic ablation study.
+  \item An experimental evaluation in simulation and on hardware. In ten-cycle trials the student completes every trial on the M24, M30, and M36 hexagonal nuts it was trained on and on unseen round and octagonal profiles, and the evaluation exposes rectangular profiles as a failure case of the learned re-grasp strategy.
 \end{enumerate}
 
+The method and its main results were submitted as a conference paper~\cite{NUTS2026}. This thesis expands the paper into a full report: it adds the background on imitation learning and flow matching, the design rationale for the action and observation contracts, the ablations implemented in the accompanying code base, the negative results that motivated the final design, and a discussion of the limitations.
+% TODO(citation): add the NUTS paper itself to literature.bib once its venue and metadata are final.
 
-\textit{Note: You can also use bibtex as bibliography backend with the TUMlatex packages. However, you have to pass \code{optBibtex} instead of \code{optBiber} to the package. Furthermore some commands related to the bibliography are different (ask Google for help).}
+\section{Outline}\label{sec:outline}
 
-\subsubsection{Get the latest Release of the TUMlatex Package}\label{get-tumlatex}
-
-If you are reading this document you probably already have downloaded the TUMlatex package.
-However, it is recommended to check if you are using the latest version.
-In the following table you find the chair-related TUMlatex packages:
-
-\begin{table}[h]
-    \centering
-    \begin{tabular}{lll}
-        \toprule
-        Dept. & Chair & TUMlatex Package \\
-        \midrule
-        ED & Aerodynamics and Fluid Mechanics & \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/-/jobs/artifacts/release/download?job=ReleaseEDAER}{AERlatex.zip}} \\
-        ED & Applied Mechanics & \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/-/jobs/artifacts/release/download?job=ReleaseEDAM}{AMlatex.zip}} \\
-        ED & Automotive Technology & \underline{\href{https://wiki.tum.de/display/ftm/Latex-Vorlage}{FTMlatex}} \\
-        ED & Machine Tools and Industrial Management & \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/-/jobs/artifacts/release/download?job=ReleaseEDIWB}{IWBlatex.zip}} \\
-        ED & Central Teaching Unit & \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/-/jobs/artifacts/release/download?job=ReleaseEDZL}{ZLlatex.zip}} \\
-        CIT & I6 - Robotics, AI \& Embedded Systems & \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/-/jobs/artifacts/release/download?job=ReleaseCITAIR}{AIRlatex.zip}} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-The packages include (replace "\code{XXX}" by your chair abbreviation)
-
-\begin{itemize}
-    \item the main class file \code{XXXlatex.cls},
-    \item the main package file \code{XXXlatex.sty}
-    (This is an alternative to using the main class file.
-    This is helpful, if you write a paper and have to use the baseclass provided by the publisher),
-    \item the syntax file \code{XXXlatex.cwl} for auto-completion in \underline{\href{http://www.texstudio.org/}{TeXstudio}},
-    \item a license file \code{XXXlatex\_LICENSE.txt} containing licensing information,
-    \item a folder \code{XXXDocumentation} containing the package documentation (therein precompiled as \code{main.pdf}),
-    \item a folder \code{XXXTemplates} containing a selection of useful templates which you can copy and directly use.
-    \item a folder \code{XXXTools} containing a selection of useful tools (e.g. TeXLive setup script).
-\end{itemize}
-
-
-\subsection{Create your own Document}
-
-The \textbf{recommended way} to create a new document is to
-\begin{enumerate}
-    \item select an appropriate template in the template folder \code{XXXTemplates},
-    \item \textbf{copy the whole template folder} (e.g. \code{XXXDocument}) wherever you want,
-    \item open the \code{main.tex} file in the template folder with your favorite LaTeX-editor,
-    \item initially compile it (using \textit{pdflatex} and optionally \textit{biber/bibtex}) and check for errors,
-    \item make your changes and fill it with content and
-    \item compile it (using \textit{pdflatex} and optionally \textit{biber/bibtex}).
-\end{enumerate}
-
-\textit{
-    Note: As an alternative way it is possible to use the main class (\code{.cls}-file) or the main package (\code{.sty}-file) as a shared resource by copying it to your local \code{texmf} folder.
-    However, in this case you may not be able to compile old documents, which have been created with a different version of this package.
-    Thus it is \textbf{strongly recommended} to make a copy of the main class file (\code{XXXlatex.cls}) for each of your documents!
-}
-
-\subsection{Documentation}
-
-The documentation of the packages is included in the folder \code{XXXDocumentation} (precompiled as file \code{main.pdf}).
-Feel free to have a look at the source code of the documentation, in order to learn how to do stuff.
-Be aware that most of the source code is automatically generated.
-
-\subsection{Bugs, Errors and Suggestions}\label{bugs-errors-suggestions}
-
-If you recognize any bug/error or you have a suggestion to make this package (even) better, please feel free to open an \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/issues}{Issue}}.
-
-\textbf{Important:} Assign the corresponding maintainer of your chair to the issue (see \underline{\href{https://gitlab.lrz.de/AM/TUMlatex}{LRZ GitLab}}).
-Expect no support for unassigned issues - they will be deleted immediately!
-
-Please use the default \textbf{Labels} to categorize your issue. Please also provide additional information like your
-\begin{itemize}
-    \item operating system (+ version),
-    \item LaTeX environment (+ version) and
-    \item LaTeX editor and (+ version).
-\end{itemize}
-
-
-\section{Guide for Developers/Contributors}\label{guide-for-developers}
-
-For information on how to contribute to this project please have a look at the \underline{\href{https://gitlab.lrz.de/AM/TUMlatex/blob/develop/CONTRIBUTING.md}{Contribution Guide}}.
-
-\section{Support}
-
-For support, please directly contact the responsible package maintainer of you chair (see "maintainer" in Section~\ref{bugs-errors-suggestions}).
-
-\textbf{Important:} If your are not associated with a chair or your chair is not part of the TUMlatex project, please read following note:
-\textit{
-    We are happy that you use TUMlatex and that you appreciate our effort in making a good LaTeX template for TUM members.
-    However, please understand that this project is maintained by various PhD students, who contribute to the template mainly in their spare time (actually we do not get paid for this - its our personal commitment).
-    Thus, we limit our "support" to employees and students of our associated chairs.
-    Certainly, we are happy for any bug report, however, we can not assist everybody in using this template neither can we respond to individual feature requests.
-    We hope you can understand this.
-}
-
-\section {License Notes}
-
-Copyright (c) 2021 Technical University of Munich (\url{https://www.tum.de/})
-
-This work may be distributed and/or modified under the conditions of the LaTeX Project Public License, either version 1.3 of this license or (at your option) any later version.
-The latest version of this license is in \url{http://www.latex-project.org/lppl.txt} and version 1.3 or later is part of all distributions of LaTeX version 2005/12/01 or later.
-
-This work has the LPPL maintenance status 'maintained'.
-The current maintainer of this work is Oliver Zobel (\href{mailto:oliver.zobel@tum.de}{oliver.zobel@tum.de}).
-
-This work consists of all files of the GitLab repository \url{https://gitlab.lrz.de/AM/TUMlatex}.
-%
+Chapter~\ref{ch:sota} reviews the theoretical background on reinforcement learning, imitation learning, generative action heads, visual representations, and operational-space control, and surveys related work on robotic assembly, policy chaining, sim-to-real transfer, and visuomotor distillation. Chapter~\ref{ch:method} presents the methodology: the problem formulation and metrics, the simulated and physical system, the privileged teacher, the hybrid teacher and demonstration pipeline, the conditional flow-matching student, and the evaluation protocol. Chapter~\ref{ch:sim} reports the experiments in simulation, including the ablations and the negative results that shaped the design. Chapter~\ref{ch:real} describes the hardware setup, the human-corrected replay, and the real-world results across nut sizes and geometries. Chapter~\ref{ch:discussion} interprets the results with respect to the research questions and discusses the limitations. Chapter~\ref{ch:conclusion} concludes and outlines future work.

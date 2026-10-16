@@ -1,4 +1,126 @@
-\chapter{Appendix 1}%
-\Blindtext%
-%
-%
+% !TeX spellcheck = en_US
+\chapter{Hyperparameters and Interfaces}\label{ch:appendix}%
+
+\section{Teacher Observations}\label{sec:app-obs}
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only. The multi-size teacher appends a clean 3-D one-hot nut-size code to both.}%
+    \label{tab:teacher-obs}%
+    \resizebox{\textwidth}{!}{%
+\begin{tabular}{llcl}
+        \toprule
+        Input & Component & Dim & Noise (actor) \\
+        \midrule
+        actor (39-D) & fingertip position relative to bolt frame & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis; bolt frame $\mathcal{N}(0,1\,\mathrm{mm})$ per reset \\
+         & fingertip quaternion (WXYZ) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
+         & end-effector linear velocity & 3 & finite difference of noisy position \\
+         & end-effector angular velocity & 3 & finite difference of noisy quaternion \\
+         & fingertip position relative to held nut & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis, each body \\
+         & held-nut quaternion (WXYZ) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
+         & target position error & 3 & inherits nut noise \\
+         & target quaternion error (WXYZ) & 4 & inherits nut noise \\
+         & grasp-phase flag & 1 & none \\
+         & thumb / index flexion force & 2 & $\mathcal{N}(0,1\,\mathrm{N})$, clamped to $\ge0$ \\
+         & previous filtered action & 9 & none \\
+        \midrule
+        critic (69-D) & fingertip position, quaternion, velocities & 13 & clean \\
+         & arm joint positions & 7 & clean \\
+         & held-nut position, position relative to bolt, quaternion & 10 & clean \\
+         & bolt position and quaternion & 7 & clean \\
+         & controller proportional gains & 6 & sampled per reset \\
+         & action smoothing factor & 1 & sampled per reset \\
+         & thumb / index flexion force & 2 & clean \\
+         & position and rotation action thresholds & 6 & sampled per reset \\
+         & target position, quaternion, progress & 8 & clean \\
+         & previous filtered action & 9 & none \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%
+% TODO(unsure): the fingertip-force channels are listed in the observation reference as actor inputs (39-D total) but are disabled in the retained task YAML; confirm the actor width of the retained teacher.
+
+\section{Teacher Hyperparameters}\label{sec:app-ppo}
+
+\begin{table}[htb]%
+    \centering%
+    \caption{PPO hyperparameters of the privileged teacher (rl\_games, asymmetric actor--critic).}%
+    \label{tab:ppo}%
+    \begin{tabular}{ll}
+        \toprule
+        Parameter & Value \\
+        \midrule
+        parallel environments & 512 \\
+        epochs & 200 \\
+        rollout horizon & 256 steps \\
+        minibatch size & 512 \\
+        mini-epochs per update & 4 \\
+        recurrent sequence length & 128 \\
+        discount $\gamma$ / GAE $\tau$ & 0.995 / 0.95 \\
+        learning rate & $10^{-4}$, adaptive with KL threshold 0.008 \\
+        clipping $\epsilon$ & 0.2 \\
+        critic coefficient & 2 \\
+        entropy coefficient & 0 \\
+        gradient-norm clip & 1.0 \\
+        bounds loss coefficient & $10^{-4}$ \\
+        actor / critic network & LSTM $2\times1024$ (layer norm) $\rightarrow$ MLP 512--128--64, ELU \\
+        action distribution & diagonal Gaussian, state-dependent $\sigma$ \\
+        mixed precision & yes \\
+        \bottomrule
+    \end{tabular}
+\end{table}%
+
+\section{Student Hyperparameters}\label{sec:app-flow}
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Hyperparameters of the conditional flow-matching student.}%
+    \label{tab:flow}%
+    \resizebox{\textwidth}{!}{%
+\begin{tabular}{ll}
+        \toprule
+        Parameter & Value \\
+        \midrule
+        action contract & 9-D Cartesian, $[-1,1]$ \\
+        action horizon $H$ & 8 (0.53\,s at 15\,Hz) \\
+        target offset & 0 (pre-step alignment) \\
+        terminal-hold padding & yes \\
+        proprioception & 29-D (10 $q$, 10 $\dot{q}$, previous action) \\
+        proprioception encoder & MLP 128--128, ELU \\
+        visual feature & 64-D (DP3: 4096 XYZRGB points, PointNet 64--128--256, max pool) \\
+        condition width & 256 \\
+        progress / phase embeddings & MLP 1--256--256 / 3--256--256, ELU \\
+        flow-time embedding & sinusoidal, 64-D \\
+        velocity network & Transformer, 4 layers, 8 heads, width 512, FF 2048, GELU, pre-norm \\
+        probability path & conditional optimal transport (linear interpolant) \\
+        optimizer & Adam, learning rate $10^{-4}$, batch 64, 300 epochs \\
+        parameter EMA decay & 0.999 \\
+        auxiliary loss & nut position from visual feature, weight 1.0 \\
+        RGB augmentation & saturation/contrast/brightness $[0.5,1.5]$, hue $[-0.15,0.15]$, blur $p=0.1$ \\
+        sampler & Euler, $N=16$ steps (online training: 8) \\
+        temporal-ensemble decay & 0.5 \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%
+
+\section{Dataset Summary}\label{sec:app-data}
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Demonstration data used for the reported students.}%
+    \label{tab:datasets}%
+    \resizebox{\textwidth}{!}{%
+\begin{tabular}{ll}
+        \toprule
+        Property & Value \\
+        \midrule
+        simulated demonstrations & 20 successful ten-cycle episodes from 32 candidates \\
+        frames (15\,Hz) & 19\,486 \\
+        impulses per episode & 30 (one per policy, waypoint, and return segment), 0.05--0.25\,N\,s \\
+        visual randomization & dome light, table, nut/bolt, floor textures, background \\
+        image size & $320\times180$ RGB and metric depth (from $640\times480$) \\
+        DP3 points per frame & 10\,542 min / 12\,374 median / 15\,366 max valid; 4096 sampled \\
+        real-world replays & 20, of which 12 with at least one human correction \\
+        human-overwritten frames & 6.48\,\% of replay frames \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%

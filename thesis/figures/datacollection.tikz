@@ -1,0 +1,31 @@
+% Hybrid-teacher data-collection loop (cyclic coordinator).
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  state/.style={draw, rounded corners=3pt, align=center, minimum height=10mm, inner sep=4pt, fill=white, text width=30mm},
+  rl/.style={state, fill=TUMBlue!12},
+  sc/.style={state, fill=TUMOrange!15},
+  gate/.style={draw, diamond, aspect=2.2, align=center, inner sep=1pt, fill=white, font=\footnotesize},
+  arr/.style={-{Latex[length=2mm]}, thick},
+  node distance=6mm and 9mm,
+]
+\node[rl] (policy) {threading policy $\bar{\pi}_{\mathrm{T}}$\\approach, grasp, turn, hold};
+\node[gate, right=of policy] (relgate) {$|\varphi-\varphi_{\mathrm{tar}}|\le5\degree$\\and proper grasp\\held for dwell?};
+\node[sc, right=of relgate] (release) {release\\open fingers to\\safe clearance};
+\node[sc, right=of release] (waypoints) {four Cartesian\\waypoints, 0.7\,s each\\(thread joint held)};
+\node[sc, below=of waypoints] (return) {return to\\reset pose, 1.0\,s};
+\node[gate, left=of return] (retgate) {within 5\,mm, $5\degree$,\\0.15\,rad?\\(16\,s timeout)};
+\node[state, left=of retgate, fill=TUMGreen!15] (rebase) {rebase: target $+60\degree$,\\canonical nut frame,\\reseed $\vec{h}$, cycle $k{+}1$};
+\node[state, below=of policy, fill=red!10, text width=30mm] (fail) {transition failure:\\episode rejected};
+\draw[arr] (policy) -- (relgate);
+\draw[arr] (relgate) -- node[above, font=\footnotesize] {yes} (release);
+\draw[arr] (relgate.south) |- node[pos=0.75, below, font=\footnotesize] {no: keep turning} ++(-10mm,-6mm) -| (policy.south east);
+\draw[arr] (release) -- (waypoints);
+\draw[arr] (waypoints) -- (return);
+\draw[arr] (return) -- (retgate);
+\draw[arr] (retgate) -- node[above, font=\footnotesize] {yes} (rebase);
+\draw[arr] (retgate.south) |- node[pos=0.75, below, font=\footnotesize] {no} (fail.east);
+\draw[arr] (rebase.west) -| node[pos=0.25, below, font=\footnotesize] {$k<K$} (policy.south);
+\node[above=3mm of release, font=\footnotesize, align=center, text width=100mm] {every segment receives one random arm impulse (0.05--0.25\,N\,s); every executed command is recorded as the 9-D label together with RGB-D, proprioception, progress, and phase};
+\end{tikzpicture}%
+}

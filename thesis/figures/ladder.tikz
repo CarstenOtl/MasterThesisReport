@@ -1,0 +1,19 @@
+% Three-mode evaluation ladder.
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, align=left, text width=44mm, inner sep=4pt, fill=white},
+  m1/.style={box, fill=TUMBlack!25},
+  m2/.style={box, fill=TUMBlue!12},
+  m3/.style={box, fill=TUMGreen!15},
+  arr/.style={-{Latex[length=2mm]}, thick},
+  node distance=4mm and 6mm,
+]
+\node[m1] (a) {\textbf{1. Offline teacher-fit}\\input: recorded teacher observations\\execution: none (no simulator)\\output: first-action and chunk RMSE, per-joint error, saturation\\proves: supervised fit and alignment};
+\node[m2, right=of a] (b) {\textbf{2. Teacher-forced clock}\\input: recorded observations on the recorded timeline\\execution: live physics\\output: realized joints, TCP, nut pose vs.\ nominal\\proves: action map, command conversion, controller, physics};
+\node[m3, right=of b] (c) {\textbf{3. Normal closed loop}\\input: live observations\\execution: live physics, errors feed back\\output: completed cycles, tracking errors, divergence\\proves: deployment-style stability and task success};
+\draw[arr] (a) -- node[above, align=center, font=\footnotesize] {pass} (b);
+\draw[arr] (b) -- node[above, align=center, font=\footnotesize] {pass} (c);
+\node[below=3mm of a, text width=44mm, align=center, font=\footnotesize] {fail $\rightarrow$ capacity, normalization, alignment};
+\node[below=3mm of b, text width=44mm, align=center, font=\footnotesize] {fail $\rightarrow$ command contract, controller, clock offset};
+\node[below=3mm of c, text width=44mm, align=center, font=\footnotesize] {fail $\rightarrow$ distribution shift and recovery};
+\end{tikzpicture}

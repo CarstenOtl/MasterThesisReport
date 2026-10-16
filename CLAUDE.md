@@ -4,61 +4,110 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-LaTeX documentation repo for a master's thesis. It holds writing deliverables (expose now, thesis later) — there is no application code, no test suite, no lint config. Treat tasks here as document authoring, not software engineering.
+LaTeX documentation repo for Carsten Oertel's master's thesis (TUM, AIR chair). It holds writing deliverables only: no application code, no test suite, no lint config. Treat tasks here as document authoring, not software engineering.
+
+| Folder        | Status                  | Notes                                                        |
+| ------------- | ----------------------- | ------------------------------------------------------------ |
+| `expose/`     | **Done and frozen**     | Do not edit, rebuild, or reformat anything in this folder.   |
+| `thesis/`     | **Active work**         | Seeded from the `AIRStudentThesis` template; still mostly template placeholder content. |
+| `additional/` | Read-only reference     | Prior reports and the conference paper (see below).          |
+
+## Rules
+
+### `expose/` is frozen
+
+The expose is submitted and signed off. Never modify any file under `expose/`, including `main.tex`, `main.pdf`, `source/`, `figures/`, and the vendored `AIRlatex.cls`. Reading it for context (e.g. to reuse the planned scope or timeline in the thesis) is fine. If a thesis change seems to need an expose change, ask first.
+
+### Never read PDFs: read the `.md` conversion
+
+Reading PDFs directly costs far too many tokens. **Do not open `.pdf` files with the Read tool**, and do not convert them to page images to inspect them. This overrides the PDF-review steps in the plugin section further down.
+
+- Every reference PDF has a plain-text sibling with the same basename and a `.md` extension. Read that instead, and use `Grep` or `offset`/`limit` to pull only the parts you need; these files are thousands of lines long.
+- If a PDF has no `.md` sibling yet, create one and commit it next to the PDF:
+  ```bash
+  pdftotext -layout path/to/file.pdf path/to/file.md
+  ```
+- To check the compiled thesis, read `thesis/main.log` (errors, undefined references/citations, overfull boxes) instead of the PDF. Only render specific pages to images if the user asks for a visual check.
+
+## Reference material
+
+### `additional/`: structure and content sources
+
+| File (read the `.md`)                    | What it is                                                                                         | Use it for                                                                 |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `SemesterThesis.md`                      | Carsten's semester thesis: *DAgger-Based Distillation of an RL-Trained Privileged Grasping Policy for a Dexterous Hand–Arm System* (TUM / Agile Robots, 2026). | Template for chapter structure, depth, tone, and AIR thesis conventions. Direct predecessor of this work. |
+| `chi_master_thesis_final_signed.md`      | Chi Zhang's (the advisor's) master's thesis: *Reinforcement Learning Based Control of an Underactuated Double Pendulum System* (TUM, 2023). | Template for the structure and scope of a full master's thesis report.     |
+| `NUTS.md`                                | The conference paper submitted on this project: *NUTS: Learning Long-Horizon Cyclic Nut Threading via Hybrid-Teacher Policy Distillation*. | Primary content source: method, experiments, results, figures, and related work for the thesis. |
+
+The two theses define the **structure** the thesis should follow; NUTS defines the **content**. The thesis expands the paper into a full report (background, method detail, extra experiments, discussion), not a reformatted copy of it.
+
+### Project code: `~/code/forgeUltra/`
+
+The code behind the thesis lives in the sibling repo `~/code/forgeUltra/` (Isaac Lab project: a single long-horizon Tiangong 2 policy that picks up a nut and threads it onto a bolt, distilled via DAgger with a conditional flow-matching action head). Treat it as **read-only reference**. Never edit it from this repo.
+
+Useful entry points when the thesis needs implementation details:
+
+- `README.md`, `HANDOVER.md`, `todo.md`: overview, current state, open issues
+- `docs/`: reference notes for rewards, controllers, observation/action spaces, and experiments
+- `forge_ultra/`, `distillation/`, `flow_matching/`: the source for environments, the teacher, and the student
+
+Always describe the method as implemented in forgeUltra or as published in NUTS. Do not invent hyperparameters, results, or architecture details; look them up.
 
 ## Build
 
-The expose builds with `latexmk` from inside the document folder (biber + alphabetic bibliography style):
+Each document folder is self-contained and builds with `latexmk` from inside the folder (pdflatex + biber, alphabetic bibliography style):
 
-```powershell
-cd expose
+```bash
+cd thesis
 latexmk -pdf main.tex
 ```
 
-There is no top-level build script — each document folder is self-contained (each carries its own `AIRlatex.cls`). Build artifacts (`.aux`, `.log`, `.bbl`, `.out`, `.toc`, …) are currently **not** ignored by `.gitignore`; `expose/main.pdf` is intentionally committed for now.
+There is no top-level build script. LaTeX build artifacts (`.aux`, `.log`, `.bbl`, `.bcf`, `.fls`, `.fdb_latexmk`, `.synctex.gz`, …) are ignored by `.gitignore`; only `.tex` sources and the compiled `main.pdf` are committed. `.vscode/settings.json` (ignored, local only) configures LaTeX Workshop with the same `pdflatex → biber → pdflatex ×2` recipe.
 
 ## Architecture
 
 ### Per-document folders, seeded from AIR templates
 
-Each document type lives in its own top-level folder (currently only `expose/`; `thesis/` will be added later). Folders are seeded by copying the **contents** of the matching template from the sibling repo `..\AIRlatex\AIRTemplates\` — student variants for this master's thesis:
+Each document type lives in its own top-level folder, seeded by copying the **contents** of the matching template from the AIR templates repo (`AIRlatex/AIRTemplates/`, not checked out on this machine):
 
-| Folder           | Template source                                         |
-| ---------------- | ------------------------------------------------------- |
-| `expose/`        | `..\AIRlatex\AIRTemplates\AIRStudentExpose\`            |
-| `thesis/` (TBD)  | `..\AIRlatex\AIRTemplates\AIRStudentThesis\`            |
+| Folder    | Template source                       |
+| --------- | ------------------------------------- |
+| `expose/` | `AIRTemplates/AIRStudentExpose/`      |
+| `thesis/` | `AIRTemplates/AIRStudentThesis/`      |
 
-Each folder vendors its own `AIRlatex.cls`, so the document is self-contained after copy. When scaffolding a new document, copy contents into the new folder (not the template folder as a subdir).
+Each folder vendors its own `AIRlatex.cls`. Do not deduplicate it to a shared location.
+
+### Thesis layout (`thesis/`)
+
+- `main.tex`: root file. Selects class options, the title page macro, and `\include`s the chapters.
+- `source/abstract.tex`, `source/chapterNN.tex`, `source/appendix.tex`: one file per chapter. Add new chapters as `source/chapterNN.tex` and register them in `main.tex`. The current `chapter01–03` hold template demo content to be replaced.
+- `source/literature.bib`: the thesis bibliography, the only `.bib` registered via `\addbibresource`. It still holds the template's demo entries, which should be removed once the demo chapters are replaced.
+- `source/library.bib`: Carsten's entire reading library (~60 entries, `AuthorYear` keys). Not registered in `main.tex`, and not every entry fits the thesis. Search it first when a claim needs a citation. When an entry is cited, copy it into `literature.bib` unchanged (same key) rather than registering `library.bib`. Do not edit `library.bib`; it is the user's library export.
+- `figures/`: mixes `.png`, `.pdf`, `.tikz`, and Inkscape `.pdf_tex` figures. The template demo chapters show the inclusion pattern for each type; copy those when adding figures.
 
 ### The AIRlatex class drives document type
 
 `main.tex` selects the document style via a class option on `\documentclass{AIRlatex}`:
 
-- `AIRstudentexpose` — expose layout (current)
-- `AIRstudentthesis` — thesis layout
-- `AIRstudentpresentation` — beamer-style presentation
+- `AIRstudentexpose`: expose layout
+- `AIRstudentthesis`: thesis layout (current work)
+- `AIRstudentpresentation`: beamer-style presentation
 
-Bibliography tool and style are also class options (`optBiber`, `optBibstyleAlphabetic`); language is `optEnglish` or its German counterpart.
-
-### Bilingual content macro
-
-Content uses `\AIRlangGerEng{<German>}{<English>}` so the same source compiles in either language — only the `optEnglish` class option switches output. When editing prose, preserve both arms of these macros even if only one is being actively written; do not collapse them to one language.
+Bibliography tool and style are also class options (`optBiber`, `optBibstyleAlphabetic`). Language is `optEnglish` or its German counterpart.
 
 ### Title page is type-specific
 
-The title page comes from a typed macro chosen for the work being submitted, e.g. `\AIRstudentexposeTitlePageMastersThesis{...}` for this expose (other variants for Bachelor / Semester / IDP are commented in `main.tex`). Switching work type means switching this macro, not editing arguments of a generic one.
+The title page comes from a typed macro chosen for the work being submitted, e.g. `\AIRstudentthesisTitlePageCustomMastersThesis{German Title}{English Title}{Field}{Author}{}{Supervisor}{Advisor}{Date}` in the thesis (Bachelor, Semester, IDP, and Diplomarbeit variants are commented out in `main.tex`). Switching work type means switching this macro, not editing arguments of a generic one. The thesis title page still has template placeholders. Fill them from the people listed in `README.md` and the expose's title page.
 
-### Figures and bibliography
+### Bilingual content macro
 
-- `figures/` mixes `.png`, `.pdf`, `.tikz`, and Inkscape `.pdf_tex` figures — each has its own inclusion pattern in `main.tex` worth copying when adding new figures.
-- Bibliography is a single `.bib` file at `source/literature.bib`, registered via `\addbibresource`.
+Template content uses `\AIRlangGerEng{<German>}{<English>}` so the same source compiles in either language; only the `optEnglish` class option switches output. Where this macro exists, preserve both arms even if only one is being actively written; do not collapse them to one language.
 
 ## Conventions when extending the repo
 
 - New document type → new top-level folder seeded from the matching `AIRStudent*` template (contents-into-folder).
-- Keep `AIRlatex.cls` vendored per-document-folder; do not deduplicate to a shared location.
-- Author bilingually via `\AIRlangGerEng{}{}` rather than hard-coding one language.
-
+- New reference PDF → add it with its `pdftotext -layout` `.md` sibling in the same commit.
+- Keep `AIRlatex.cls` vendored per document folder.
 
 ---
 

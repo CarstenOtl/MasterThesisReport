@@ -1,0 +1,80 @@
+% !TeX spellcheck = en_US
+\chapter*{List of Abbreviations}%
+\addcontentsline{toc}{chapter}{List of Abbreviations}%
+\begin{tabular}{ll}
+ACT & Action Chunking with Transformers \\
+ADR & Automatic Domain Randomization \\
+BC & Behavior Cloning \\
+CFM & Conditional Flow Matching \\
+DAgger & Dataset Aggregation \\
+DoF & Degree of Freedom \\
+DP3 & 3D Diffusion Policy \\
+DR & Domain Randomization \\
+EMA & Exponential Moving Average \\
+FR3 & Franka Research 3 \\
+IL & Imitation Learning \\
+LSTM & Long Short-Term Memory \\
+MDP & Markov Decision Process \\
+MLP & Multilayer Perceptron \\
+ODE & Ordinary Differential Equation \\
+OSC & Operational-Space Control \\
+PD & Proportional-Derivative \\
+POMDP & Partially Observable Markov Decision Process \\
+PPO & Proximal Policy Optimization \\
+RGB-D & Color and Depth Image \\
+RL & Reinforcement Learning \\
+RMSE & Root Mean Square Error \\
+SDF & Signed Distance Field \\
+TCP & Tool Center Point \\
+\end{tabular}
+\cleardoublepage%
+%
+\chapter*{List of Symbols}%
+\addcontentsline{toc}{chapter}{List of Symbols}%
+The following symbols are used with the same meaning in all chapters.
+\begin{center}
+\begin{tabular}{lp{10.5cm}}
+\toprule
+Symbol & Meaning \\
+\midrule
+\multicolumn{2}{l}{\textbf{Task}} \\
+$\mathcal{S}$ & ordered phase sequence of one threading cycle \\
+$m_t \in \Mset = \MRL \cup \Mscript$ & active phase at step $t$; learned phases $\MRL$, scripted phases $\Mscript$ \\
+$K$ & number of cycles per trial ($K=10$) \\
+$\Delta\varphi^{*}$ & desired clockwise nut rotation per cycle ($60\degree$) \\
+$\varphi_k$ & unwrapped nut angle after the goal-reaching phase of cycle $k$ \\
+$e_k$, $e_{\mathrm{ep}}$ & cyclic and episodic (accumulated) tracking error \\
+$C(\tau)$, $E(\tau)$ & completed cycles and tracking cost of a trajectory $\tau$ \\
+$\rho$ & thread pitch \\
+$\theta_t$, $d_t$ & revolute and prismatic coordinate of the simplified thread joint \\
+\multicolumn{2}{l}{\textbf{Teacher}} \\
+$\vec{x}_t$ & full simulator state \\
+$\vec{z}^{\pi}_t = g_\pi(\vec{x}_t,\vec{\xi}_t)$ & actor observation with observation noise $\vec{\xi}_t$ \\
+$\vec{h}_t$ & recurrent hidden state of the actor \\
+$\piT(\vec{a}\mid\vec{z}^{\pi},\vec{h})$, $\bar{\pi}_{\mathrm{T}}$ & privileged RL teacher and its deterministic mean \\
+$\kappa_m$ & scripted controller of transition phase $m\in\Mscript$ \\
+$\piHT$, $\piH$ & hybrid teacher and human operator \\
+$\vec{a}_t \in [-1,1]^{9}$ & normalized Cartesian-controller action \\
+$r_t$, $R_{i,t}$, $P_{j,t}$ & shaped reward, reward terms, penalty terms \\
+\multicolumn{2}{l}{\textbf{Student}} \\
+$\obs_t = (\vec{O}^{\mathrm{RGBD}}_t, \vec{s}_t, p_t, \vec{e}^{m}_t)$ & student observation: RGB-D image, proprioception, progress, phase encoding \\
+$\mathcal{P}_t$, $\vec{v}_t\in\R^{64}$ & point cloud and visual feature \\
+$\cond_t \in \R^{256}$ & fused condition vector \\
+$H$ & action horizon (chunk length, $H=8$) \\
+$\Uc^{D}_t = [\act_t,\dots,\act_{t+H-1}]$ & demonstrated action chunk \\
+$\Uc^{0}_t \sim \mathcal{N}(\vec{0},\mat{I})$ & Gaussian source sample \\
+$\lambda \in [0,1]$ & flow time \\
+$\Uc^{\lambda}_t$ & interpolant between source and target chunk \\
+$\vfield(\Uc^{\lambda},\lambda\mid\cond)$ & learned conditional velocity field \\
+$N$ & number of ODE integration steps \\
+$\beta$ & probability of teacher control during online DAgger \\
+$\Dsim$, $\Dreal$, $\Dset$ & simulated, real-world, and combined demonstration sets \\
+\multicolumn{2}{l}{\textbf{Control}} \\
+$\vec{q}$, $\dot{\vec{q}}$ & joint positions and velocities \\
+$\vec{\tau}$ & joint torques \\
+$\mat{J}$, $\mat{M}$, $\mat{\Lambda}$ & geometric Jacobian, joint-space inertia, task-space inertia \\
+$\mat{K}_p$, $\mat{K}_d$ & proportional and derivative gains \\
+\bottomrule
+\end{tabular}
+\end{center}
+\cleardoublepage%

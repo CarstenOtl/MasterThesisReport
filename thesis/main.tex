@@ -14,26 +14,60 @@
 % Load additional LaTeX packages - remove what you do not need
 \usepackage{algorithm}%
 \usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
 \usepackage{booktabs}%
+\usepackage{multirow}%
+\usepackage{subcaption}%
+\usepackage{tabularx}%
+\DeclareUnicodeCharacter{03C0}{\ensuremath{\pi}}%
+\usetikzlibrary{positioning,shapes.geometric,fit,backgrounds,decorations.pathreplacing}%
 %
 % Set paths
 \graphicspath{{figures/}}%
 \addbibresource{source/literature.bib}%
+% library.bib entries carry long personal reading notes (abstract/note fields with raw HTML)
+% that break the generated .bbl; drop them at the biber level so the .bib stays an unchanged copy.
+\DeclareSourcemap{\maps[datatype=bibtex]{\map{\step[fieldset=note,null]\step[fieldset=abstract,null]\step[fieldset=annote,null]\step[fieldsource=title,match=\regexp{π},replace=\regexp{\\pi}]}}}%
 %
 % Define additional commands
 \newcommand{\code}[1]{\texttt{#1}}%
-\newcommand{\degree}[0]{^\circ}%
+\newcommand{\degree}[0]{\ensuremath{^\circ}}%
+% Draft placeholders: every missing number, figure, or citation is marked with \tbd
+% and a "% TODO(...)" comment. All of them are collected in thesis/TODO_draft.md.
+\newcommand{\tbd}{\textcolor{red}{TBD}}%
+% Notation (one convention for the whole document, see the symbol table)
+\providecommand{\mat}[1]{\boldsymbol{#1}}%
+\providecommand{\argmin}{\operatornamewithlimits{arg\,min}}%
+\providecommand{\argmax}{\operatornamewithlimits{arg\,max}}%
+\newcommand{\E}{\mathbb{E}}%
+\newcommand{\R}{\mathbb{R}}%
+\newcommand{\Dsim}{\mathcal{D}_{\mathrm{sim}}}%
+\newcommand{\Dreal}{\mathcal{D}_{\mathrm{real}}}%
+\newcommand{\Dset}{\mathcal{D}}%
+\newcommand{\MRL}{\mathcal{M}_{\mathrm{RL}}}%
+\newcommand{\Mscript}{\mathcal{M}_{\mathrm{script}}}%
+\newcommand{\Mset}{\mathcal{M}}%
+\newcommand{\piT}{\pi_{\mathrm{T}}}%
+\newcommand{\piHT}{\pi_{\mathrm{HT}}}%
+\newcommand{\piH}{\pi_{\mathrm{H}}}%
+\newcommand{\piS}{\pi_{\theta}}%
+\newcommand{\Uc}{\vec{U}}%
+\newcommand{\act}{\vec{u}}%
+\newcommand{\obs}{\vec{y}}%
+\newcommand{\cond}{\vec{c}}%
+\newcommand{\vfield}{\vec{v}_{\theta}}%
 %
 \begin{document}%
 % Titlepage
 % ---------
 \frontmatter%
 % Info: separate multiple supervisors by \newline
-%\AIRstudentthesisTitlePageCustomDiplomarbeit{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
-%\AIRstudentthesisTitlePageCustomBachelorsThesis{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
-%\AIRstudentthesisTitlePageCustomSemesterThesis{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
-%\AIRstudentthesisTitlePageCustomIDP{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
-\AIRstudentthesisTitlePageCustomMastersThesis{German Title}{English Title}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Martin Mustermann}{}{\AIRnamesProfKnoll}{Musterbetreuer, M.Sc.}{\AIRutilsDate{1}{1}{2020}}%
+% TODO(title): confirm final German/English title and submission date with the advisor.
+\AIRstudentthesisTitlePageCustomMastersThesis{Lernen langfristiger zyklischer Mutter-Gewindemontage mit einer geschickten Hand durch Policy-Destillation eines hybriden Lehrers}{Learning Long-Horizon Cyclic Nut Threading with a Dexterous Hand via Hybrid-Teacher Policy Distillation}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Carsten Oertel}{}{\AIRnamesProfKnoll}{Chi Zhang, M.Sc.}{\AIRutilsDate{15}{11}{2026}}%
+%
+% Acknowledgments
+% ---------------
+\include{source/acknowledgments}%
 %
 % Abstract
 % --------
@@ -42,10 +76,19 @@
 % Content
 % -------
 \AIRstudentthesisPrintTableOfContents%
+\listoffigures%
+\cleardoublepage%
+\listoftables%
+\cleardoublepage%
+\include{source/notation}%
 \mainmatter%
 \include{source/chapter01}%
 \include{source/chapter02}%
 \include{source/chapter03}%
+\include{source/chapter04}%
+\include{source/chapter05}%
+\include{source/chapter06}%
+\include{source/chapter07}%
 %
 % Appendix
 % --------
@@ -55,7 +98,7 @@
 % References
 % ----------
 {%
-    %\sloppy% "Word"-like typesetting in order to improve breaking lines with long URLs/DOIs
+    \sloppy% "Word"-like typesetting in order to improve breaking lines with long URLs/DOIs
     \printbibliography[heading=bibintoc]%
 }%
 %
