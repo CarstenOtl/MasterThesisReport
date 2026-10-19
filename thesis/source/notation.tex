@@ -53,7 +53,7 @@ $\vec{z}^{\pi}_t = g_\pi(\vec{x}_t,\vec{\xi}_t)$ & actor observation with observ
 $\vec{h}_t$ & recurrent hidden state of the actor \\
 $\piT(\vec{a}\mid\vec{z}^{\pi},\vec{h})$, $\bar{\pi}_{\mathrm{T}}$ & privileged RL teacher and its deterministic mean \\
 $\kappa_m$ & scripted controller of transition phase $m\in\Mscript$ \\
-$\piHT$, $\piH$ & hybrid teacher and human operator \\
+$\piHT$ & hybrid teacher \\
 $\vec{a}_t \in [-1,1]^{9}$ & normalized Cartesian-controller action \\
 $r_t$, $R_{i,t}$, $P_{j,t}$ & shaped reward, reward terms, penalty terms \\
 \multicolumn{2}{l}{\textbf{Student}} \\
@@ -68,7 +68,7 @@ $\Uc^{\lambda}_t$ & interpolant between source and target chunk \\
 $\vfield(\Uc^{\lambda},\lambda\mid\cond)$ & learned conditional velocity field \\
 $N$ & number of ODE integration steps \\
 $\beta$ & probability of teacher control during online DAgger \\
-$\Dsim$, $\Dreal$, $\Dset$ & simulated, real-world, and combined demonstration sets \\
+$\Dsim$, $\Dset$ & simulated demonstration set and the training set formed from it \\
 \multicolumn{2}{l}{\textbf{Control}} \\
 $\vec{q}$, $\dot{\vec{q}}$ & joint positions and velocities \\
 $\vec{\tau}$ & joint torques \\

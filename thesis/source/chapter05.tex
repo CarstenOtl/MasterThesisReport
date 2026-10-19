@@ -1,7 +1,7 @@
 % !TeX spellcheck = en_US
 \chapter{Experiments on Real Hardware}\label{ch:real}%
 
-This chapter describes the physical system and reports the hardware experiments. Section~\ref{sec:real-setup} covers the robot, the camera and its calibration, the controller, and the measurement of the nut angle. Section~\ref{sec:real-replay} describes the replay of simulated demonstrations with human corrections and quantifies the interventions. Section~\ref{sec:real-results} reports the closed-loop results of the distilled student on the training nut sizes, Section~\ref{sec:real-geometry} on unseen nut geometries, and Section~\ref{sec:real-stress} under long-horizon stress.
+This chapter describes the physical system and reports the hardware experiments. Section~\ref{sec:real-setup} covers the robot, the camera and its calibration, the controller, and the measurement of the nut angle. Section~\ref{sec:real-transfer} describes the zero-shot transfer protocol. Section~\ref{sec:real-results} reports the closed-loop results of the distilled student on the training nut sizes, Section~\ref{sec:real-geometry} on unseen nut geometries, and Section~\ref{sec:real-stress} under long-horizon stress.
 
 \section{Hardware Setup}\label{sec:real-setup}
 
@@ -12,71 +12,86 @@ Robot commands use the same Cartesian impedance law as in simulation. The deploy
 % TODO(results): document the physical controller gains, the target low-pass settings, and the hand command rate used in the hardware trials (libfranka tooling on the franka-chi branch).
 
 \paragraph{Controller families.}
-The simulated Factory controller and the physical libfranka-style controller share the task-space law of \eqref{eq:osc} but differ in the nullspace projector. The Factory controller uses the undamped, dynamically consistent torque projector built from the joint-space inertia, whereas the libfranka example uses a damped kinematic projector built from a regularized pseudoinverse of the Jacobian transpose with regularization 0.2, and it adds the robot's Coriolis term, which the simulator supplies in the matching simulated backend. Both backends are implemented in the simulation with selectable gains, so that a teacher can be trained under either; the teacher trained under the libfranka gains did not reach contact (Section~\ref{sec:sim-experts}), which is why the reported teachers use the Factory gains and the physical controller is tuned toward them rather than the other way around.
+The simulated Factory controller and the physical libfranka-style controller share the task-space law of \eqref{eq:osc} but differ in the nullspace projector. The Factory controller uses the undamped, dynamically consistent torque projector built from the joint-space inertia, whereas the libfranka example uses a damped kinematic projector built from a regularized pseudoinverse of the Jacobian transpose with regularization 0.2, and it adds the robot's Coriolis term, which the simulator supplies in the matching simulated backend. Both backends are implemented in the simulation with selectable gains, so that a teacher can be trained under either. The reported teachers use the Factory gains, and the physical controller is tuned toward them rather than the other way around, so that the student's commands meet the stiffness under which the teacher acquired its contact behavior.
 
 \paragraph{Trajectory export.}
-For replay, every simulated demonstration is exported as a command-only deployment artifact. The simulator recording is authoritative for the geometric joint path; because some scripted phases change the joint position kinematically while writing zero articulation velocity, the export does not use recorded velocities but fits one twice continuously differentiable quintic curve through the recorded positions and derives position, velocity, and acceleration from it, with deployment limits on joint positions and velocities applied explicitly. Rows with a valid controller command also retain the recorded reverse-engineered 17-D impedance command, so that a joint-space replay is possible on controllers that do not expose a Cartesian interface. On the FR3 the Cartesian targets are replayed directly through the libfranka-style controller, which keeps replay and student execution on the same path.
+For open-loop validation of the action path, every simulated demonstration can be exported as a command-only deployment artifact. The simulator recording is authoritative for the geometric joint path; because some scripted phases change the joint position kinematically while writing zero articulation velocity, the export does not use recorded velocities but fits one twice continuously differentiable quintic curve through the recorded positions and derives position, velocity, and acceleration from it, with deployment limits on joint positions and velocities applied explicitly. Rows with a valid controller command also retain the recorded reverse-engineered 17-D impedance command, so that a joint-space replay is possible on controllers that do not expose a Cartesian interface. On the FR3 the Cartesian targets are executed directly through the libfranka-style controller, which keeps open-loop playback and student execution on the same path.
 
-The nut angle, which the metrics of Section~\ref{sec:metrics} require, is read from an angular scale mounted under the bolt (Figure~\ref{fig:real-dial}); the unwrapped angle is recorded at the end of every goal-reaching phase. The test-object family consists of M24, M30, and M36 nuts in four profiles each, hexagonal, octagonal, rectangular, and round, with matching bolts and holders; teacher and student training use only the hexagonal profiles, and the other three profiles are held out for the generalization study.
-% TODO(figure): add the test-object family photograph (NUTS Fig. 5, right) to thesis/figures/nuts/; it is not extractable from the paper PDF as a single image.
+The nut angle that the metrics of Section~\ref{sec:metrics} require is read from an angular scale printed on a sheet under the bolt pedestal (Figure~\ref{fig:real-phases}); the unwrapped angle is recorded at the end of every goal-reaching phase. The test-object family, shown in Figure~\ref{fig:real-setup} on the right, consists of M24, M30, and M36 nuts in four profiles each, hexagonal, octagonal, rectangular, and round, with matching bolts and holders. Teacher and student training use the hexagonal profiles only; the other three profiles are held out for the generalization study of Section~\ref{sec:real-geometry}.
 
 \begin{figure}[htb]%
     \centering%
-    \begin{subfigure}[b]{0.42\textwidth}
+    \begin{subfigure}[b]{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/nuts/real_setup_threading.png}
-        \caption{Student policy threading on the physical system.}
+        \includegraphics[width=\textwidth]{figures/hardware_setup_annotated.png}
+        \caption{Physical workcell.}
     \end{subfigure}\hfill
-    \begin{subfigure}[b]{0.55\textwidth}
+    \begin{subfigure}[b]{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/nuts/real_approach.png}
-        \caption{Approach from the reset pose.}
+        \includegraphics[width=\textwidth]{figures/NutBoltHolderFamilyOnly2_annotated.png}
+        \caption{Test-object family.}
     \end{subfigure}
-    \caption{Real-world setup: FR3 arm with the Inspire hand, the bolt on its pedestal, and the fixed RealSense D415. Images reproduced from the accompanying paper~\cite{NUTS2026}.}%
+    \caption{Hardware setup. Left: the FR3 arm with the Inspire RH56DFX hand, the bolts on their holders in front of the robot, and the fixed RealSense D415 on its stand. Right: M24, M30, and M36 bolts with the hexagonal, octagonal, rectangular, and round nuts of each size; only the hexagonal nuts are used for training.}%
     \label{fig:real-setup}%
 \end{figure}%
 
 \begin{figure}[htb]%
     \centering%
-    \includegraphics[width=0.31\textwidth]{figures/nuts/real_dial_a.png}\hfill
-    \includegraphics[width=0.31\textwidth]{figures/nuts/real_dial_b.png}\hfill
-    \includegraphics[width=0.31\textwidth]{figures/nuts/real_dial_c.png}
-    \caption{Nut-angle measurement. An angular scale under the bolt is read at the end of every goal-reaching phase to compute the cyclic and ten-cycle tracking errors; from left to right, grasp, turn, and release of one cycle. Images reproduced from the accompanying paper~\cite{NUTS2026}.}%
-    \label{fig:real-dial}%
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_approach.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_grasp.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_rotate.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_goal.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_release.png}\\[1mm]
+    \hspace*{0.2\textwidth}\includegraphics[width=0.19\textwidth]{figures/photos/dial_grasp.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/dial_rotate.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/dial_goal.png}\hspace*{0.2\textwidth}
+    \caption{One threading cycle on the physical robot. Top, from left to right: approach, grasp, rotation, goal reaching, and release with return to the reset pose. Bottom: top-down views of the angular scale under the bolt during grasp, rotation, and goal reaching; the scale is read at the end of every goal-reaching phase to compute the cyclic and ten-cycle tracking errors.}%
+    \label{fig:real-phases}%
+\end{figure}%
+% TODO(figure): these photos were taken during the earlier hardware trials; retake them with the zero-shot student, or confirm that they are suitable as an illustration of the phases.
+
+\begin{figure}[htb]%
+    \centering%
+    \includegraphics[height=0.3\textwidth]{figures/photos/real_rgb.png}\hspace{6mm}%
+    \includegraphics[height=0.3\textwidth]{figures/photos/real_depth.png}
+    \caption{Student observation on the physical system: the RGB image (left) and the metric depth image (right) of the RealSense D415 after center-cropping and downscaling to $320\times180$. The depth image is back-projected through the calibrated intrinsics into the point cloud that the student encodes.}%
+    \label{fig:real-rgbd}%
 \end{figure}%
 
-\section{Human-Corrected Replay}\label{sec:real-replay}
+\section{Zero-Shot Transfer Protocol}\label{sec:real-transfer}
 
-The twenty simulated ten-cycle demonstrations were replayed on the physical robot through the deployment controller. Each replay follows the recorded Cartesian targets, and the operator monitors the grasp. When slip or misalignment is anticipated, the operator takes over from grasp through release of the affected cycle, re-establishes contact, completes the turn, and hands control back to the replay. Twelve of the twenty replays, 60\,\%, contain at least one correction. The human-overwritten grasp-to-release segments comprise 6.48\,\% of the replay frames; the remaining 93.52\,\% retain the hybrid-teacher actions, which shows that the intervention is temporally sparse. The corrected replays are recorded with the physical camera and proprioception and form $\Dreal$. The student of the full method is trained for 300 epochs on $\Dset=\Dsim\cup\Dreal$ with eight-step chunks and deployed with a prediction horizon of eight and sixteen ODE integration steps.
+The student of the full method is trained for 300 epochs on the simulated dataset $\Dset=\Dsim$ of Section~\ref{sec:dataset} with eight-step chunks and deployed on the physical robot without any real-world training data, with a prediction horizon of eight and sixteen ODE integration steps. The transfer rests on the four properties of Section~\ref{sec:sim2real}: the calibrated camera of Section~\ref{sec:real-setup} is the one that rendered the demonstrations, the point-cloud crop box removes the physical background before encoding, the demonstrations were rendered under lighting, texture, and background randomization, and the Cartesian targets are executed by the impedance controller described above. The student receives the progress scalar from the elapsed trial time and the process phase from the physical events of the cycle, as in simulation (Section~\ref{sec:student}). Teacher and student training use the hexagonal nuts only.
+% TODO(results): document the deployment settings of the zero-shot trials (checkpoint, depth preprocessing on the physical D415, phase-signal source on hardware).
 
 \section{Results on Training Nut Sizes}\label{sec:real-results}
 
-Table~\ref{tab:ablation-real} reports the real-world counterpart of the simulation ablation on the M24 hexagonal nut. The full method (f) completes all ten cycles in every trial with a cyclic tracking error of $-4.21\pm1.20\degree$ and a ten-cycle error of $-42.10\pm4.37\degree$; the cyclic error is about $2\degree$ larger in magnitude than in simulation, which the thesis attributes to the thread resistance and finger compliance of the physical system that the simplified model does not capture. The single-cycle student (a) completes 5.2 cycles on average and slips off the nut edge as in simulation. The ResNet student (b) degrades further on hardware, from 2.3 to 1.1 cycles, which is consistent with an image-space representation that is more sensitive to the appearance gap than the point-cloud representation. The decisive comparison is between (e) and (f): the student trained on simulated data alone, which was perfect in simulation, completes only 2.1 cycles on hardware with a cyclic error of $-10.05\pm4.08\degree$, whereas the student that also saw the human-corrected replays completes every trial. The sparse corrections, 6.5\,\% of the real frames, are sufficient to adapt the demonstration distribution to the contact and perception discrepancies of the hardware (Q4). The regression heads (c) and (d) were not advanced to hardware, because they did not complete a cycle in simulation.
+Table~\ref{tab:ablation-real} is the hardware counterpart of the simulation ablation on the M24 hexagonal nut and answers Q4. Three of the five students are taken to hardware: the full method (e), the single-cycle student (a), and the ResNet student (b), which tests whether the image-space representation transfers as well as the point cloud. The two regression heads (c) and (d) are evaluated in simulation only. The hardware results are \tbd.
+% TODO(results): run ten zero-shot M24 trials each for (e), (a), and (b) once the simulated-only students are retrained and the randomization ranges are fitted to the physical sensor (Section 3.4.4). For reference: the earlier zero-shot hardware run of the simulated-only student completed 2.1+-1.4 cycles with a cyclic error of -10.05+-4.08 deg; the earlier full-method hardware numbers came from a student trained with real-world replay data and cannot be reused.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Real-world ablations on the M24 hexagonal nut over ten trials, with the same conventions as Table~\ref{tab:ablation-sim}. Ablations (c) and (d) were not tested on hardware. Results from the accompanying paper~\cite{NUTS2026}.}%
+    \caption{Real-world zero-shot ablations on the M24 hexagonal nut over ten trials, with the same conventions as Table~\ref{tab:ablation-sim}. Ablations (c) and (d) are evaluated in simulation only.}%
     \label{tab:ablation-real}%
     \small
     \begin{tabular}{lccc}
         \toprule
         Ablation & Completed cycles $\uparrow$ & Cyclic error $\rightarrow0$ & Ten-cycle error $\rightarrow0$ \\
         \midrule
-        (a) single-cycle student & $5.2\pm1.2$ & $-4.56\pm5.55$ & -- \\
-        (b) ResNet encoder & $1.1\pm0.9$ & $+24.09\pm9.94$ & -- \\
-        (e) simulated data only & $2.1\pm1.4$ & $-10.05\pm4.08$ & -- \\
-        (f) full method & $10.0\pm0.0$ & $-4.21\pm1.20$ & $-42.10\pm4.37$ \\
+        (a) single-cycle student & \tbd & \tbd & \tbd \\
+        (b) ResNet encoder & \tbd & \tbd & \tbd \\
+        (e) full method & \tbd & \tbd & \tbd \\
         \bottomrule
     \end{tabular}
 \end{table}%
 
 \section{Generalization across Nut Sizes and Geometries}\label{sec:real-geometry}
 
-Table~\ref{tab:geometry} reports the full method on the in-distribution M24, M30, and M36 hexagonal nuts and on the out-of-distribution octagonal, rectangular, and round profiles of each size, with ten trials per nut. The student completes the task on all training objects. The M30 nut achieves the smallest lag, $3.7\degree$ per cycle and $37\degree$ over the ten-cycle trial, and the M36 nut the largest among the training sizes; the thesis hypothesizes that the larger geometry increases the sensitivity to simulation-model errors such as penetration-depth mismatch, but the experiments do not isolate this factor. Among the unseen profiles, the round nut achieves the best performance, followed by the octagonal nut, in both cyclic and ten-cycle error; because no geometry factor was ablated individually, this ranking is not attributed to a specific property. The rectangular nut is a failure case. A common failure occurs after the nut has been turned $60\degree$: in the next cycle the fingers fail to establish contact with the next pair of faces, which for a rectangle are not where the hexagon's faces would be, and the nut remains stuck at the first position. The smaller M24 rectangle escapes this failure by chance in some trials but survives only two more cycles before the mismatched re-grasp fails completely; the M30 and M36 rectangles complete no cycle. Transfer is therefore strong when an unseen profile preserves re-grasp configurations compatible with training and degrades sharply when its face topology conflicts with the learned re-grasp strategy.
+Table~\ref{tab:geometry} reports the full method on all twelve test objects with ten trials per object: the M24, M30, and M36 hexagonal nuts, on which the student was trained, and the octagonal, rectangular, and round profiles of each size, which it has never seen. The study tests two kinds of generalization. Across sizes, the student must infer the nut size from the point cloud, since it receives no explicit size input. Across profiles, the question is whether the learned pinch-and-re-grasp strategy, which the demonstrations show only on hexagons, transfers to a different face topology. The results are \tbd.
+% TODO(results): run the twelve-object zero-shot evaluation (ten trials per nut). The earlier geometry results came from a student trained with real-world replay data and cannot be reused.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Geometry-dependent real-world transfer across nut sizes and profiles over ten trials per nut. Values are mean $\pm$ standard deviation; the octagonal, rectangular, and round rows are out-of-distribution geometries. Results from the accompanying paper~\cite{NUTS2026}.}%
+    \caption{Real-world zero-shot transfer across nut sizes and profiles over ten trials per nut. Values are mean $\pm$ standard deviation; the octagonal, rectangular, and round rows are out-of-distribution geometries.}%
     \label{tab:geometry}%
     \small
     \begin{tabular}{llccc}
@@ -103,5 +118,5 @@ Table~\ref{tab:geometry} reports the full method on the in-distribution M24, M30
 
 \section{Long-Horizon Stress}\label{sec:real-stress}
 
-Beyond the ten-cycle protocol, the student was run until failure. It eventually fails after 15 to 22 cycles, depending on nut size, geometry, and test conditions. The failures concentrate at the re-grasp: as the nut advances along the bolt by one pitch per revolution, its height after twenty cycles lies outside the axial range covered by the demonstrations, whose teacher was trained with at most 20\,mm of initial-height randomization. The degradation therefore appears to be largely due to limited randomization along the bolt axis rather than to the policy's cycle count as such, and it motivates the axial curriculum proposed in Chapter~\ref{ch:conclusion}. The per-nut cycle counts at failure are \tbd.
-% TODO(results): tabulate cycles-to-failure per nut size and profile from the long-horizon stress trials.
+Beyond the ten-cycle protocol, the student is run on hardware for as many cycles as it sustains, to measure how far its horizon extends beyond the ten cycles of the demonstrations. Every revolution raises the nut by one pitch, so after enough cycles its height leaves the axial range that the demonstrations cover, whose teacher was trained with up to 20\,mm of initial-height randomization; the stress trials therefore measure the reach of the learned behavior along the bolt. The cycle counts per nut are \tbd.
+% TODO(results): run the long-horizon stress trials with the zero-shot student and tabulate the sustained cycle count per nut size and profile.
