@@ -1,56 +1,141 @@
 % !TeX spellcheck = en_US
 \chapter{Introduction}\label{ch:introduction}%
 
-This chapter motivates the learning of nut threading with a dexterous hand, defines the cyclic threading problem that the thesis addresses, states the research questions and contributions, and outlines the remaining chapters.
-
 \section{Motivation}\label{sec:motivation}
 
-A world built for human hands is full of parts and tools that a robot can only use if it can hold them, reorient them, and move them against resistance. Multi-fingered hands promise this versatility, and learning-based control has recently made in-hand manipulation with such hands practical in simulation and on hardware~\cite{BicchiKumar2000,Weinberg2024,Chen2021,Handa2024}. Mechanical assembly is among the most demanding applications of this capability, because a firm grasp of one part has to be maintained while a fine, contact-rich motion joins it to another part.
+Threaded fasteners such as a nut on a bolt join parts so that the joint can be released again, which makes them the standard choice wherever products are assembled in the field, maintained, adjusted, or taken apart~\cite{Budynas2020,Niemann2019}. In industrial production, turning the nut along the thread is done by dedicated equipment, as Figure~\ref{fig:threading-automation} illustrates. Handheld and stationary nutrunners drive the fastener with a powered spindle, multi-spindle stations tighten several fasteners of one part at once, and robots carry screwdriving end effectors that feed and drive fasteners.
+% TODO(cite): industrial threading automation (nutrunners, multi-spindle stations, robotic screwdriving end effectors).
+All of these rely on structure around the joint. A fixture presents the part in a known pose, the fastener arrives in a known orientation, and the tool is matched to one fastener type.
+% TODO(cite): dependence of automated fastening on fixtures, fixed part poses, and fastener feeding.
+This structure pays off in high-volume production. It stops working where parts vary, where the cell is not built around one product, where batches are small, and in maintenance and disassembly, where the joint has to be found and handled wherever it is.
+% TODO(cite): limits of dedicated fastening automation for product variants, small batches, maintenance, and disassembly.
+Even with a dedicated tool, uncertainty in the pose of the mating part remains a research problem of its own~\cite{Manyar2023}.
 
-Fastening a nut onto a bolt is an everyday example and one of the hardest to automate. The parts mate through sub-millimeter thread geometry, progress is governed by friction and contact forces that are difficult to sense, and the fastener must stay in the grasp while it is turned. Reinforcement learning (RL) in GPU-parallel simulation has brought contact-rich assembly within reach: Factory~\cite{Narang2022} simulates nut-and-bolt engagement with thousands of simultaneous contacts in real time, and FORGE~\cite{Noseworthy2025} and IndustReal~\cite{Tang2023industreal} transfer such policies to physical arms. These systems act with a parallel-jaw gripper and start every episode with the fastener already held. The policy learns to turn a pre-grasped part; acquiring the grasp, keeping it under load, and re-grasping, which a complete thread run-down requires, remain outside the learning problem.
+\begin{figure}[htb]%
+    \centering%
+    % TODO(figure): replace each \fbox placeholder by a photograph. Images need a license or a citable source; manufacturer press images usually allow use with attribution, which then goes into the caption.
+    \parbox[c][3cm][c]{0.21\textwidth}{\centering\includegraphics[width=\linewidth,height=2.6cm,keepaspectratio]{figures/additional/stationaryNutRunner.png}\\[2pt]\small (a)}\hfill%
+    % TODO(figure): panel (b), a multi-spindle tightening station.
+    \fbox{\parbox[c][3cm][c]{0.21\textwidth}{\centering\small (b) Placeholder:\\ multi-spindle station}}\hfill%
+    % TODO(figure): panel (c), an industrial robot with a screwdriving end effector.
+    \fbox{\parbox[c][3cm][c]{0.21\textwidth}{\centering\small (c) Placeholder:\\ robot with screwdriving end effector}}\hfill%
+    % TODO(figure): panel (d), a fixture that presents the part in a fixed pose.
+    \fbox{\parbox[c][3cm][c]{0.21\textwidth}{\centering\small (d) Placeholder:\\ fixture presenting the part}}%
+    \caption{How threading is automated today: (a) a stationary nutrunner (image from~\cite{IntlAirTool}), (b) a multi-spindle station that tightens several fasteners of one part at once, (c) a robot with a screwdriving end effector, and (d) a fixture that presents the part in a fixed pose. Each solution is built for one fastener type and a known part pose.}%
+    \label{fig:threading-automation}%
+\end{figure}%
 
-With a dexterous hand the task takes a different shape. Humans thread nuts in several ways, depending on the resistance: a single finger spins a loose nut, a pinch grasp is used for controlled threading, and a tripod or power grasp is applied when the nut becomes tight~\cite{Feix2016}. In the pinch grasp that this thesis studies, one turn is bounded by the range of the wrist and the fingers. The nut therefore has to be turned, released, re-approached, and grasped again, cycle after cycle, while it advances along the bolt by one pitch per revolution. The task is long-horizon and cyclic, and its difficulty lies less in any single phase than in the transitions between phases. A grasp that lands slightly off the intended faces, a release that disturbs the nut, or a return that brings the fingers back at the wrong height propagates into the next cycle and accumulates over ten or more cycles. Learning-based work on dexterous threading has so far addressed the spinning motion of an already engaged fastener~\cite{Hsieh2026} and goal-conditioned screwing of furniture parts~\cite{Lum2026}; controlled, goal-directed, multi-cycle threading of ordinary nuts with learned grasping and re-grasping has not been shown.
+People handle the cases that dedicated equipment cannot. They pick up a nut, place it on a bolt, and turn it with their fingers, and they use the same hands to operate a wrench or a screwdriver. A robot with a dexterous, multi-fingered hand could in principle do the same. It could work with the parts and tools that were designed for people, in workcells that were designed for people, without a dedicated tool for every fastener~\cite{BicchiKumar2000,Weinberg2024}. Learning-based control has made in-hand manipulation with such hands practical in simulation and on hardware~\cite{Chen2021,Handa2024,Weinberg2024}. Robots have fastened screws with manual screwdrivers~\cite{Tang2023,Tang2024screwdriving}, and a single learned policy has manipulated a range of everyday tools with a dexterous hand~\cite{Kedia2026}. The vision behind this thesis is a dexterous robot that helps in manufacturing and assembly in a world built for humans. Threading a nut by hand is one of the basic skills such a robot needs. If a dexterous robot is to thread, it has to learn the skill, and the next section explains why that is hard.
 
-\section{Problem Setup}\label{sec:problem-setup}
+\section{Problem: How Can a Robot Learn Threading?}\label{sec:problem-setup}
 
-This thesis considers the task of threading a hexagonal nut onto a vertically mounted bolt with a seven-degree-of-freedom Franka Research~3 (FR3) arm that carries an Inspire RH56DFX five-fingered hand. The nut starts engaged on the bolt by a fraction of a turn. One threading cycle consists of approaching the nut, establishing a pinch grasp between thumb and index finger on two opposing faces, rotating the nut clockwise by a target angle of $60\degree$ while it advances along the thread, holding the target, releasing the nut, and returning the hand to a re-grasp pose. A trial requires ten such cycles in sequence. The deployed policy has to execute them from an aligned RGB-D camera and the robot's proprioception alone, without privileged object state or scripted controllers.
+Teaching a robot to thread a nut with a dexterous hand raises three difficulties at once. First, the skill has to be learned in simulation and transferred to hardware, although thread contact is very hard to simulate (difficulty~(a), Section~\ref{sec:difficulty-sim2real}). Second, the dexterous hand has a high-dimensional action space and countless ways to solve the task (difficulty~(b), Section~\ref{sec:difficulty-dexterity}). Third, threading is a long-horizon cyclic task (difficulty~(c), Section~\ref{sec:difficulty-horizon}). The following subsections treat the three difficulties in turn, and each ends with the requirement it puts on the method.
 
-The skill is learned in simulation and transferred to the physical robot. A faithful thread simulation is expensive, because engaged threads produce thousands of simultaneous contacts~\cite{Narang2022}, and the reinforcement-learning stage of this work therefore uses a simplified thread model that couples a passive revolute joint to a position-controlled prismatic joint while keeping the finger--nut contact forces. The simplification opens a sim-to-real gap in contact and perception that the transfer method has to close.
+\subsection{Simulation}\label{sec:difficulty-sim2real}
 
-Two properties of the task shape the method, which Figure~\ref{fig:overview} summarizes. The task is long-horizon and cyclic, so a policy has to sustain consecutive cycles and is sensitive to errors at phase boundaries; this favors generating the training signal phase by phase, where each phase is easy to specify. The task is also only partially observable at deployment, because the nut pose that a simulator exposes to a privileged policy has to be inferred from camera images by the deployed policy; this favors a teacher--student scheme in which a privileged teacher is distilled into a sensor-based student~\cite{Singh2025,Oertel2026}. The method of this thesis follows from these two observations: demonstrations are generated by a hybrid teacher that decomposes the cycle into a learned turning skill and scripted transitions, a single visuomotor student is distilled from these demonstrations in simulation, and the student is transferred to the physical robot zero-shot, where it executes the complete cyclic task.
+Learning a contact-rich skill directly on hardware is slow and unsafe. \Ac{RL} needs many trials, every trial costs robot time and wear, and exploration produces collisions and excessive forces~\cite{Kober2013}. Simulation removes these limits. GPU-parallel simulators run thousands of environments at once and have made \ac{RL} feasible for dexterous manipulation and for contact-rich assembly~\cite{Handa2024,Petrenko2023,Narang2022}.
+
+Thread contact, however, is among the hardest interactions to simulate. Engaged threads produce thousands of simultaneous contacts~\cite{Narang2022}, and simulating them faithfully needs dedicated contact methods~\cite{Narang2022} that remain expensive at the scale of parallel rollouts that \ac{RL} needs (Section~\ref{sec:thread-model}).
+
+The GPU-parallel engines that make this scale possible, such as PhysX and MuJoCo, model contact through interpenetration. When two bodies overlap, the solver measures the penetration depth and generates a repulsive force that pushes the bodies apart again (Figure~\ref{fig:depenetration}).
+% TODO(cite): penetration-based contact resolution in PhysX and MuJoCo (soft or penalty-like contact, depenetration velocity, contact offsets).
+Contact is therefore never strictly rigid. It tolerates a small overlap, and the repulsive force grows with that overlap.
+
+\begin{figure}[htb]%
+    \centering%
+    % TODO(figure): illustrate depenetration in a physics engine. Two bodies overlap by a penetration depth d, the solver generates a repulsive force or velocity along the contact normal that grows with d, and the bodies are pushed apart again.
+    \fbox{\parbox[c][4cm][c]{0.7\textwidth}{\centering\small Placeholder:\ depenetration in a physics engine\ (penetration depth, contact normal, repulsive force)}}%
+    \caption{How a physics engine resolves contact. Two bodies that overlap by a penetration depth $d$ receive a repulsive force along the contact normal that grows with $d$ and pushes them apart.}%
+    \label{fig:depenetration}%
+\end{figure}%
+
+For large bodies this tolerance is harmless. For threads it is not, because the thread geometry is small. The pitch is 3 to 4\,mm for the nuts used in this thesis (Section~\ref{sec:thread-model}), and the flanks and crests are smaller still. At this scale, the overlap that the solver tolerates is no longer negligible against the geometry. A nut that is pushed along the axis can sink into the opposing flank and slide across the crest into the next groove, instead of following the helix. The repulsive force does not forbid this path, it only makes it more expensive. In simulation, the nut can thus phase through the threads.
+
+A learning policy finds such shortcuts. If the reward pays for axial progress of the nut, the policy can collect it by pushing the nut through the threads rather than by turning it along the helix (Figure~\ref{fig:thread-exploit}). The resulting behavior solves the simulated task and fails on hardware, where the threads are rigid and the nut advances only by rotating. Faithful thread contact is therefore both expensive to simulate and easy to exploit, and any simplification of the thread opens a gap in contact between simulation and reality. A deployed policy also has to perceive the nut through a camera, and rendered images differ from real ones, which opens a second gap in perception. Collecting real data to close these gaps would bring back the cost that simulation was meant to avoid.
+
+\begin{figure}[htb]%
+    \centering%
+    % TODO(figure): short illustration of thread geometry. Show the nut and bolt thread profiles with pitch and flank, a reward that pays for axial progress, and the exploit path in which the nut interpenetrates the flank and crosses into the next groove instead of following the helix.
+    \fbox{\parbox[c][4cm][c]{0.7\textwidth}{\centering\small Placeholder:\ thread geometry and the interpenetration exploit\ (pitch, flank, helical path versus path through the thread)}}%
+    \caption{How interpenetration can be exploited in thread simulation. A reward for axial progress of the nut is collected on the helical path by turning the nut, but also on a shortcut in which the nut interpenetrates the thread flank and crosses the crest into the next groove.}%
+    \label{fig:thread-exploit}%
+\end{figure}%
+
+\emph{Requirement:} a thread model that is cheap enough for massively parallel \ac{RL} and cannot be exploited through interpenetration, and a transfer recipe that carries the learned skill to hardware without real-world data.
+
+\subsection{Threading with a Dexterous Hand}\label{sec:difficulty-dexterity}
+
+A multi-fingered hand on an arm has far more actuated joints than a parallel-jaw gripper, and its action space is correspondingly high-dimensional~\cite{Chen2021,Chen2023}. The task also has a large solution space. People thread a nut with a single finger, with a pinch between thumb and index finger, or with a grasp of several fingers, depending on how strongly the thread resists.
+% TODO(cite): human grasp strategies for threading a nut (single finger, pinch, multi-finger grasp) as a function of thread resistance. Feix2016 is a general grasp taxonomy and does not cover threading.
+A policy that may choose among all of these strategies has to explore a vast space of finger motions, and a reward that steers it toward one reliable strategy is hard to design~\cite{Kober2013}.
+
+A dexterous hand also has to acquire the grasp, keep it under load while the nut turns, and release it again. Learned assembly with parallel-jaw grippers does not face this part of the problem. There, the threading or insertion policy starts every episode with the part already held, so it learns to move a part that is grasped, and grasping, holding, and re-grasping are not part of what it learns~\cite{Narang2022,Noseworthy2025,Tang2023industreal}. Learned dexterous threading has so far addressed the spinning of an already engaged fastener~\cite{Hsieh2026} and goal-conditioned screwing of furniture parts~\cite{Lum2026}.
+
+\emph{Requirement:} a learned policy that controls the hand and the arm together, with the solution space narrowed to one grasp strategy, the pinch grasp, which the policy has to acquire, hold, and release.
+
+\subsection{Threading as a Long-Horizon Cyclic Task}\label{sec:difficulty-horizon}
+
+A long-horizon cyclic task repeats a fixed sequence of phases many times while the task state advances from one repetition to the next. Threading with a pinch grasp is such a task. One turn is limited by the range of the wrist and the fingers, so the hand has to approach the nut, grasp it, turn it, release it, and return for the next grasp, cycle after cycle. Meanwhile the nut advances along the thread by a fraction of a pitch in every cycle, so no two cycles start from the same state. Many tasks in assembly and everyday manipulation share this structure, for example driving a screw, turning a crank, winding a cable, or wiping a surface.
+% TODO(cite): repetitive cyclic manipulation tasks in assembly and everyday settings.
+
+Three properties make such tasks hard. First, errors compound across cycles. A grasp that lands slightly off the intended faces, a release that disturbs the nut, or a return that brings the fingers back at the wrong height carries over into the next cycle and accumulates. For a learned policy this is worse, because small deviations lead it to states it was not trained on, where its errors grow further~\cite{Ross2011}. Second, failures concentrate at the transitions between phases, where the contact between hand and nut is made or broken, rather than within a single phase. Third, a single \ac{RL} policy for the whole task needs a reward that covers every phase and every transition, and it has to assign the outcome of a late cycle to decisions made many steps earlier. Reward shaping over many phases and credit assignment over the full horizon break down for such a policy~\cite{Kober2013}.
+% TODO(cite): reward shaping and credit assignment for a single RL policy over long multi-phase horizons.
+
+The common answer is to decompose the task into skills, train one policy per skill, and chain the policies at deployment~\cite{Chen2023}. Chaining moves the difficulty to the transitions. The final state of one policy has to lie in the region where the next policy succeeds, which needs extra machinery that fine-tunes the sub-policies for their neighbors~\cite{Chen2023}, and several policies together with a switching logic have to be deployed. A second answer is to imitate complete long-horizon demonstrations with one generative policy~\cite{Chi2024,Black2026}. This avoids the reward problem, but it needs demonstrations of the whole task, and teleoperated demonstrations of forceful dexterous manipulation are hard to collect~\cite{Kedia2026}.
+
+\emph{Requirement:} a training signal that is easy to specify phase by phase, and one deployable policy that sustains many cycles without switching between separate policies.
+
+Taken together, the three requirements point to one approach: decompose the task where the training signal is generated, and unify it where the policy is deployed.
+
+\section{Approach}\label{sec:approach}
+
+This thesis decomposes the task during data generation and unifies it at deployment, as Figure~\ref{fig:overview} summarizes. Each part of the approach answers one of the difficulties of Section~\ref{sec:problem-setup}. A simplified kinematic thread model couples the axial travel of the nut to its rotation while keeping the finger--nut contacts, which makes massively parallel training with \ac{PPO} feasible (Section~\ref{sec:difficulty-sim2real}). A privileged \ac{RL} teacher, which observes the true nut pose in simulation, learns the pinch-grasp turn: approach, grasp, rotation, and goal reaching (Section~\ref{sec:difficulty-dexterity}). Scripted controllers release the nut and return the hand. Chained with the teacher, they form a hybrid teacher that generates complete multi-cycle demonstrations whose phase boundaries are triggered by physical events (Section~\ref{sec:difficulty-horizon}, data side).
+
+A single visuomotor student is then distilled from these demonstrations by \ac{CFM}~\cite{Lipman2023}. It acts from a fixed \acs{RGBD} camera and proprioception and runs the whole cycle without the teacher's privileged state and without switching between policies (Section~\ref{sec:difficulty-horizon}, deployment side). This teacher--student structure follows earlier work that distills privileged policies into sensor-based students~\cite{Singh2025,Lum2024,Oertel2026}. Finally, a camera model calibrated against the physical cell, a metric point-cloud representation~\cite{Ze2024}, randomized rendering~\cite{Singh2025}, and a Cartesian action path shared by teacher, student, and robot carry the student to hardware without real-world data (Section~\ref{sec:difficulty-sim2real}, transfer side).
 
 \begin{figure}[htb]%
     \centering%
     \includegraphics[width=\textwidth,trim=17bp 85bp 5bp 117bp,clip]{figures/SimThreadTeaser.pdf}%
-    \caption{Overview of the approach: decompose during data generation, unify at deployment. Top: a privileged RL teacher is trained in parallel simulated workcells; during data collection its rollouts are chained with scripted release-and-reset controllers into long-horizon demonstrations $\Dsim$; a conditional flow-matching student is distilled from them and acts from RGB and depth. Bottom: the deployed student executes approach, grasp, rotation, goal reaching, and release-and-reset on the physical robot and returns for the next cycle.}%
+    \caption{Overview of the approach: decompose during data generation, unify at deployment. Top: a privileged \acs{RL} teacher is trained in parallel simulated workcells; during data collection its rollouts are chained with scripted release-and-reset controllers into long-horizon demonstrations $\Dsim$; a conditional flow-matching student is distilled from them and acts from RGB and depth. Bottom: the deployed student executes approach, grasp, rotation, goal reaching, and release-and-reset on the physical robot and returns for the next cycle.}%
     \label{fig:overview}%
 \end{figure}%
-% TODO(figure): the teaser graphic is the project's publication figure; check that it does not show a real-world replay or correction branch, and edit it if it does.
+% TODO(figure): the teaser graphic is the project's publication figure; check that it does not show a real-world replay or correction branch, and edit it if it does. Also check that it does not print robot, hand, or camera product names, which first appear in Chapter 5.
 
 \section{Research Questions}\label{sec:research-questions}
 
-The exposé of this thesis posed two research questions. The first asked whether a force-aware policy that threads a nut onto a bolt with a dexterous hand--arm system can be learned with proximal policy optimization (PPO) in a privileged simulation without constraining the thread interaction. The second asked whether such a privileged teacher can be distilled into a vision-based student that estimates the object pose accurately enough for sub-millimeter thread interaction. In the course of the work both questions were sharpened by the structure of the task. The cyclic task is learned most effectively when the thread is simulated by a kinematic coupling that ties axial progress to rotation, when the RL teacher is responsible for the turn, and when scripted controllers provide the transitions between turns (Chapter~\ref{ch:method}). The thesis therefore refines the two questions into four that organize its experiments:
+The approach rests on two claims, that one student can replace a chain of policies and that it can be trained on simulated data alone, and on one design choice, the student that performs the unification. Three research questions test them.
 
-\begin{enumerate}
-  \item Does a single student trained on complete multi-cycle demonstrations outperform repeated execution of a single-cycle policy (Q1)?
-  \item Which visual representation preserves the geometry needed for repeated re-grasping under viewpoint and axial change, a point-cloud encoder or an image-space encoder (Q2)?
-  \item Does a generative flow-matching action head distill the heterogeneous demonstrations more effectively than deterministic regression with recurrent or Transformer backbones (Q3)?
-  \item Does a student trained on simulated demonstrations only transfer zero-shot to the physical robot when the camera model is calibrated against the physical cell, the visual representation is metric, and the rendered appearance is randomized (Q4)?
-\end{enumerate}
+\begin{description}
+  \item[RQ1 (long horizon).] Does one student distilled from complete multi-cycle demonstrations sustain consecutive threading cycles better than a single-cycle policy that is invoked repeatedly?
+  \item[RQ2 (student design).] Which student design distills the hybrid-teacher demonstrations into a policy that sustains the cyclic task? The thesis compares a flow-matching action head with deterministic regression on \ac{LSTM} and Transformer backbones, and a point-cloud encoder with an image-space encoder.
+  \item[RQ3 (sim-to-real).] Can a student trained on simulated demonstrations only transfer zero-shot to the physical hand--arm system?
+\end{description}
+
+RQ1 tests the answer to the long-horizon difficulty, RQ2 asks which student makes the unification work, and RQ3 tests the answer to the transfer difficulty. Chapter~\ref{ch:sim} answers RQ1 and RQ2 in simulation, and Chapter~\ref{ch:real} answers RQ3 on hardware. The answer to the dexterity difficulty, the privileged teacher, is tested by the teacher training that Chapter~\ref{ch:sim} reports before the student experiments.
 
 \section{Contributions}\label{sec:contributions}
 
 The thesis makes the following contributions.
 
 \begin{enumerate}
-  \item A formulation of long-horizon cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged RL policy for approach, grasp, rotation, and goal reaching with scripted controllers for release and return. The hybrid teacher generates coherent multi-cycle demonstrations with physically gated phase boundaries, and every phase is specified by the mechanism that specifies it most simply.
-  \item A zero-shot sim-to-real recipe for the visuomotor student: the calibrated extrinsics and intrinsics of the physical camera are reproduced in simulation, the student encodes a metric point cloud cropped to the workspace, and the demonstrations are rendered under lighting, texture, and background randomization and augmented with image-space color perturbations, so that a student trained on simulated data alone acts on the physical camera stream.
-  \item A unified visuomotor student distilled by conditional flow matching from point-cloud features of an aligned RGB-D view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. The thesis derives the objective, describes the student as implemented, and compares it in a systematic ablation study against online DAgger variants, deterministic regression heads, alternative vision encoders, privileged observations, and a joint-space action contract.
-  \item An experimental evaluation in simulation and on hardware. In simulation the student completes every ten-cycle trial on the M24 hexagonal nut with a mean cyclic tracking error of $-1.77\degree$. The hardware evaluation covers the M24, M30, and M36 hexagonal nuts it was trained on and held-out octagonal, rectangular, and round profiles; its results are \tbd.
+  \item A formulation of cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged \ac{RL} policy for approach, grasp, rotation, and goal reaching with scripted controllers for release and return. The hybrid teacher generates coherent multi-cycle demonstrations with physically gated phase boundaries.
+  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. A systematic ablation compares it with deterministic regression heads, alternative vision encoders, online \ac{DAgger} variants, privileged observations, and a joint-space action contract.
+  \item A zero-shot sim-to-real recipe for the student: a camera model calibrated against the physical cell, a metric point cloud cropped to the workspace, visual randomization of the rendered demonstrations, and a Cartesian action path shared by teacher, student, and robot.
+  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, three of which were not seen in training. The simulation results are reported in Chapter~\ref{ch:sim}; the hardware results are \tbd.
 \end{enumerate}
 
-The work continues the author's semester thesis~\cite{Oertel2026}, which distilled a privileged grasping teacher into an RGB student with DAgger on the same hand--arm family, and it was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments; the acknowledgments state this attribution.
+The work continues the author's semester thesis~\cite{Oertel2026}, which distilled a privileged grasping teacher into an RGB student with \ac{DAgger} on a dexterous hand--arm system. It was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments; the acknowledgments state this attribution.
 
 \section{Outline}\label{sec:outline}
 
-Chapter~\ref{ch:sota} reviews the theoretical background on reinforcement learning, imitation learning, generative action heads, visual representations, and operational-space control, and surveys related work on robotic assembly, policy chaining, sim-to-real transfer, and visuomotor distillation. Chapter~\ref{ch:method} presents the methodology: the problem formulation and metrics, the simulated and physical system, the privileged teacher, the hybrid teacher and demonstration pipeline, the conditional flow-matching student, and the evaluation protocol. Chapter~\ref{ch:sim} reports the experiments in simulation, including the ablations that justify each design choice. Chapter~\ref{ch:real} describes the hardware setup, the zero-shot transfer protocol, and the real-world evaluation across nut sizes and geometries. Chapter~\ref{ch:discussion} interprets the results with respect to the research questions and discusses the limitations. Chapter~\ref{ch:conclusion} concludes and outlines future work.
+Chapter~\ref{ch:sota} provides the background that the method builds on: the thread geometry that the thread model uses, \ac{RL} with privileged information, imitation learning and compounding error, generative action heads, visual representations for manipulation, and operational-space control. It then reviews related work on robotic assembly and threading, dexterous manipulation, sim-to-real transfer, long-horizon tasks and policy chaining, and teacher--student distillation.
+
+Chapter~\ref{ch:method} presents the method, with each part answering one difficulty of Section~\ref{sec:problem-setup}: the problem formulation, the simulated system with its thread model and controller, the privileged teacher, the hybrid teacher and the generation of demonstrations, the distillation of the student by conditional flow matching, and the evaluation protocol.
+
+Chapter~\ref{ch:sim} reports the experiments in simulation. It covers teacher training, the main ablations that answer RQ1 and RQ2, the design ablations of the student, and the comparison of offline and online distillation.
+
+Chapter~\ref{ch:real} describes the hardware setup and the zero-shot transfer protocol and reports the real-world evaluation across nut sizes and geometries, which answers RQ3.
+
+Chapter~\ref{ch:discussion} interprets the results with respect to the research questions, discusses what they mean for robotic assembly, and states the limitations of the work.
+
+Chapter~\ref{ch:conclusion} returns to the assembly motivation of this chapter, summarizes what a dexterous robot can now do in threading and what is still missing, and outlines future work.

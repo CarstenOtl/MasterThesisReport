@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "paper-review-system@anthropic-plugin-directory": true
+  }
+}

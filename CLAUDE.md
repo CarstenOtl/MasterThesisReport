@@ -105,6 +105,7 @@ Template content uses `\AIRlangGerEng{<German>}{<English>}` so the same source c
 
 ## Conventions when extending the repo
 
+- When drafting or editing thesis text, follow `thesis/notes/writing_guidelines.md`.
 - New document type → new top-level folder seeded from the matching `AIRStudent*` template (contents-into-folder).
 - New reference PDF → add it with its `pdftotext -layout` `.md` sibling in the same commit.
 - Keep `AIRlatex.cls` vendored per document folder.

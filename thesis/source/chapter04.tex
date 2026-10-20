@@ -1,11 +1,11 @@
 % !TeX spellcheck = en_US
 \chapter{Experiments in Simulation}\label{ch:sim}%
 
-This chapter reports the simulation experiments. Section~\ref{sec:sim-setup} fixes the experimental setup. Section~\ref{sec:sim-teacher} reports the training of the privileged teachers. Section~\ref{sec:sim-student} reports the main student ablations in simulation, Section~\ref{sec:sim-design} the design ablations of the student, and Section~\ref{sec:sim-online} compares offline with online distillation. Section~\ref{sec:sim-inventory} inventories every ablation that the code base supports and marks which of them have results. Numbers that are not yet available are marked \tbd{} and listed in the draft to-do file.
+This chapter tests the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions. It answers RQ1 and RQ2 of Section~\ref{sec:research-questions}; RQ3, the zero-shot transfer, needs the physical system and is evaluated in Chapter~\ref{ch:real}. Section~\ref{sec:sim-setup} fixes the setup that all experiments share. Section~\ref{sec:sim-teacher} shows that the privileged teacher and the hybrid rollout produce reliable multi-cycle demonstrations, the precondition for every student. Section~\ref{sec:sim-student} reports the main ablations that answer RQ1 and RQ2. Section~\ref{sec:sim-design} reports the design ablations that fixed the action contract, the conditioning, and the encoder of the student, and Section~\ref{sec:sim-online} compares offline with online distillation. Section~\ref{sec:sim-inventory} lists every ablation that the code base supports and marks which of them have results, and Section~\ref{sec:sim-summary} summarizes the chapter. Numbers that are not yet available are marked \tbd.
 
 \section{Experimental Setup}\label{sec:sim-setup}
 
-All simulation experiments use the system of Section~\ref{sec:system} in Isaac~Sim~5.1 with physics at 120\,Hz and control at 15\,Hz, on a single NVIDIA GeForce RTX~5090. Teachers are trained with 512 parallel environments for 200 epochs, which takes about ten hours per teacher; the student is trained offline for 300 epochs in about 30 minutes. The student data set is the one of Section~\ref{sec:dataset}: 20 successful ten-cycle demonstrations of the M24 hexagonal nut collected from 32 environments with 30 random arm impulses each, 19\,486 frames in total, under lighting and texture randomization of the dome light, the tabletop, the nut and bolt textures, the floor texture, and the image background in the style of DextrAH-RGB~\cite{Singh2025}. Figure~\ref{fig:sim-scenes} shows the parallel training scenes and the randomized student views. Unless stated otherwise, students use the Cartesian action contract with $H=8$, sixteen Euler steps, a temporal-ensemble decay of 0.5, EMA weights, and the DP3-style encoder; evaluation follows Section~\ref{sec:evaluation} with ten trials of ten cycles on the M24 nut in a nominal scene without physical domain randomization.
+All simulation experiments run the system of Section~\ref{sec:system} in Isaac~Sim~5.1 with physics at 120\,Hz and control at 15\,Hz on a single NVIDIA GeForce RTX~5090. Each teacher is trained with 512 parallel environments for 200 epochs, which takes about ten hours. The student is trained offline for 300 epochs in about 30 minutes on the dataset of Section~\ref{sec:dataset}: 20 successful ten-cycle demonstrations of the M24 hexagonal nut, collected from 32 environments with 30 random arm impulses each, 19\,486 frames in total. The demonstrations are rendered under lighting and texture randomization of the dome light, the tabletop, the nut and bolt textures, the floor texture, and the image background in the style of DextrAH-RGB~\cite{Singh2025}. Figure~\ref{fig:sim-scenes} shows the parallel training scenes and the randomized student views. Unless stated otherwise, students use the Cartesian action contract with $H=8$, sixteen Euler steps, a temporal-ensemble decay of 0.5, \acs{EMA} weights, and the DP3-style encoder. Evaluation follows Section~\ref{sec:evaluation}: ten trials of ten cycles on the M24 nut in a nominal scene without physical domain randomization.
 
 \begin{figure}[htb]%
     \centering%
@@ -34,40 +34,41 @@ All simulation experiments use the system of Section~\ref{sec:system} in Isaac~S
 \section{Teacher Training}\label{sec:sim-teacher}
 
 \label{sec:sim-experts}
-With the simplified thread model and the three-stage reward of Section~\ref{sec:teacher}, the threading expert learns the single $60\degree$ turn from the engaged nut. On the Tiangong\,2 platform the recipe with the $\pm30\degree$ initial-yaw curriculum reached a population success rate of 83.6\,\% at the end of training with a peak of 90.0\,\%; on the FR3 platform the retained M24 teacher, trained for 200 epochs with the curriculum and the axial-height randomization, completed ten consecutive cycles in all 32 hybrid-teacher candidate environments without a single transition failure, which is the property that matters for demonstration generation. Table~\ref{tab:teacher-results} summarizes the teacher results; the single-turn success rate of the FR3 teacher at the final curriculum level is \tbd.
+Every demonstration comes from the hybrid teacher, so the teacher has to turn the nut reliably and hand over cleanly to the scripted release and return. The teacher result is also the experimental test of difficulty~(b) of Section~\ref{sec:problem-setup}: whether a learned policy acquires the pinch grasp and keeps it under the turning load through the commanded hand and arm degrees of freedom. With the simplified thread model and the three-stage reward of Section~\ref{sec:teacher}, the threading expert learns the single $60\degree$ turn from the engaged nut. On an earlier humanoid-arm platform, the recipe with the $\pm30\degree$ initial-yaw curriculum reached a population success rate of 83.6\,\% at the end of training, with a peak of 90.0\,\%. On the final platform, the retained M24 teacher, trained for 200 epochs with the curriculum and the axial-height randomization, completed ten consecutive cycles in all 32 hybrid-teacher candidate environments without a single transition failure. This is the property that matters for demonstration generation. The single-turn success rate of this teacher at the final curriculum level is \tbd.
 % TODO(results): report final-epoch single-turn success and curriculum level of the retained FR3 M24 threading teacher (TensorBoard of the run promoted on 2026-09-10) and of the M24/M30/M36 multi-size teacher.
+Table~\ref{tab:teacher-results} summarizes the teacher results. It shows that the teacher on the final platform meets the requirement of the student dataset, error-free transitions over ten cycles, while its single-turn success rates are still pending.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Teacher training results. Success is the population success rate at the end of training; the hybrid-teacher column counts candidate environments that completed the required cycles with zero transition failures.}%
+    \caption{Teacher training results. Success is the population success rate at the end of training; the hybrid-teacher column counts candidate environments that completed the required cycles with zero transition failures. The earlier platform is the humanoid arm on which the project started; the final platform is described in Section~\ref{sec:real-setup}.}%
     \label{tab:teacher-results}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{llccc}
         \toprule
         Teacher & Platform & Success & Peak success & Hybrid rollout \\
         \midrule
-        Threading, $\pm30\degree$ yaw curriculum & Tiangong\,2 & 83.6\,\% & 90.0\,\% & -- \\
-        Threading, M24, yaw and depth randomization & FR3 & \tbd & \tbd & 32/32 ten-cycle \\
-        Threading, M24/M30/M36 one-hot & FR3 & \tbd & \tbd & \tbd \\
+        Threading, $\pm30\degree$ yaw curriculum & earlier humanoid arm & 83.6\,\% & 90.0\,\% & -- \\
+        Threading, M24, yaw and depth randomization & final & \tbd & \tbd & 32/32 ten-cycle \\
+        Threading, M24/M30/M36 one-hot & final & \tbd & \tbd & \tbd \\
         \bottomrule
     \end{tabular}}
 \end{table}%
 
-The pickup expert of the full-task variant learns to approach, pinch, and lift a loose nut with the same recipe, with 95.3\,\% grasp and 94.5\,\% lift success on Tiangong\,2 and 99.8\,\% pinch success on the FR3. Seating the nut on the bolt is outside the scope of this thesis (Section~\ref{sec:thread-model}), and the threading results start from an engaged nut. All reported teachers are trained with the Factory controller gains of Section~\ref{sec:action-contract}, and the physical controller is tuned toward these gains (Chapter~\ref{ch:real}).
+The pickup expert of the full-task variant (Section~\ref{sec:hybrid-fulltask}) learns to approach, pinch, and lift a loose nut with the same recipe. It reached 95.3\,\% grasp and 94.5\,\% lift success on the earlier platform and 99.8\,\% pinch success on the final platform. Seating the nut on the bolt is outside the scope of this thesis (Section~\ref{sec:thread-model}), so all threading results start from an engaged nut. All reported teachers use the Factory controller gains of Section~\ref{sec:action-contract}, and the physical controller is tuned toward these gains (Chapter~\ref{ch:real}).
 
 \section{Student Ablations in Simulation}\label{sec:sim-student}
 
-The main ablation study addresses the four questions of Section~\ref{sec:research-questions}: whether one student trained on multi-cycle data beats a single-cycle policy that is invoked repeatedly (Q1), what the point-cloud encoder contributes (Q2), and whether the flow-matching head beats deterministic regression with recurrent and Transformer backbones (Q3); the zero-shot transfer of Q4 is evaluated on hardware in Chapter~\ref{ch:real}. Five students are trained on the simulated dataset of Section~\ref{sec:dataset} and evaluated under matched budgets; each ablation changes exactly one component of the full method.
+The main ablation study answers RQ1 and RQ2 of Section~\ref{sec:research-questions}. Five students are trained on the simulated dataset of Section~\ref{sec:dataset} and evaluated under matched budgets, and each ablation changes exactly one component of the full method. Ablation (a) addresses RQ1: it tests whether one student trained on multi-cycle data outperforms a single-cycle policy that is invoked repeatedly. Ablations (b) to (d) address RQ2: (b) replaces the point-cloud encoder with an image-space encoder, and (c) and (d) replace the flow-matching head with deterministic regression on a recurrent and on a Transformer backbone. RQ3 is evaluated on hardware in Chapter~\ref{ch:real}.
 
 \begin{enumerate}
   \item[(a)] \emph{Single-cycle student.} The student is trained on demonstrations of one cycle and is invoked ten times in a trial; its temporal context is reset after every cycle.
   \item[(b)] \emph{ResNet visual encoder.} The point-cloud encoder is replaced by the one-branch image-space encoder of Section~\ref{sec:student}, an ImageNet-pretrained ResNet-18 stage-2 trunk that fuses RGB, log depth, a validity mask, and the calibrated per-pixel XYZ coordinates into the same 64-D feature. Policy, objective, data, and budget are unchanged.
-  \item[(c)] \emph{Point-cloud encoder with LSTM regression.} The flow-matching Transformer is replaced by the DextrAH-RGB-style recurrent backbone of Section~\ref{sec:baselines}, a layer-normalized 512-unit LSTM followed by a 512--512--256 ELU MLP, trained by deterministic action regression on the same data.
+  \item[(c)] \emph{Point-cloud encoder with \ac{LSTM} regression.} The flow-matching Transformer is replaced by the DextrAH-RGB-style recurrent backbone of Section~\ref{sec:baselines}, a layer-normalized 512-unit \ac{LSTM} followed by a 512--512--256 ELU \acs{MLP}, trained by deterministic action regression on the same data.
   \item[(d)] \emph{Point-cloud encoder with Transformer regression.} The deterministic ACT-style Transformer of Section~\ref{sec:baselines} predicts the eight-step chunk from eight learned action queries.
   \item[(e)] \emph{Full method.} One flow-matching student with the point-cloud encoder is trained on the complete multi-cycle simulated demonstrations.
 \end{enumerate}
 
-Table~\ref{tab:ablation-sim} reports the results on the M24 hexagonal nut. The full method (e) completes all ten cycles in every trial, with a cyclic tracking error of $-1.77\pm1.02\degree$ and a ten-cycle error of $-17.7\pm3.23\degree$: the student lags the $60\degree$ target by less than two degrees per cycle, and the lag accumulates without drift in its spread over the trial. The four ablations isolate the components that make this possible. The single-cycle student (a) removes the axial advance of the nut from the data: in a single-cycle demonstration the nut is always grasped at its reset height, whereas over ten cycles it rises by one sixth of a pitch per cycle, and the multi-cycle student has to read this height from the point cloud (Q1). The ResNet student (b) keeps everything but the representation (Q2), and the two regression heads (c) and (d) keep the data and, for (d), the backbone, the chunk length, and the temporal ensembling, so that the difference to (e) isolates the generative objective (Q3). Their results on the simulated dataset are \tbd.
+Table~\ref{tab:ablation-sim} reports the results on the M24 hexagonal nut. The full method (e) completes all ten cycles in every trial, with a cyclic tracking error of $-1.77\pm1.02\degree$ and a ten-cycle error of $-17.7\pm3.23\degree$. The student thus lags the $60\degree$ target by less than two degrees per cycle, and the lag accumulates over the trial without its spread drifting. Each ablation removes one property on which this result may depend. The single-cycle student (a) never sees the axial advance of the nut: in a single-cycle demonstration the nut is always grasped at its reset height, whereas over ten cycles it rises by one sixth of a pitch per cycle, and the multi-cycle student has to read this height from the point cloud (RQ1). The ResNet student (b) keeps everything but the representation. The regression students (c) and (d) keep the data and, for (d), also the backbone, the chunk length, and the temporal ensembling, so that their difference to (e) isolates the generative objective (RQ2). Their results on the simulated dataset are \tbd.
 % TODO(results): retrain ablations (a)-(d) on the simulated-only ten-cycle M24 dataset and evaluate ten trials each. The previous runs (a 5.5+-0.8, b 2.3+-0.9 / +20.17+-7.80, c 0.0, d 1.4+-0.8 / +124.21+-18.50) included the real-world replay data and cannot be reused.
 
 \begin{table}[htb]%
@@ -81,23 +82,23 @@ Table~\ref{tab:ablation-sim} reports the results on the M24 hexagonal nut. The f
         \midrule
         (a) single-cycle student & \tbd & \tbd & \tbd \\
         (b) ResNet encoder & \tbd & \tbd & \tbd \\
-        (c) LSTM regression & \tbd & \tbd & \tbd \\
+        (c) \ac{LSTM} regression & \tbd & \tbd & \tbd \\
         (d) Transformer regression & \tbd & \tbd & \tbd \\
         (e) full method & $10.0\pm0.0$ & $-1.77\pm1.02$ & $-17.7\pm3.23$ \\
         \bottomrule
     \end{tabular}
 \end{table}%
 
-Q2 is addressed in two ways, by the closed-loop ablation (b) and by a representation probe. For the probe, one shared pose decoder is trained on the frozen 64-D feature of each encoder to predict the nut position and orientation. The orientation of the nut faces relative to the fingers is exactly what a re-grasp needs, so the probe tests whether a representation carries the quantity that the closed loop depends on. The probe errors of the point-cloud and the ResNet features are \tbd.
+For the encoder part of RQ2, a representation probe complements the closed-loop ablation (b). One shared pose decoder is trained on the frozen 64-D feature of each encoder to predict the nut position and orientation. A re-grasp needs exactly the orientation of the nut faces relative to the fingers, so the probe tests whether a representation carries the quantity on which the closed loop depends. The probe errors of the point-cloud and the ResNet features are \tbd.
 % TODO(results): rerun the pose probe on the encoders of the simulated-only students (e) and (b). The previous probe (point cloud 8 mm / 15.16 deg, ResNet 8.6 mm / 31.20 deg) used encoders trained with the real-world replay data.
 
 \section{Design Ablations of the Student}\label{sec:sim-design}
 
-The ablations of Section~\ref{sec:sim-student} compare the final student against alternatives at the level of whole components. The design of the student itself was fixed by a sequence of controlled single-rollout ablations on six-cycle sequential-threading data, which this section reports because they document why each component is present. All runs in this section use the privileged 6-D nut-pose observation or the RGB-D observation as stated, 20 impulse-augmented demonstrations, 300 epochs, the Cartesian contract, $H=8$, and the student-owned cyclic evaluation with a six-cycle requirement at a fixed seed; they are matched single rollouts, not success rates.
+The main ablations compare the final student with alternatives at the level of whole components. The design of the student itself was fixed earlier by a sequence of controlled ablations, which this section reports because they explain why each component is present. The action-contract comparison uses pickup demonstrations; the remaining design ablations use six-cycle sequential-threading data. Except where a subsection varies them, all runs use the privileged 6-D nut-pose observation or the \acs{RGBD} observation as stated, 20 impulse-augmented demonstrations, 300 epochs, the Cartesian contract, $H=8$, and the student-owned cyclic evaluation with a six-cycle requirement at a fixed seed. The results are matched single rollouts, not success rates.
 
 \subsection{Action Contract}\label{sec:sim-contract}
 
-The Cartesian contract of Section~\ref{sec:action-contract} is supported by a direct comparison on pickup demonstrations with the privileged 6-D observation. Materialized in the native Cartesian contract, the demonstrations produced a flow student with 10/10 grasps and lifts, 5/10 terminal successes on the handoff-only task, and 8/10 qualified handoffs, 7/10 engagement entries, and 2/10 held engagements on the stricter engagement task. Materialized in the 17-D joint-PD contract, the same demonstrations produced a student that fitted its labels equally well offline (training flow loss 0.03, teacher-fit chunk RMSE 0.040, correlation 0.998) and grasped and lifted in every trial, but reached the handoff waypoint in none; terminal-hold padding and a residual variant that predicts arm-position residuals left this unchanged. Imitating the bounded, bolt-relative action that the teacher itself produced is therefore what turns a good offline fit into closed-loop task progress, and all later students use the Cartesian contract. Table~\ref{tab:contract} summarizes the comparison.
+The student imitates the teacher's bounded, bolt-relative Cartesian action because a joint-space contract fails in closed loop despite an equally good offline fit. Table~\ref{tab:contract} compares the two contracts on pickup demonstrations with the privileged 6-D observation. Materialized in the native Cartesian contract of Section~\ref{sec:action-contract}, the demonstrations produced a flow student with 10/10 grasps and lifts, 5/10 terminal successes on the handoff-only task, and 8/10 qualified handoffs, 7/10 engagement entries, and 2/10 held engagements on the stricter engagement task. Materialized in the 17-D joint-PD contract, the same demonstrations produced a student that fitted its labels equally well offline (training flow loss 0.03, teacher-fit chunk \acs{RMSE} 0.040, correlation 0.998) and grasped and lifted in every trial, but reached the handoff waypoint in none. Neither terminal-hold padding nor a residual variant that predicts arm-position residuals reached the handoff waypoint either. A good offline fit therefore turns into closed-loop task progress only when the student imitates the action that the teacher itself produced, and all later students use the Cartesian contract.
 \begin{table}[htb]%
     \centering%
     \caption{Action-contract ablation of the offline flow student on pickup demonstrations (privileged 6-D observation, single seed). G0 is the handoff waypoint above the bolt tip and G1 the engagement goal.}%
@@ -118,16 +119,16 @@ The Cartesian contract of Section~\ref{sec:action-contract} is supported by a di
 
 \subsection{Progress and Phase Conditioning}\label{sec:sim-conditioning}
 
-On six-cycle sequential-threading demonstrations with policy-only impulses, a state-conditioned flow student completed four of the six cycles. With impulses in every phase segment and the global trajectory progress $p_t$ added to the condition, the student completed all six required cycles in 735 control ticks with zero transition failures; its release times, however, drifted increasingly behind the teacher, by $+8.6$\,s at the sixth release, and the fifth cycle took twice as long as the others. Adding the three-way process-phase encoding reduced the completion time to 609 ticks, equalized the cycle durations to 6.7 to 7.1\,s, reduced the release-time errors against the teacher to within $\pm0.5$\,s, reduced the controlled-joint RMSE against the nominal trajectory from $11.5\degree$ to $4.7\degree$ and the TCP position RMSE from 75\,mm to 28\,mm, and reduced the final cumulative nut-turn error from $-60\degree$ to $-8\degree$. The offline teacher-fit of the phase-conditioned checkpoint was marginally worse than that of the progress-only checkpoint (first-action RMSE 0.0046 against 0.0044), so the closed-loop improvement is not explained by a better fit; the phase encoding acts as a synchronization signal that keeps the student's internal clock aligned with physical events when the cycle duration deviates from nominal. Both conditions have been enabled by default since. Table~\ref{tab:conditioning} collects the numbers.
+The global progress scalar lets the student finish all cycles, and the process-phase encoding keeps it synchronized with the physical cycle. On six-cycle sequential-threading demonstrations with policy-only impulses, a state-conditioned flow student completed four of the six cycles. With impulses in every phase segment and the global trajectory progress $p_t$ added to the condition, the student completed all six required cycles in 735 control ticks with zero transition failures. Its release times, however, drifted increasingly behind the teacher, by $+8.6$\,s at the sixth release, and the fifth cycle took twice as long as the others. Adding the three-way process-phase encoding reduced the completion time to 609 ticks and equalized the cycle durations to 6.7 to 7.1\,s. It also reduced the release-time errors against the teacher to within $\pm0.5$\,s, the controlled-joint \acs{RMSE} against the nominal trajectory from $11.5\degree$ to $4.7\degree$, the \acs{TCP} position \acs{RMSE} from 75\,mm to 28\,mm, and the final cumulative nut-turn error from $-60\degree$ to $-8\degree$. The offline teacher fit of the phase-conditioned checkpoint was marginally worse than that of the progress-only checkpoint (first-action \acs{RMSE} 0.0046 against 0.0044), so a better fit does not explain the closed-loop improvement. The phase encoding acts instead as a synchronization signal that keeps the student's internal clock aligned with physical events when the cycle duration deviates from nominal. All later students use both conditions. Table~\ref{tab:conditioning} collects the numbers.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Conditioning ablation on six-cycle sequential threading (privileged 6-D observation, matched single rollouts at one seed). RMSE values are against the nominal teacher trajectory in absolute time; the final turn error is the cumulative nut-rotation error after the last cycle.}%
+    \caption{Conditioning ablation on six-cycle sequential threading (privileged 6-D observation, matched single rollouts at one seed). \acs{RMSE} values are against the nominal teacher trajectory in absolute time; the final turn error is the cumulative nut-rotation error after the last cycle.}%
     \label{tab:conditioning}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccc}
         \toprule
-        Condition & Cycles & Ticks & Joint RMSE & Final turn error \\
+        Condition & Cycles & Ticks & Joint \acs{RMSE} & Final turn error \\
         \midrule
         state only, policy-only impulses & 4/6 & 776 & $14.9\degree$ & -- \\
         state + progress $p_t$, all-phase impulses & 6/6 & 735 & $11.5\degree$ & $-60.3\degree$ \\
@@ -138,12 +139,12 @@ On six-cycle sequential-threading demonstrations with policy-only impulses, a st
 
 \subsection{Vision Encoder and Pretraining}\label{sec:sim-vision}
 
-The first RGB-D student used the two-branch cross-attention encoder with an auxiliary nut-position head and completed all six cycles in 617 ticks, matching the privileged student; a recollection with explicit success markers and retraining reproduced the result in 627 ticks. The retained DP3 encoder is pretrained on rendered sweeps of a free-moving nut from the calibrated camera, which reaches a held-out position error of 5.9\,mm and a hexagon-symmetry-aware rotation error of $46\degree$; fine-tuning on hybrid-teacher images with phase-balanced sampling reaches 1.9\,mm and $3.8\degree$ on held-out teacher episodes, and 2.8\,mm and $6.6\degree$ on images from a student rollout. The ten-cycle DP3 student of Table~\ref{tab:ablation-sim} was initialized from this sweep-pretrained encoder with all encoder parameters trainable; it completed all ten cycles in 1072 ticks with a maximum turn of $60.3\degree$ and a mean absolute retained-turn error of $3.1\degree$. Its release times lag those of its source demonstration by 2.7\,s on average and by 7.4\,s at the tenth cycle, a timing drift that does not affect the completion of the cycles. A closed-loop comparison of the DP3, Adapt3R-style, and ResNet encoders under identical data and budget beyond ablation (b) is \tbd{} (Table~\ref{tab:encoders}).
+The visual students match the privileged student, and the retained \ac{DP3} encoder owes its accuracy to pretraining on rendered nut sweeps. The first \acs{RGBD} student used the two-branch cross-attention encoder with an auxiliary nut-position head and completed all six cycles in 617 ticks, matching the privileged student; a recollection with explicit success markers and retraining reproduced the result in 627 ticks. The retained \ac{DP3} encoder is pretrained on rendered sweeps of a free-moving nut from the calibrated camera and reaches a held-out position error of 5.9\,mm and a hexagon-symmetry-aware rotation error of $46\degree$. Fine-tuning on hybrid-teacher images with phase-balanced sampling reduces these errors to 1.9\,mm and $3.8\degree$ on held-out teacher episodes, and to 2.8\,mm and $6.6\degree$ on images from a student rollout. The ten-cycle \ac{DP3} student of Table~\ref{tab:ablation-sim} was initialized from this sweep-pretrained encoder with all encoder parameters trainable. It completed all ten cycles in 1072 ticks with a maximum turn of $60.3\degree$ and a mean absolute retained-turn error of $3.1\degree$. Its release times lag those of its source demonstration by 2.7\,s on average and by 7.4\,s at the tenth cycle, a timing drift that does not affect the completion of the cycles. Table~\ref{tab:encoders} prepares a closed-loop comparison of the \ac{DP3}, Adapt3R-style, ResNet, two-branch, and depth-only encoders under identical data and budget, which extends ablation (b); its results are \tbd.
 % TODO(results): train offline_flow_matching_adapt3r_agent.yaml and the one-channel ResNet encoder on the ten-cycle M24 dataset with the same recipe as the DP3 student; evaluate ten trials each.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Vision-encoder ablation of the flow student on the ten-cycle M24 task (ten trials). The DP3 row is the full method; the remaining rows are placeholders.}%
+    \caption{Vision-encoder ablation of the flow student on the ten-cycle M24 task (ten trials). The \acs{DP3} row is the full method; the remaining rows are placeholders.}%
     \label{tab:encoders}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
@@ -153,7 +154,7 @@ The first RGB-D student used the two-branch cross-attention encoder with an auxi
         point cloud, DP3-style (RGB + XYZ) & $10.0\pm0.0$ & $-1.77\pm1.02$ & $-17.7\pm3.23$ \\
         ResNet-18 early fusion (b) & \tbd & \tbd & \tbd \\
         Adapt3R-style (frozen ResNet + 3D attention) & \tbd & \tbd & \tbd \\
-        Two-branch cross-attention RGB-D & \tbd & \tbd & \tbd \\
+        Two-branch cross-attention \acs{RGBD} & \tbd & \tbd & \tbd \\
         Depth-only CNN & \tbd & \tbd & \tbd \\
         \bottomrule
     \end{tabular}}
@@ -161,7 +162,7 @@ The first RGB-D student used the two-branch cross-attention encoder with an auxi
 
 \subsection{Privileged Observations, Horizon, Integration Steps, and Inputs}\label{sec:sim-sweeps}
 
-The privileged observation modes serve as upper bounds and as diagnostics: with the nut position (3-D) or pose (6-D) appended to the proprioception instead of the visual feature, the same flow student is trained and evaluated without rendering. On six-cycle sequential threading the privileged 6-D student and the RGB-D student both completed six cycles at matched settings, which shows that the visual feature carries the information the task needs. The remaining sweeps over the action horizon $H$, the number of Euler steps $N$, the temporal-ensemble decay, the hand-velocity input, and the terminal-hold padding are implemented as command-line options of the offline trainer and evaluator but have not been run as controlled studies; Table~\ref{tab:sweeps} gives the skeleton.
+The privileged observation modes serve as upper bounds and as diagnostics. With the nut position (3-D) or pose (6-D) appended to the proprioception instead of the visual feature, the same flow student is trained and evaluated without rendering. On six-cycle sequential threading, the privileged 6-D student and the \acs{RGBD} student both completed six cycles at matched settings, which shows that the visual feature carries the information the task needs. The remaining sweeps over the action horizon $H$, the number of Euler steps $N$, the temporal-ensemble decay, the hand-velocity input, and the terminal-hold padding are implemented as command-line options of the offline trainer and evaluator but have not been run as controlled studies. Table~\ref{tab:sweeps} gives the skeleton; once filled, it will show how sensitive the reference student is to each of these choices and what inference latency each number of Euler steps costs.
 % TODO(results): run action-horizon sweep (H in {1, 4, 8, 16}), ODE-step sweep (N in {1, 4, 8, 16, 32}), temporal-ensemble decay in {0, 0.5, 0.8}, and --hand-velocity-observation omitted on the ten-cycle M24 dataset; ten trials each; also record inference latency per N.
 
 \begin{table}[htb]%
@@ -185,7 +186,7 @@ The privileged observation modes serve as upper bounds and as diagnostics: with 
 
 \subsection{Nut-Size Conditioning, Domain Randomization, and Force Observations}\label{sec:sim-robustness}
 
-Three further ablations are implemented but not yet qualified in simulation. The multi-size teacher conditions on a one-hot code of M24, M30, and M36 with round-robin assignment and per-size meshes, keypoints, and pitches; the student is trained on hexagonal nuts of all three sizes without an explicit size input and must infer the size from the point cloud. Per-size simulation results of the student are \tbd; the hardware results across sizes are reported in Chapter~\ref{ch:real}. Physical domain randomization of mass, friction, controller gains, and reset pose is enabled during teacher training and disabled during demonstration collection and evaluation; its effect on the student when enabled at evaluation time is \tbd. Hardware-equivalent force observations, the thumb and index flexion forces projected onto the pad normals and the seven arm joint reaction torques normalized by the FR3 limits, are implemented as observation channels for both teacher and student, but are not yet part of any trained contract; their effect is \tbd. Table~\ref{tab:robustness} lists the skeleton.
+Three further ablations are implemented but not yet qualified in simulation. First, the multi-size teacher conditions on a one-hot code of M24, M30, and M36 with round-robin assignment and per-size meshes, keypoints, and pitches. The student is trained on hexagonal nuts of all three sizes without an explicit size input and must infer the size from the point cloud. Its per-size simulation results are \tbd; the hardware results across sizes are reported in Chapter~\ref{ch:real}. Second, physical domain randomization of mass, friction, controller gains, and reset pose is enabled during teacher training and disabled during demonstration collection and evaluation; its effect on the student when enabled at evaluation time is \tbd. Third, hardware-equivalent force observations are implemented as observation channels for both teacher and student: the thumb and index flexion forces projected onto the pad normals, and the seven arm joint reaction torques normalized by the joint torque limits of the arm. They are not yet part of any trained contract, and their effect is \tbd. Table~\ref{tab:robustness} lists the skeleton, which will show how far the student tolerates size variation, physical perturbation, and additional force input.
 % TODO(results): (i) per-size ten-trial evaluation of the multi-size student in simulation; (ii) evaluation with --enable-domain-randomization; (iii) teacher and student retrained with the fingertip-force and joint-torque channels enabled in the actor/student vectors.
 
 \begin{table}[htb]%
@@ -198,7 +199,7 @@ Three further ablations are implemented but not yet qualified in simulation. The
         Ablation & Condition & Completed cycles $\uparrow$ & Cyclic error $\rightarrow0$ & Ten-cycle error $\rightarrow0$ \\
         \midrule
         nut size & M24 / M30 / M36 & \tbd & \tbd & \tbd \\
-        physical DR at evaluation & off / on & \tbd & \tbd & \tbd \\
+        physical \acs{DR} at evaluation & off / on & \tbd & \tbd & \tbd \\
         force observations & none / fingertip / fingertip + torque & \tbd & \tbd & \tbd \\
         axial-height curriculum & 20\,mm / \tbd & \tbd & \tbd & \tbd \\
         \bottomrule
@@ -207,7 +208,7 @@ Three further ablations are implemented but not yet qualified in simulation. The
 
 \section{Offline versus Online Distillation}\label{sec:sim-online}
 
-The offline flow student is compared with online DAgger using the recurrent LSTM student on cyclic threading from privileged 6-D observations under the Cartesian contract, with the hybrid teacher as the label source and a ten-cycle cap per episode. The intervention schedule determines which part of the cycle the online student learns. Under full teacher control ($\beta=1$) it learns the threading turn; under full student control ($\beta=0$) with teacher labels it learns the turn and the complete release-and-return transition; and with an intervention probability that decays linearly from full teacher to full student control it learns both and completes two uninterrupted student-only turn-release-return cycles. The offline flow student completes all six cycles of the conditioning study with privileged observations and all ten cycles from RGB-D. Table~\ref{tab:online} summarizes the comparison.
+Offline flow distillation produces students that complete every required cycle, whereas the online \ac{DAgger} students complete at most two. The comparison uses online \ac{DAgger} with the recurrent \ac{LSTM} student on cyclic threading from privileged 6-D observations under the Cartesian contract, with the hybrid teacher as the label source and a ten-cycle cap per episode. The intervention schedule determines which part of the cycle the online student learns. Under full teacher control ($\beta=1$) it learns the threading turn. Under full student control ($\beta=0$) with teacher labels it learns the turn and the complete release-and-return transition. With an intervention probability that decays linearly from full teacher to full student control, it learns both and completes two uninterrupted student-only turn-release-return cycles. The offline flow student completes all six cycles of the conditioning study with privileged observations and all ten cycles from \acs{RGBD}. Table~\ref{tab:online} summarizes the comparison.
 % TODO(results): the online flow-matching student (Section 3.5.5) is implemented; train online_dagger_flow_matching on cyclic_threading with nut_pose_6d (beta=1, H=8), evaluate ten trials, and add it to Table 4.5 if it qualifies.
 
 \begin{table}[htb]%
@@ -219,40 +220,40 @@ The offline flow student is compared with online DAgger using the recurrent LSTM
         \toprule
         Student & Intervention & Completed cycles & Learned behavior \\
         \midrule
-        online DAgger LSTM & $\beta=1$ & 0 & threading turn \\
-        online DAgger LSTM & $\beta=0$ & 1 & turn and transition \\
-        online DAgger LSTM & $\beta$ decayed $1\rightarrow0$ & 2 & turn and transition, two cycles \\
-        online DAgger LSTM & SafeDAgger 0.10/0.075 & 0 & approach \\
+        online \ac{DAgger} \ac{LSTM} & $\beta=1$ & 0 & threading turn \\
+        online \ac{DAgger} \ac{LSTM} & $\beta=0$ & 1 & turn and transition \\
+        online \ac{DAgger} \ac{LSTM} & $\beta$ decayed $1\rightarrow0$ & 2 & turn and transition, two cycles \\
+        online \ac{DAgger} \ac{LSTM} & SafeDAgger 0.10/0.075 & 0 & approach \\
         offline flow, state + progress + phase & -- & 6/6 & complete cycle, Table~\ref{tab:conditioning} \\
-        offline flow, RGB-D & -- & 10/10 & complete cycle, Table~\ref{tab:ablation-sim} \\
+        offline flow, \acs{RGBD} & -- & 10/10 & complete cycle, Table~\ref{tab:ablation-sim} \\
         \bottomrule
     \end{tabular}}
 \end{table}%
 
-The evaluation ladder of Section~\ref{sec:ladder} explains where the offline student's advantage comes from. Table~\ref{tab:ladder-results} places several students on its first rung next to their closed-loop outcome. Every listed checkpoint reproduces its training labels with first-action RMSE below 0.04 in normalized action units and correlation above 0.99, and the online LSTM students likewise fit their labels and execute them correctly in teacher-forced mode. The offline fit is therefore a necessary diagnostic and not a predictor of task success; the closed-loop column is decided by the contract, the conditioning, and the data. The retained student combines the three properties that the closed loop rewards: the Cartesian contract, the progress and phase conditions, and demonstrations that contain the teacher's recoveries from disturbances in every phase. Together with chunked prediction and temporal ensembling, these let it recover from its own deviations under its own observations, which is the regime in which the online recurrent students fall behind.
+The evaluation ladder of Section~\ref{sec:ladder} shows that the offline fit does not explain this difference. Table~\ref{tab:ladder-results} places several offline students on its first rung next to their closed-loop outcome. Every listed checkpoint reproduces its training labels with first-action \acs{RMSE} below 0.04 in normalized action units and correlation above 0.99, and the online \ac{LSTM} students likewise fit their labels and execute them correctly in teacher-forced mode. The offline fit is therefore a necessary diagnostic and not a predictor of task success; the closed-loop outcome follows the contract, the conditioning, and the data. The retained student combines the three properties that the closed loop rewards: the Cartesian contract, the progress and phase conditions, and demonstrations that contain the teacher's recoveries from disturbances in every phase. Together with chunked prediction and temporal ensembling, these properties plausibly let it recover from its own deviations under its own observations, which is the regime in which the online recurrent students fall behind.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Offline teacher-fit against closed-loop outcome for offline flow students (EMA weights, sixteen Euler steps, one training episode). RMSE values are in the student's action units; the joint-PD row is in physical units, the Cartesian rows in normalized action units.}%
+    \caption{Offline teacher-fit against closed-loop outcome for offline flow students (\acs{EMA} weights, sixteen Euler steps, one training episode). \acs{RMSE} values are in the student's action units; the joint-PD row is in physical units, the Cartesian rows in normalized action units.}%
     \label{tab:ladder-results}%
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{llcccl}
         \toprule
-        Student & Data & First-action RMSE & Chunk RMSE & Correlation & Closed loop \\
+        Student & Data & First-action \acs{RMSE} & Chunk \acs{RMSE} & Correlation & Closed loop \\
         \midrule
         joint-PD, 6-D nut pose & pickup, 20 episodes & 0.035 & 0.040 & 0.998 & 0/10 handoff \\
         Cartesian, 6-D nut pose, state only & 6-cycle threading, policy impulses & 0.0050 & 0.0110 & 0.9996 & 4/6 cycles \\
         Cartesian, 6-D nut pose, + progress & 6-cycle, all-phase impulses & 0.0044 & 0.0122 & 0.9997 & 6/6 cycles \\
         Cartesian, 6-D nut pose, + progress + phase & 6-cycle, all-phase impulses & 0.0046 & 0.0129 & 0.9997 & 6/6 cycles \\
-        Cartesian, RGB-D two-branch, + aux.\ head & 6-cycle, all-phase impulses & 0.0044 & 0.0055 & 0.9997 & 6/6 cycles \\
-        Cartesian, DP3 from sweep pretraining & 10-cycle, all-phase impulses & 0.019 & 0.019 & 0.994 & 10/10 cycles \\
+        Cartesian, \acs{RGBD} two-branch, + aux.\ head & 6-cycle, all-phase impulses & 0.0044 & 0.0055 & 0.9997 & 6/6 cycles \\
+        Cartesian, \ac{DP3} from sweep pretraining & 10-cycle, all-phase impulses & 0.019 & 0.019 & 0.994 & 10/10 cycles \\
         \bottomrule
     \end{tabular}}
 \end{table}%
 
 \section{Ablation Inventory}\label{sec:sim-inventory}
 
-Table~\ref{tab:inventory} lists every ablation that the code base exposes as a configuration, with the chapter that reports its result or the placeholder that awaits one. The inventory follows the three ablation axes of the student assembly, namely the vision encoder, the action head, and the observation and action contract, and the teacher, data, and evaluation options around them.
+Table~\ref{tab:inventory} lists every ablation that the code base exposes as a configuration, with the table or section that reports its result or the placeholder that awaits one. The inventory follows the three ablation axes of the student, namely the vision encoder, the action head, and the observation and action contract, and adds the teacher, data, and evaluation options around them. It shows which design choices are backed by a result and which remain open.
 
 \begin{table}[htb]%
     \centering%
@@ -263,15 +264,15 @@ Table~\ref{tab:inventory} lists every ablation that the code base exposes as a c
         \toprule
         Axis & Ablation & Options & Result \\
         \midrule
-        student & behavior cloning (joint history MLP) & diagnostic only & Section~\ref{sec:baselines} \\
-        student & online DAgger LSTM & $\beta$ fixed, decayed, SafeDAgger & Table~\ref{tab:online} \\
-        student & offline flow matching & Transformer, MLP backbone & Table~\ref{tab:ablation-sim} \\
-        student & online DAgger flow matching & $\beta=1$, $H=8$ & \tbd \\
-        student & regression heads & LSTM (c), Transformer (d) & Table~\ref{tab:ablation-sim} \\
-        vision & encoder & DP3, Adapt3R, ResNet (b), two-branch, depth-only & Tables~\ref{tab:ablation-sim}, \ref{tab:encoders} \\
-        vision & DP3 initialization & scratch, sweep pretraining & Section~\ref{sec:sim-vision} \\
+        student & behavior cloning (joint history \acs{MLP}) & diagnostic only & Section~\ref{sec:baselines} \\
+        student & online \ac{DAgger} \ac{LSTM} & $\beta$ fixed, decayed, SafeDAgger & Table~\ref{tab:online} \\
+        student & offline flow matching & Transformer, \acs{MLP} backbone & Table~\ref{tab:ablation-sim} \\
+        student & online \ac{DAgger} flow matching & $\beta=1$, $H=8$ & \tbd \\
+        student & regression heads & \ac{LSTM} (c), Transformer (d) & Table~\ref{tab:ablation-sim} \\
+        vision & encoder & \ac{DP3}, Adapt3R, ResNet (b), two-branch, depth-only & Tables~\ref{tab:ablation-sim}, \ref{tab:encoders} \\
+        vision & \ac{DP3} initialization & scratch, sweep pretraining & Section~\ref{sec:sim-vision} \\
         vision & depth corruption in pretraining & none, Gaussian, realistic & \tbd \\
-        observation & privileged vs visual & nut XYZ, nut 6-D, RGB-D & Section~\ref{sec:sim-sweeps} \\
+        observation & privileged vs visual & nut XYZ, nut 6-D, \acs{RGBD} & Section~\ref{sec:sim-sweeps} \\
         observation & hand velocities & included, omitted & \tbd \\
         observation & force channels & fingertip force, joint torque & \tbd \\
         observation & phase encoding & none, process phase & Table~\ref{tab:conditioning} \\
@@ -287,3 +288,7 @@ Table~\ref{tab:inventory} lists every ablation that the code base exposes as a c
         \bottomrule
     \end{tabular}}
 \end{table}%
+
+\section{Summary}\label{sec:sim-summary}
+
+In simulation, the hybrid teacher produces error-free ten-cycle demonstrations, and the full method trained on them completes all ten cycles of the M24 task in every trial with a cyclic error of $-1.77\pm1.02\degree$. The design ablations attribute this result to the Cartesian contract, the progress and phase conditions, and demonstrations with recoveries from disturbances in every phase, and they show that the offline fit alone does not predict it. Whether the multi-cycle data (RQ1) and the point-cloud encoder and flow-matching head (RQ2) are each necessary will be settled by the reruns of ablations (a) to (d) on the simulated dataset. Simulation cannot show whether the student bridges the gap in contact and perception that the simplified thread model and the rendered images leave open. Chapter~\ref{ch:real} therefore deploys the same student, trained on simulated data only, on the physical system to answer RQ3.

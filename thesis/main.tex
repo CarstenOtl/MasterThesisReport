@@ -5,7 +5,7 @@
               ,optBlackRefs%          black references to reduce number of colored pages
               %,optCMYK%              color model
               ,optBiber%              bibliography tool
-              ,optBibstyleAlphabetic% bibliography style
+              ,optBibstyleIEEE%       bibliography style (IEEE, numbered by appearance)
               ,optCenterEquations%    alignment of equations
               ,optEnglish%            language
               %,optTikzExternalize%   compiles faster for large tikz images
@@ -19,6 +19,9 @@
 \usepackage{multirow}%
 \usepackage{subcaption}%
 \usepackage{tabularx}%
+\usepackage{acro}%
+\acsetup{list/display=all,list/template=tabular}%
+\input{source/acronyms}%
 \DeclareUnicodeCharacter{03C0}{\ensuremath{\pi}}%
 \usetikzlibrary{positioning,shapes.geometric,fit,backgrounds,decorations.pathreplacing}%
 %

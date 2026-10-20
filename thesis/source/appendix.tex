@@ -43,7 +43,7 @@
 
 \begin{table}[htb]%
     \centering%
-    \caption{PPO hyperparameters of the privileged teacher (rl\_games, asymmetric actor--critic).}%
+    \caption{\acs{PPO} hyperparameters of the privileged teacher (rl\_games, asymmetric actor--critic).}%
     \label{tab:ppo}%
     \begin{tabular}{ll}
         \toprule
@@ -62,7 +62,7 @@
         entropy coefficient & 0 \\
         gradient-norm clip & 1.0 \\
         bounds loss coefficient & $10^{-4}$ \\
-        actor / critic network & LSTM $2\times1024$ (layer norm) $\rightarrow$ MLP 512--128--64, ELU \\
+        actor / critic network & \ac{LSTM} $2\times1024$ (layer norm) $\rightarrow$ \acs{MLP} 512--128--64, ELU \\
         action distribution & diagonal Gaussian, state-dependent $\sigma$ \\
         mixed precision & yes \\
         \bottomrule
@@ -85,15 +85,15 @@
         target offset & 0 (pre-step alignment) \\
         terminal-hold padding & yes \\
         proprioception & 29-D (10 $q$, 10 $\dot{q}$, previous action) \\
-        proprioception encoder & MLP 128--128, ELU \\
-        visual feature & 64-D (DP3: 4096 XYZRGB points, PointNet 64--128--256, max pool) \\
+        proprioception encoder & \acs{MLP} 128--128, ELU \\
+        visual feature & 64-D (\ac{DP3}: 4096 XYZRGB points, PointNet 64--128--256, max pool) \\
         condition width & 256 \\
-        progress / phase embeddings & MLP 1--256--256 / 3--256--256, ELU \\
+        progress / phase embeddings & \acs{MLP} 1--256--256 / 3--256--256, ELU \\
         flow-time embedding & sinusoidal, 64-D \\
         velocity network & Transformer, 4 layers, 8 heads, width 512, FF 2048, GELU, pre-norm \\
         probability path & conditional optimal transport (linear interpolant) \\
         optimizer & Adam, learning rate $10^{-4}$, batch 64, 300 epochs \\
-        parameter EMA decay & 0.999 \\
+        parameter \acs{EMA} decay & 0.999 \\
         auxiliary loss & nut position from visual feature, weight 1.0 \\
         RGB augmentation & saturation/contrast/brightness $[0.5,1.5]$, hue $[-0.15,0.15]$, blur $p=0.1$ \\
         sampler & Euler, $N=16$ steps (online training: 8) \\
@@ -118,7 +118,7 @@
         impulses per episode & 30 (one per policy, waypoint, and return segment), 0.05--0.25\,N\,s \\
         visual randomization & dome light, table, nut/bolt, floor textures, background \\
         image size & $320\times180$ RGB and metric depth (from $640\times480$) \\
-        DP3 points per frame & 10\,542 min / 12\,374 median / 15\,366 max valid; 4096 sampled \\
+        \ac{DP3} points per frame & 10\,542 min / 12\,374 median / 15\,366 max valid; 4096 sampled \\
         \bottomrule
     \end{tabular}}
 \end{table}%

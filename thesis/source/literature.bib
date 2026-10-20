@@ -288,3 +288,110 @@
    title = {Query-Efficient Imitation Learning for End-to-End Autonomous Driving},
    year = {2016}
 }
+
+% Added manually (not in library.bib): machine elements textbooks for the threaded-joint motivation.
+% Only the claims listed in thesis/notes/threading_sources.md are verified against these sources.
+
+@book{Niemann2019,
+   author = {Gustav Niemann and Hans Winter and Bernd-Robert H{\"o}hn and Karsten Stahl},
+   title = {Maschinenelemente 1: Konstruktion und Berechnung von Verbindungen, Lagern, Wellen},
+   edition = {5},
+   publisher = {Springer Vieweg},
+   address = {Berlin, Heidelberg},
+   year = {2019},
+   isbn = {978-3-662-55481-4},
+   doi = {10.1007/978-3-662-55482-1},
+   language = {german}
+}
+
+@book{Budynas2020,
+   author = {Richard G. Budynas and J. Keith Nisbett},
+   title = {Shigley's Mechanical Engineering Design},
+   edition = {11},
+   publisher = {McGraw-Hill Education},
+   address = {New York},
+   year = {2020},
+   isbn = {978-0-07-339821-1}
+}
+
+% Added manually (not in library.bib): textbook references for operational-space control.
+
+@book{Lynch2017,
+   author = {Kevin M. Lynch and Frank C. Park},
+   title = {Modern Robotics: Mechanics, Planning, and Control},
+   publisher = {Cambridge University Press},
+   address = {Cambridge},
+   year = {2017},
+   isbn = {978-1-107-15630-2}
+}
+
+@incollection{Chung2016,
+   author = {Wan Kyun Chung and Li-Chen Fu and Torsten Kr{\"o}ger},
+   title = {Motion Control},
+   booktitle = {Springer Handbook of Robotics},
+   editor = {Bruno Siciliano and Oussama Khatib},
+   edition = {2},
+   chapter = {8},
+   pages = {163-194},
+   publisher = {Springer},
+   address = {Cham},
+   year = {2016},
+   doi = {10.1007/978-3-319-32552-1_8}
+}
+
+@incollection{Villani2016,
+   author = {Luigi Villani and Joris De Schutter},
+   title = {Force Control},
+   booktitle = {Springer Handbook of Robotics},
+   editor = {Bruno Siciliano and Oussama Khatib},
+   edition = {2},
+   chapter = {9},
+   pages = {195-220},
+   publisher = {Springer},
+   address = {Cham},
+   year = {2016},
+   doi = {10.1007/978-3-319-32552-1_9}
+}
+
+
+% Copied unchanged from library.bib after the chapter rewrite.
+
+@article{Koczy2025,
+   abstract = {We present a framework for learning dexterous in-hand manipulation with multifingered hands using visuomotor diffusion policies. Our system enables complex in-hand manipulation tasks, such as unscrewing a bottle lid with one hand, by leveraging a fast and responsive teleoperation setup for the four-fingered Allegro Hand. We collect high-quality expert demonstrations using an augmented reality (AR) interface that tracks hand movements and applies inverse kinematics and motion retargeting for precise control. The AR headset provides real-time visualization, while gesture controls streamline teleoperation. To enhance policy learning, we introduce a novel demonstration outlier removal approach based on HDBSCAN clustering and the Global-Local Outlier Score from Hierarchies (GLOSH) algorithm, effectively filtering out low-quality demonstrations that could degrade performance. We evaluate our approach extensively in real-world settings and provide all experimental videos on the project website: https://dex-manip.github.io/},
+   author = {Piotr Koczy and Michael C. Welle and Danica Kragic},
+   month = {3},
+   title = {Learning Dexterous In-Hand Manipulation with Multifingered Hands via Visuomotor Diffusion},
+   year = {2025}
+}
+
+@article{Lin2024,
+   abstract = {Manipulating objects with two multi-fingered hands has been a long-standing challenge in robotics, due to the contact-rich nature of many manipulation tasks and the complexity inherent in coordinating a high-dimensional bimanual system. In this work, we share novel insights into physical modeling, real-time perception, and reward design that enable policies trained in simulation using deep reinforcement learning (RL) to be effectively and efficiently transferred to the real world. Specifically, we consider the problem of twisting lids of various bottle-like objects with two hands, demonstrating policies with generalization capabilities across a diverse set of unseen objects as well as dynamic and dexterous behaviors. To the best of our knowledge, this is the first sim-to-real RL system that enables such capabilities on bimanual multi-fingered hands.},
+   author = {Toru Lin and Zhao-Heng Yin and Haozhi Qi and Pieter Abbeel and Jitendra Malik},
+   month = {10},
+   title = {Twisting Lids Off with Two Hands},
+   year = {2024}
+}
+
+@article{Lin2025,
+   abstract = {Learning generalizable robot manipulation policies, especially for complex multi-fingered humanoids, remains a significant challenge. Existing approaches primarily rely on extensive data collection and imitation learning, which are expensive, labor-intensive, and difficult to scale. Sim-to-real reinforcement learning (RL) offers a promising alternative, but has mostly succeeded in simpler state-based or single-hand setups. How to effectively extend this to vision-based, contact-rich bimanual manipulation tasks remains an open question. In this paper, we introduce a practical sim-to-real RL recipe that trains a humanoid robot to perform three challenging dexterous manipulation tasks: grasp-and-reach, box lift and bimanual handover. Our method features an automated real-to-sim tuning module, a generalized reward formulation based on contact and object goals, a divide-and-conquer policy distillation framework, and a hybrid object representation strategy with modality-specific augmentation. We demonstrate high success rates on unseen objects and robust, adaptive policy behaviors -- highlighting that vision-based dexterous manipulation via sim-to-real RL is not only viable, but also scalable and broadly applicable to real-world humanoid manipulation tasks.},
+   author = {Toru Lin and Kartik Sachdev and Linxi Fan and Jitendra Malik and Yuke Zhu},
+   month = {9},
+   note = {- Introduction of a simple, automated <b>real-to-sim system identification method</b> to overcome this with less than four minutes of real-world data<br/><br/>- Proposal of a novel <b>keypoint-based reward formulation </b>to facilitate such coordination between hand and arms effectively.<br/><br/>- task-aware initialization strategy to accelerate single task RL, and decompose the overall multi-task (e.g. object) policy learning into separate single-task RL followed by generalist policy distillation},
+   title = {Sim-to-Real Reinforcement Learning for Vision-Based Dexterous Manipulation on Humanoids},
+   year = {2025}
+}
+
+@article{Zhang2026,
+   abstract = {The NIST Assembly Task Board #1 remains a challenging benchmark for learning-based methods in robotic manipulation. Over short horizons, it demands precise, contact-rich control of small, tight-fitting parts. Over long horizons, it requires recovery and coordination across extended action sequences. Demonstrations, task decomposition, and dense progress rewards have enabled research advances by providing guidance on how to assemble. But how much of the strategy must be specified? The progression from AlphaGo to AlphaGo Zero showed that RL at scale can discover superhuman strategies without prescribing how to win. AlphaNIST asks whether a sparse binary task reward and task diversity admitted by this task-agnostic reward can similarly let a robot discover how to assemble. In simulation, we train a single policy from scratch across all 20 assembly tasks on the NIST Assembly Task Board #1, reaching 98.2% overall training success without demonstrations, progress shaping, scripted primitives, or per-task tuning. The framework also trains policies to complete ten assembly pairs in a single episode without a prescribed order, with task success rewarded only when all ten pairs are simultaneously complete. The learned policies discover dexterous and planning-like behaviors: choosing grasps for later assembly, using surrounding geometry to reorient parts, and preparing one part, assembling another, then returning to finish the first without an explicit planner. For videos, see our website: https://alpha-nist.github.io/},
+   author = {Octi Zhang and Iretiayo Akinola and Rosario Scalise and Mateo Guaman Castro and Patrick Yin and Tobias Widmer and Miles Macklin and Chris Amevor and Dylan Turpin and Dirk Van Gelder and Jan Carius and Ankur Handa and Gavriel State and Yunrong Guo and Yashraj Narang},
+   month = {10},
+   title = {AlphaNIST: Emergent Assembly Skills from Binary Task Rewards},
+   year = {2026}
+}
+
+@online{IntlAirTool,
+   author = {{International Air Tool}},
+   title = {Desoutter Nutrunners},
+   url = {https://www.intlairtool.com/nutrunners-and-angle-wrenches/desoutter-nutrunners/},
+   urldate = {2026-10-20}
+}

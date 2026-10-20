@@ -66,6 +66,7 @@
 % --> optBibstyleAlphabetic      (module-option)
 % --> optBibstyleAuthorYear      (module-option)
 % --> optBibstyleAuthorYearAPA   (module-option)
+% --> optBibstyleIEEE            (module-option)
 % AIRnames                       (module)
 % AIRutils                       (module)
 % --> optHideTodos               (module-option)
@@ -152,6 +153,7 @@
 \DeclareOption{optBibstyleAlphabetic}{\def\optBibstyleAlphabetic{x}}%
 \DeclareOption{optBibstyleAuthorYear}{\def\optBibstyleAuthorYear{x}}%
 \DeclareOption{optBibstyleAuthorYearAPA}{\def\optBibstyleAuthorYearAPA{x}}%
+\DeclareOption{optBibstyleIEEE}{\def\optBibstyleIEEE{x}}%
 \DeclareOption{optHideTodos}{\def\optHideTodos{x}}%
 \DeclareOption{optHideAnnotations}{\def\optHideAnnotations{x}}%
 \DeclareOption{optBlackRefs}{\def\optBlackRefs{x}}%
@@ -4876,7 +4878,9 @@
     \ifdefined\optBibstyleAlphabetic\else%
         \ifdefined\optBibstyleAuthorYear\else%
             \ifdefined\optBibstyleAuthorYearAPA\else%
-                \def\optBibstyleNumeric{x}%
+                \ifdefined\optBibstyleIEEE\else%
+                    \def\optBibstyleNumeric{x}%
+                \fi%
             \fi%
         \fi%
     \fi%
@@ -4911,6 +4915,9 @@
 \ifdefined\optBibstyleAuthorYearAPA% see issue #32
     \PassOptionsToPackage{style=apa}{biblatex}%
 \else\fi%
+\ifdefined\optBibstyleIEEE% numbered by order of appearance
+    \PassOptionsToPackage{style=ieee}{biblatex}%
+\else\fi%
 %
 % Load package
 % ------------
@@ -4929,10 +4936,14 @@
 %
 % Sorting
 % -------
-\ExecuteBibliographyOptions{sorting=nyt}%  Set sorting order
+\ifdefined\optBibstyleIEEE\else%
+    \ExecuteBibliographyOptions{sorting=nyt}%  Set sorting order
+\fi%
 \ExecuteBibliographyOptions{maxnames=99}%  Set maximum names of a reference
-\DeclareNameAlias{sortname}{family-given}% Sort by last name
-\DeclareNameAlias{default}{family-given}%  Print last name first
+\ifdefined\optBibstyleIEEE\else%
+    \DeclareNameAlias{sortname}{family-given}% Sort by last name
+    \DeclareNameAlias{default}{family-given}%  Print last name first
+\fi%
 %
 %
 % End test, if a backend has been specified
