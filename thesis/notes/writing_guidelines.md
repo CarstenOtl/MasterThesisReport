@@ -15,11 +15,13 @@
 - This is a thesis on <topic in one sentence>. Include only what serves that question.
 - No irrelevant side facts, no unpublished work, no speculation about features that were not built.
 - Introduce background only if the reader needs it to follow the method or results.
+- In the theoretical background, state what a method does, why it is used, and what it is generally used for. Leave specific experimental results of other works to the related work and results chapters.
 
 ## Facts and claims
 - Use facts. Every claim is backed by a citation, a number, a figure, or a result from this work.
 - Report numbers with units, sample sizes, and variance where available.
 - Describe the method exactly as implemented. Never invent hyperparameters, results, or architecture details.
+- When citing an example the reader may not know (e.g. a benchmark task from another paper), first describe its setup: task, robot, what is varied and what is measured. Then state the result.
 - Separate observation (what the data shows) from interpretation (why it might be so). Hedge only where the evidence is genuinely uncertain.
 - State limitations plainly, in the discussion, without apology.
 
