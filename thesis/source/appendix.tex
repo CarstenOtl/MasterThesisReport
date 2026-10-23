@@ -5,7 +5,7 @@
 
 \begin{table}[htb]%
     \centering%
-    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only. The multi-size teacher appends a clean 3-D one-hot nut-size code to both.}%
+    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only. The multi-size teacher instead uses a 40-D actor without the fingertip forces and an 80-D critic, each including a clean 3-D one-hot nut-size code.}%
     \label{tab:teacher-obs}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{llcl}
@@ -80,7 +80,7 @@
         \toprule
         Parameter & Value \\
         \midrule
-        action contract & 9-D Cartesian, $[-1,1]$ \\
+        action contract & 9-D filtered Cartesian target, fixed scale, $[-1,1]$ \\
         action horizon $H$ & 8 (0.53\,s at 15\,Hz) \\
         target offset & 0 (pre-step alignment) \\
         terminal-hold padding & yes \\
@@ -92,7 +92,7 @@
         flow-time embedding & sinusoidal, 64-D \\
         velocity network & Transformer, 4 layers, 8 heads, width 512, FF 2048, GELU, pre-norm \\
         probability path & conditional optimal transport (linear interpolant) \\
-        optimizer & Adam, learning rate $10^{-4}$, batch 64, 300 epochs \\
+        optimizer & AdamW, learning rate $10^{-4}$, gradient clip 1.0, batch 64, 300 epochs \\
         parameter \acs{EMA} decay & 0.999 \\
         auxiliary loss & nut position from visual feature, weight 1.0 \\
         RGB augmentation & saturation/contrast/brightness $[0.5,1.5]$, hue $[-0.15,0.15]$, blur $p=0.1$ \\

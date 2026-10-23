@@ -6,7 +6,7 @@
 %
 \chapter*{List of Symbols}%
 \addcontentsline{toc}{chapter}{List of Symbols}%
-The following symbols are used with the same meaning in all chapters.
+Unless a section states otherwise, the symbols below keep the following meanings in all chapters.
 \begin{center}
 \begin{tabular}{lp{10.5cm}}
 \toprule
@@ -29,7 +29,7 @@ $\vec{h}_t$ & recurrent hidden state of the actor \\
 $\piT(\vec{a}\mid\vec{z}^{\pi},\vec{h})$, $\bar{\pi}_{\mathrm{T}}$ & privileged RL teacher and its deterministic mean \\
 $\kappa_m$ & scripted controller of transition phase $m\in\Mscript$ \\
 $\piHT$ & hybrid teacher \\
-$\vec{a}_t \in [-1,1]^{9}$ & normalized Cartesian-controller action \\
+$\vec{a}_t \in [-1,1]^{9}$ & normalized Cartesian-controller action (teacher); rescaled filtered target (student label) \\
 $r_t$, $R_{i,t}$, $P_{j,t}$ & shaped reward, reward terms, penalty terms \\
 \multicolumn{2}{l}{\textbf{Student}} \\
 $\obs_t = (\vec{O}^{\mathrm{RGBD}}_t, \vec{s}_t, p_t, \vec{e}^{m}_t)$ & student observation: RGB-D image, proprioception, progress, phase encoding \\
