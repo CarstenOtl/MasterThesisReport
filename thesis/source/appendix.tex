@@ -5,39 +5,40 @@
 
 \begin{table}[htb]%
     \centering%
-    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only. The multi-size teacher instead uses a 40-D actor without the fingertip forces and an 80-D critic, each including a clean 3-D one-hot nut-size code.}%
+    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only; joint torques are divided by the effort limits of 87\,N\,m (joints 1--4) and 12\,N\,m (joints 5--7). An earlier multi-size configuration uses a 40-D actor without force channels and an 80-D critic, each including a clean 3-D one-hot nut-size code.}%
     \label{tab:teacher-obs}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{llcl}
         \toprule
         Input & Component & Dim & Noise (actor) \\
         \midrule
-        actor (39-D) & fingertip position relative to bolt frame & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis; bolt frame $\mathcal{N}(0,1\,\mathrm{mm})$ per reset \\
-         & fingertip quaternion (WXYZ) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
+        actor (46-D) & fingertip position relative to bolt frame & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis; bolt frame $\mathcal{N}(0,1\,\mathrm{mm})$ per reset \\
+         & fingertip quaternion (WXYZ, $w$ and $z$ zeroed) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
          & end-effector linear velocity & 3 & finite difference of noisy position \\
-         & end-effector angular velocity & 3 & finite difference of noisy quaternion \\
+         & end-effector angular velocity ($x$ and $y$ zeroed) & 3 & finite difference of noisy quaternion \\
          & fingertip position relative to held nut & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis, each body \\
          & held-nut quaternion (WXYZ) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
          & target position error & 3 & inherits nut noise \\
-         & target quaternion error (WXYZ) & 4 & inherits nut noise \\
+         & target quaternion error (WXYZ, $w\geq0$) & 4 & inherits nut noise \\
          & grasp-phase flag & 1 & none \\
-         & thumb / index flexion force & 2 & $\mathcal{N}(0,1\,\mathrm{N})$, clamped to $\ge0$ \\
-         & previous filtered action & 9 & none \\
+         & thumb / index flexion force & 2 & gain $U(0.8,1.2)$, offset $U(-1,1)$\,N per reset; $\mathcal{N}(0,1\,\mathrm{N})$; $\ge0$ \\
+         & arm joint torques (normalized) & 7 & gain $U(0.9,1.1)$, offset $U(-0.01,0.01)$ per reset; $\mathcal{N}(0,0.005)$; in $[-1,1]$ \\
+         & previous filtered action (roll, pitch masked) & 9 & none \\
         \midrule
-        critic (69-D) & fingertip position, quaternion, velocities & 13 & clean \\
+        critic (76-D) & fingertip position, quaternion, velocities & 13 & clean \\
          & arm joint positions & 7 & clean \\
          & held-nut position, position relative to bolt, quaternion & 10 & clean \\
          & bolt position and quaternion & 7 & clean \\
          & controller proportional gains & 6 & sampled per reset \\
          & action smoothing factor & 1 & sampled per reset \\
          & thumb / index flexion force & 2 & clean \\
+         & arm joint torques (normalized) & 7 & clean \\
          & position and rotation action thresholds & 6 & sampled per reset \\
          & target position, quaternion, progress & 8 & clean \\
          & previous filtered action & 9 & none \\
         \bottomrule
     \end{tabular}}
 \end{table}%
-% TODO(unsure): the fingertip-force channels are listed in the observation reference as actor inputs (39-D total) but are disabled in the retained task YAML; confirm the actor width of the retained teacher.
 
 \section{Teacher Hyperparameters}\label{sec:app-ppo}
 
@@ -49,7 +50,7 @@
         \toprule
         Parameter & Value \\
         \midrule
-        parallel environments & 512 \\
+        parallel environments & \tbd \\ % TODO(results): environment count of the retained M24 teacher run
         epochs & 200 \\
         rollout horizon & 256 steps \\
         minibatch size & 512 \\
@@ -84,9 +85,10 @@
         action horizon $H$ & 8 (0.53\,s at 15\,Hz) \\
         target offset & 0 (pre-step alignment) \\
         terminal-hold padding & yes \\
-        proprioception & 29-D (10 $q$, 10 $\dot{q}$, previous action) \\
+        proprioception & 29-D (10 $q$, 10 $\dot{q}$, previous action) \\ % TODO(unsure): 26-D if the running student omits the hand velocities
         proprioception encoder & \acs{MLP} 128--128, ELU \\
         visual feature & 64-D (\ac{DP3}: 4096 XYZRGB points, PointNet 64--128--256, max pool) \\
+        encoder initialization & pose-regression pretraining in 16 parallel scenes, fine-tuned end to end \\
         condition width & 256 \\
         progress / phase embeddings & \acs{MLP} 1--256--256 / 3--256--256, ELU \\
         flow-time embedding & sinusoidal, 64-D \\
@@ -96,7 +98,7 @@
         parameter \acs{EMA} decay & 0.999 \\
         auxiliary loss & nut position from visual feature, weight 1.0 \\
         RGB augmentation & saturation/contrast/brightness $[0.5,1.5]$, hue $[-0.15,0.15]$, blur $p=0.1$ \\
-        sampler & Euler, $N=16$ steps (online training: 8) \\
+        sampler & Euler, $N=16$ steps (online training: 8; CPU deployment: 2) \\
         temporal-ensemble decay & 0.5 \\
         \bottomrule
     \end{tabular}}
@@ -106,19 +108,24 @@
 
 \begin{table}[htb]%
     \centering%
-    \caption{Demonstration data used for the reported students.}%
+    \caption{Demonstration data of the M24 ten-cycle collection used for the reported students.}%
     \label{tab:datasets}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{ll}
         \toprule
         Property & Value \\
         \midrule
-        simulated demonstrations & 20 successful ten-cycle episodes from 32 candidates \\
-        frames (15\,Hz) & 19\,486 \\
+        teacher & single-size M24 teacher of Section~\ref{sec:teacher}, mean action, $\beta=1$ \\
+        simulated demonstrations & 20 successful ten-cycle episodes from 32 parallel environments \\
+        frames (15\,Hz) & \tbd \\
+        start state & nominal pose, no initial yaw, nut at the top of the thread \\
+        per-cycle target & $60\degree$ grid, release $5\degree$ before the target \\
+        task randomization & active as in Table~\ref{tab:dr}, except initial yaw, height, and target turn \\
         impulses per episode & 30 (one per policy, waypoint, and return segment), 0.05--0.25\,N\,s \\
         visual randomization & dome light, table, nut/bolt, floor textures, background \\
-        image size & $320\times180$ RGB and metric depth (from $640\times480$) \\
-        \ac{DP3} points per frame & 10\,542 min / 12\,374 median / 15\,366 max valid; 4096 sampled \\
+        image size & $320\times180$ RGB and metric depth \\
+        \ac{DP3} points per frame & \tbd{} valid (min / median / max); 4096 sampled \\
         \bottomrule
     \end{tabular}}
 \end{table}%
+% TODO(results): frame count and DP3 valid-point audit (depth_audit_dp3.json) of the M24 ten-cycle collection.

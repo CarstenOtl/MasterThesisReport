@@ -58,6 +58,29 @@
 \newcommand{\cond}{\vec{c}}%
 \newcommand{\vfield}{\vec{v}_{\theta}}%
 %
+% Add Agile Robots logo underneath TUM logo + collaboration note under TUM header
+\let\origAIRstudentthesisTitlePageFrontPage\AIRstudentthesisTitlePageFrontPage
+\renewcommand{\AIRstudentthesisTitlePageFrontPage}[8]{%
+    \origAIRstudentthesisTitlePageFrontPage{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
+    % Agile Robots logo directly underneath the TUM logo (top-right)
+    \AIRlayoutPutAtNorthEast{2cm}{3.6cm}{\includegraphics[width=1.9cm]{Agile_Robots_logo}}%
+    % "In collaboration with Agile Robots SE" aligned with the bottom of the Agile Robots logo
+    % Font matches the TUM header (Helvetica / phv, TUMBlue)
+    \AIRlayoutPutAtNorthWest{2.5cm}{5.5cm}{\fontfamily{phv}\fontsize{10pt}{12pt}\selectfont In collaboration with Agile Robots SE}%
+}%
+%
+% Add the industry supervisor to the title-page info table
+\renewcommand{\AIRstudentthesisTitlePageFrontPageInfoTable}[4]{%
+\sffamily\fontsize{12pt}{14pt}\selectfont\noindent%
+\begin{tabular}{@{}p{0.22\textwidth}p{0.75\textwidth}}%
+	\bfseries \AIRlangGerEng{Themenstellende/r}{Supervisor} & #1\\\\%
+	\ifthenelse{\equal{#2}{}}{}{\bfseries \AIRlangGerEng{Betreuer/Betreuerin}{Advisor} & #2\\\\}% (Optional)
+	\bfseries \AIRlangGerEng{Industriebetreuer}{Industry supervisor} & Antonio Gonzales Marin, M.Sc.\newline Agile Robots SE\\\\%
+	\bfseries \AIRlangGerEng{Autor}{Author} & #3\\\\%
+	\bfseries \AIRlangGerEng{Datum}{Date} & #4 in \AIRaddressCityChair\\%
+\end{tabular}%
+}%
+%
 \begin{document}%
 % Titlepage
 % ---------

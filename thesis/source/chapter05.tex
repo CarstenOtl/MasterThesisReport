@@ -5,7 +5,7 @@ Chapter~\ref{ch:sim} showed that the distilled student sustains consecutive thre
 
 \section{Hardware Setup}\label{sec:real-setup}
 
-The physical workcell, shown in Figure~\ref{fig:real-setup}, realizes the generic platform of Section~\ref{sec:platform} with specific products. The arm is a seven-\acs{DoF} \ac{FR3}. An Inspire RH56DFX right hand is mounted on its flange through a 10\,mm adapter. The kinematic structure of the hand, the three commanded pinch degrees of freedom, and the bench geometry are those of Section~\ref{sec:platform}.
+The physical workcell, shown in Figure~\ref{fig:real-setup}, is the platform of Section~\ref{sec:platform}: the \ac{FR3} arm with the Inspire RH56DFX right hand, the three commanded pinch degrees of freedom, and the bench geometry described there.
 
 The simulated system is a model of this workcell. The transform of the adapter flange was measured and reproduced in the simulated asset. The hand asset was regenerated from the official robot URDF that ships with this hand, which carries the measured pivot geometry of the fingers. Joint limits and link inertias are those of the URDF, and linear mimic ratios approximate the linkage that couples the finger joints of the physical hand. The \ac{FR3} is the arm that replaced the earlier humanoid-arm platform of Section~\ref{sec:platform}.
 

@@ -27,6 +27,39 @@ The former ablation (e) "simulated data only" is now the full method (e); the ol
 | Abstract, Ch. 1 contributions, Ch. 6 Q1–Q4, Ch. 7 | fill in the hardware sentence / update interpretations once the above exist |
 | Figures | `SimThreadTeaser.pdf` (Fig. 1.1) and `mainpipeline.pdf` (Fig. 3.1) are publication figures that may still draw the real-world replay / human-correction branch; edit them. The hardware photos in Fig. 5.2 were taken during the earlier trials; retake or confirm |
 
+Revision 2026-10-25: Chapter 3 and the appendix tables now describe the forgeUltra
+`force-observations` branch (HEAD 304d4d9). Teacher = the M24 V2 teacher trained with
+`m24_threading_force_curriculum_success_term.yaml` (exp_11 run06: 46-D actor with two
+fingertip forces and seven normalized joint torques, 76-D critic, pinch effort limit
+0.5 N m, pad friction 1.5, grip-hold reward, ADR-ramped off-axis nut-wrench penalty,
+sampled target turn U(55, 65) deg with +-2.5 deg success tolerance, terminal success,
+hold curriculum 8 -> 12). Dataset = the ten-cycle collection
+`collect_m24_success_term_dataset.py` (task DR on, initial yaw and depth pinned, 60 deg
+grid targeting with modulo-60 observation rebase). Student = offline DP3 flow student
+currently training (encoder pretrained in parallel scenes, fine-tuned end to end).
+The audit fixes of `notes/xref_chapter03/README.md` that still hold on this branch were
+applied in Ch. 3 (grasp frame, dead zone, EMA, clip, controller differences, release
+proxy, crop wording, N=16 vs CPU 2, positional embeddings, online/LSTM recipe, ladder
+metrics, cycle definition).
+
+### Placeholders added by the 2026-10-25 revision
+
+| Location | What is needed |
+| --- | --- |
+| Ch. 3, Sec. 3.3 last paragraph; Table A.2 | teacher run: parallel environments, wall-clock time, final initial-yaw level and success-hold length (`params/adr_state.yaml`), and whether run06 was initialized from the run05 checkpoint (if so, say so in the text) |
+| Ch. 3, Sec. 3.4.5; Table A.4 | frame count, candidate/rejected episodes, DP3 valid-point audit of the ten-cycle M24 collection |
+| Ch. 3, Sec. 3.5.3; Fig. 3.4; Table A.3 | proprioception width of the running student (29-D baseline vs 26-D `--hand-velocity-observation omitted`), whether the auxiliary nut head is on, and which pretraining checkpoint initializes the encoder |
+
+### Text in other chapters that now contradicts Chapter 3 (not yet edited)
+
+| Location | Conflict |
+| --- | --- |
+| Ch. 4, Sec. 4.1 (line 8) | "512 parallel environments ... about ten hours", "19 486 frames", "30 minutes" describe the September teacher, dataset, and student |
+| Ch. 4, Sec. 4.2 and Table 4.1 | describe the September V1 teacher and its 32/32 hybrid rollout; the run06 teacher row and its single-turn success, ADR level, and hold length are missing |
+| Ch. 4, all student tables | results come from students trained on the September dataset; they must be rerun on the ten-cycle M24 collection |
+| Ch. 5, Sec. 5.4 (line 70) | "300 epochs ... sixteen ODE integration steps" on hardware; state the deployed checkpoint and step count once the new student is deployed |
+| Ch. 6, line 10 | TODO about the 39-D actor is obsolete; the teacher actor is 46-D with force channels |
+
 Every `\tbd` in the text and every `% TODO(...)` comment is listed here. Nothing in
 this list was invented in the draft; where a number was unavailable the cell reads
 `TBD`.
@@ -35,7 +68,7 @@ this list was invented in the draft; where a number was unavailable the cell rea
 
 | Location | What is missing | Run / artifact needed |
 | --- | --- | --- |
-| Ch. 3, Sec. 3.5.3 "Action chunking and execution" | student inference latency (image encoding + 16 Euler steps) | time `evaluate_flow.py` per policy tick on the deployment GPU; also per `N` for Table 4.6 |
+| Ch. 3, Sec. 3.5.3 "Action chunking and execution" | student inference latency (image encoding + 16 Euler steps) | time `evaluate_flow.py` per policy tick on the deployment GPU; also per `N` for Table 4.6. Reference numbers for the same architecture: `inspirehand-franka-ros2-ws-/apps/policy_rollout/README.md` (RTX 3060 Laptop 11.7 ms at 16 steps; i7-12700H 16 ms at 2 steps) |
 | Ch. 4, Table 4.1 (teacher results) | final-epoch single-turn success and curriculum level of the retained FR3 M24 teacher and of the M24/M30/M36 multi-size teacher; hybrid-rollout count of the multi-size teacher | TensorBoard of the FR3 threading run promoted on 2026-09-10 (`last_ForgeTg2_ep_200_rew_17628.744.pth`) and of the `multi_nut_threading_z_randomized.yaml` run (`checkpoints/franka_threading_v2/multi_nut_z20mm`) |
 | Ch. 4, Table 4.5 (vision encoders) | closed-loop ten-trial results for the Adapt3R-style, two-branch, and depth-only encoders | train `offline_flow_matching_adapt3r_agent.yaml`, `two_channel_rgbd_encoder.yaml`, `depth_aux.yaml` on the ten-cycle M24 dataset (`sequential-threading-dual-supervision-20260910-181107-771583`) with the DP3 recipe; `play_distillation --num_episodes 10` |
 | Ch. 4, Table 4.6 (sweeps) | action horizon H ∈ {1,4,16}, Euler steps N ∈ {1,4,8,32}, ensemble decay ∈ {0,0.8}, `--hand-velocity-observation omitted`, privileged 3-D/6-D on the ten-cycle task | offline flow trainer/evaluator options; ten trials each |
@@ -101,18 +134,12 @@ Look the metadata up on the publisher pages before adding the entries.
 - Acknowledgments: attribution of jointly developed components (hybrid teacher,
   distillation stack, hardware experiments were largely developed/run by the advisor's
   commits).
-- Isaac Lab version: the experiment notes say 2.2.1, the repository README v2.3.2 (Ch. 3, Sec. 3.2.1).
 - Phase encoding: an earlier method description lists a one-hot over all six phases of
   eq. (1); the code uses a three-way one-hot (policy / release waypoints / return). Text
   follows the code (Sec. 3.5.3). `mainpipeline.pdf` labels a 256-D state feature next to
   the 64-D visual feature; the code projects the 64+128 concatenation to a 256-D condition.
-- Proprioception standardization: the offline flow trainer appears not to standardize
-  the 29-D input (only the auxiliary nut position is standardized). Sec. 3.5.3.
 - Camera calibration used for hardware trials: the repository artifact is "measured"
   (27.46 mm / 3.50° fit RMSE), not deployment-validated (Sec. 5.1).
-- Teacher actor width: the observation reference lists 39-D including two fingertip
-  force channels, but the retained task YAML disables `fingertip_force` for the actor
-  (Appendix Table A.1).
 - Ch. 4, Table 4.1: the 83.6 % / 90.0 % threading-expert success is from the Tiangong 2
   line (`todo.md`, 2026-08-23); no FR3 success rate is recorded in the docs.
 - Ch. 5, Sec. 5.1: hand control interface ("serial interface") and 1 kHz libfranka rate
@@ -120,8 +147,6 @@ Look the metadata up on the publisher pages before adding the entries.
 - Ch. 6: the axial-coverage argument for Q1 and the orientation argument for Q2 are
   mechanistic interpretations that the retrained ablations (a), (b) must confirm; the
   claim that random point sampling acts as augmentation is a hypothesis.
-- The experiment notes report 512 environments for the retained FR3 teacher; the README
-  quickstart uses 384 for pickup. Text uses 512.
 
 ## 5. Open questions for Carsten
 
