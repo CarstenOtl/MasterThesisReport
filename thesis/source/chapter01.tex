@@ -99,7 +99,7 @@ A single visuomotor student is then distilled from these demonstrations by \ac{C
 \begin{figure}[htb]%
     \centering%
     \includegraphics[width=\textwidth,trim=17bp 85bp 5bp 117bp,clip]{figures/SimThreadTeaser.pdf}%
-    \caption{Overview of the approach: decompose during data generation, unify at deployment. Top: a privileged \acs{RL} teacher is trained in parallel simulated workcells; during data collection its rollouts are chained with scripted release-and-reset controllers into long-horizon demonstrations $\Dsim$; a conditional flow-matching student is distilled from them and acts from RGB and depth. Bottom: the phases of one cycle on the physical robot, approach, grasp, rotation, goal reaching, and release-and-reset, after which the hand returns for the next cycle.}%
+    \caption{Overview of the approach: decompose during data generation, unify at deployment. Top: a privileged \acs{RL} teacher is trained in parallel simulated workcells. During data collection its rollouts are chained with scripted release-and-reset controllers into long-horizon demonstrations $\Dsim$. A conditional flow-matching student is distilled from them and acts from RGB and depth. Bottom: the phases of one cycle on the physical robot, approach, grasp, rotation, goal reaching, and release-and-reset, after which the hand returns for the next cycle.}%
     \label{fig:overview}%
 \end{figure}%
 % TODO(figure): the teaser graphic is the project's publication figure; check that it does not show a real-world replay or correction branch, and edit it if it does. Also check that it does not print robot, hand, or camera product names, which first appear in Chapter 5.
@@ -124,12 +124,12 @@ The thesis makes the following contributions.
 
 \begin{enumerate}
   \item A formulation of cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged \ac{RL} policy for approach, grasp, rotation, and goal reaching with scripted controllers for release and return. The hybrid teacher generates coherent multi-cycle demonstrations with physically gated phase boundaries.
-  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Controlled single-seed design studies compare offline flow students with online \ac{DAgger} variants, privileged observations, and a joint-space action contract; the comparison with deterministic regression heads and alternative vision encoders is \tbd.
+  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Controlled single-seed design studies compare offline flow students with online \ac{DAgger} variants, privileged observations, and a joint-space action contract. The comparison with deterministic regression heads and alternative vision encoders is \tbd.
   \item A zero-shot sim-to-real recipe for the student: a camera model calibrated against the physical cell, a metric point cloud cropped to the workspace, visual randomization of the rendered demonstrations, and a Cartesian action path shared by teacher, student, and robot.
-  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, of which only the M24 hexagonal nut appears in the training data. The simulation results are reported in Chapter~\ref{ch:sim}; the hardware results are \tbd.
+  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, of which only the M24 hexagonal nut appears in the training data. The simulation results are reported in Chapter~\ref{ch:sim}. The hardware results are \tbd.
 \end{enumerate}
 
-This work was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments; the acknowledgments state this attribution.
+This work was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments. The acknowledgments state this attribution.
 
 \section{Outline}\label{sec:outline}
 

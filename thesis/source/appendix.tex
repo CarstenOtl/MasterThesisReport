@@ -1,43 +1,127 @@
 % !TeX spellcheck = en_US
-\chapter{Hyperparameters and Interfaces}\label{ch:appendix}%
+\chapter{Implementation Details}\label{ch:appendix}%
 
-\section{Teacher Observations}\label{sec:app-obs}
+\section{Simulation and Controller}\label{sec:app-sim}
 
 \begin{table}[htb]%
     \centering%
-    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only; joint torques are divided by the effort limits of 87\,N\,m (joints 1--4) and 12\,N\,m (joints 5--7). An earlier multi-size configuration uses a 40-D actor without force channels and an 80-D critic, each including a clean 3-D one-hot nut-size code.}%
-    \label{tab:teacher-obs}%
+    \caption{Simulation settings, thread model, and simulated hand of Section~\ref{sec:system}.}%
+    \label{tab:sim-params}%
     \resizebox{\textwidth}{!}{%
-\begin{tabular}{llcl}
+\begin{tabular}{ll}
         \toprule
-        Input & Component & Dim & Noise (actor) \\
+        Parameter & Value \\
         \midrule
-        actor (46-D) & fingertip position relative to bolt frame & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis; bolt frame $\mathcal{N}(0,1\,\mathrm{mm})$ per reset \\
-         & fingertip quaternion (WXYZ, $w$ and $z$ zeroed) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
-         & end-effector linear velocity & 3 & finite difference of noisy position \\
-         & end-effector angular velocity ($x$ and $y$ zeroed) & 3 & finite difference of noisy quaternion \\
-         & fingertip position relative to held nut & 3 & $\mathcal{N}(0,0.25\,\mathrm{mm})$ per axis, each body \\
-         & held-nut quaternion (WXYZ) & 4 & random-axis angle $\mathcal{N}(0,0.1\degree)$ \\
-         & target position error & 3 & inherits nut noise \\
-         & target quaternion error (WXYZ, $w\geq0$) & 4 & inherits nut noise \\
-         & grasp-phase flag & 1 & none \\
-         & thumb / index flexion force & 2 & gain $U(0.8,1.2)$, offset $U(-1,1)$\,N per reset; $\mathcal{N}(0,1\,\mathrm{N})$; $\ge0$ \\
-         & arm joint torques (normalized) & 7 & gain $U(0.9,1.1)$, offset $U(-0.01,0.01)$ per reset; $\mathcal{N}(0,0.005)$; in $[-1,1]$ \\
-         & previous filtered action (roll, pitch masked) & 9 & none \\
+        simulator & Isaac~Sim~5.1, Isaac~Lab~2.3.2, PhysX \\
+        physics rate / policy rate & 120\,Hz / 15\,Hz (one command held over eight physics steps) \\
         \midrule
-        critic (76-D) & fingertip position, quaternion, velocities & 13 & clean \\
-         & arm joint positions & 7 & clean \\
-         & held-nut position, position relative to bolt, quaternion & 10 & clean \\
-         & bolt position and quaternion & 7 & clean \\
-         & controller proportional gains & 6 & sampled per reset \\
-         & action smoothing factor & 1 & sampled per reset \\
-         & thumb / index flexion force & 2 & clean \\
-         & arm joint torques (normalized) & 7 & clean \\
-         & position and rotation action thresholds & 6 & sampled per reset \\
-         & target position, quaternion, progress & 8 & clean \\
-         & previous filtered action & 9 & none \\
+        prismatic thread drive & stiffness $2\times10^{5}$\,N/m, damping 200\,N\,s/m, force limit 1000\,N \\
+        thread friction \eqref{eq:friction} & $\tau_c=2\times10^{-3}$\,N\,m, $c_v=2\times10^{-4}$\,N\,m\,s/rad, $\omega_s=0.1$\,rad/s \\
+        thread pitch $\rho$ & 3.0 / 3.5 / 4.0\,mm for M24 / M30 / M36 \\
+        nut carrier mass & 1\,g \\
+        prismatic lower limit & 0.2\,mm above the physical stop \\
+        \midrule
+        pinch-joint effort limit & 0.5\,N\,m (hand drives otherwise 20\,N\,m) \\
+        pad friction coefficient & 1.5 (robot 0.75, nut 1.0, averaged pad--nut 1.25) \\
         \bottomrule
     \end{tabular}}
+\end{table}%
+
+The pinch-joint effort limit bounds the grip force. A replay of a policy trained without the limit gave median pad forces of about 43\,N at the thumb and 38\,N at the index. Limits of 1.0\,N\,m and 0.3\,N\,m reduced them to about 27/21\,N and 12/7\,N, whereas 0.1\,N\,m let the grip collapse. The retained limit of 0.5\,N\,m lies between the two working values.
+
+The force channels of the teacher have the following counterparts on the physical system. The simulated joint torques are the reaction torques that PhysX projects onto the arm joint axes, not the commanded torques, so contact loads appear in them. Because the simulated arm carries no gravity load, their counterpart on the \ac{FR3} is the external-torque estimate \texttt{tau\_ext\_hat\_filtered} of libfranka, not the raw sensor torque. The fingertip forces are the pad contact forces along the pad normal, the only component that the fingertip sensors of the hand measure. In simulation, the Jacobian of the controller is the flange Jacobian shifted to the grasp point by the lever arm $\vec{r}$, $\mat{J}_v=\mat{J}_{v,\mathrm{flange}}-[\vec{r}]_\times\mat{J}_{\omega,\mathrm{flange}}$, and the mass matrix is the arm block of the generalized mass matrix, which includes the inertia of the attached hand.
+
+% TODO(unsure): the deployment controller source is not in forgeUltra; confirm that its Jacobian also comes from the libfranka model and is shifted to the grasp point, and that its nullspace damping is critical (2*sqrt(10)).
+\begin{table}[htb]%
+    \centering%
+    \caption{Action decoding and controller of the shared Cartesian contract. The values are nominal. The per-episode randomization of the simulated controller is listed in Table~\ref{tab:dr}. In the physical column, ``same'' marks values shared with simulation.}%
+    \label{tab:controller}%
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lll}
+        \toprule
+        Quantity & Simulation & Physical \acs{FR3} \\
+        \midrule
+        \multicolumn{3}{l}{\emph{Action decoding}} \\
+        position offset scale & 0.05\,m per unit action & same \\
+        roll, pitch scale & 1\,rad per unit action & same \\
+        yaw range & $[-180\degree,90\degree]$, inside the wrist joint limits & same \\
+        pinch joints & $\pm1$ moves by half the joint range; 0 holds the closed grasp & same \\
+        smoothing factor & 0.0625; fingers $3\times$ & same \\
+        step limit from current pose & 0.02\,m per axis, 0.097\,rad per Euler angle, every physics step & same, every 1\,kHz cycle \\
+        \midrule
+        \multicolumn{3}{l}{\emph{Impedance law \eqref{eq:osc}}} \\
+        stiffness $\mat{K}_p$ & $[565,565,565]$\,N/m, $[28,28,28]$\,N\,m/rad, world axes & same \\
+        damping $\mat{K}_d$ & $2\sqrt{\mat{K}_p}$ (critical) & same \\
+        posture gains $\mat{K}_{p,0}$, $\mat{K}_{d,0}$ & 10, 6.32 & same \\
+        nullspace projector & dynamically consistent & same \\
+        wrench dead zone & randomized, Table~\ref{tab:dr} & none \\
+        torque limit & $\pm100$\,N\,m per joint & robot torque-rate limit \\
+        control rate & 120\,Hz (physics rate) & 1\,kHz \\
+        \midrule
+        \multicolumn{3}{l}{\emph{Model quantities}} \\
+        Jacobian $\mat{J}$ & PhysX flange Jacobian, shifted to the grasp point & libfranka robot model \\
+        mass matrix $\mat{M}$ & PhysX generalized mass matrix, arm block & libfranka robot model, hand as end-effector load \\
+        gravity & disabled for the arm links & compensated by libfranka \\
+        Coriolis term & none & none \\
+        grasp-frame velocity & mean thumb and index tip velocity, flange angular velocity & arm-only grasp-point velocity \\
+        \midrule
+        \multicolumn{3}{l}{\emph{Force channels (teacher only)}} \\
+        arm joint torques & PhysX projected joint-reaction torque & \texttt{tau\_ext\_hat\_filtered} \\
+        fingertip forces & pad contact force along the pad normal & fingertip force sensors of the hand \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%
+
+\section{Teacher Reward}\label{sec:app-reward}
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Reward terms of the threading teacher \eqref{eq:reward}. Progress terms pay only for newly achieved progress. The weight of $P^{\mathrm{wrench}}$ rises from zero at the first initial-yaw curriculum level to one at its full range.}%
+    \label{tab:reward}%
+    \resizebox{\textwidth}{!}{%
+\begin{tabular}{lll}
+        \toprule
+        Term & Definition & Weight \\
+        \midrule
+        $R^{\mathrm{center}}$ & newly achieved fraction of the initial grasp-center--nut-center gap, until the grasp latches & 30 \\
+        $R^{\mathrm{face}}$ & newly achieved fraction of the initial pad--face gap, until the grasp latches & 30 \\
+        $R^{\mathrm{grasp}}$ & one-time bonus when the proper grasp has held for 10 consecutive steps & 150 \\
+        $R^{\mathrm{hold}}$ & per step with proper grasp and both pads pressing with at least 1\,N & 0.2 \\
+        $R^{\mathrm{turn}}$ & newly achieved fraction of the keypoint distance to the target pose remaining at latch, while the grasp is live & 60 \\
+        $R^{\mathrm{target}}$ & one-time bonus on success & 250 \\
+        \midrule
+        $P^{\mathrm{magnitude}}$ & normalized commanded translation and yaw & $10^{-3}$ \\
+        $P^{\Delta a}$ & action change & 0.1 \\
+        $P^{\mathrm{align}}$ & misalignment of hand and nut frames & 0.02 \\
+        $P^{\mathrm{force}}$ & summed pad contact force above a threshold $U(5,10)$\,N, per newton & 0.05 \\
+        $P^{\mathrm{settle}}$ & $\omega_t^2$ from $50\degree$ of rotation onward & 0.25 \\
+        $P^{\mathrm{wrench}}$ & lateral force above 2\,N and axial force above 5\,N per newton, tilting torque above 0.05\,N\,m per N\,m & 0.05 / 0.05 / 1.0 \\
+        $P^{\mathrm{clear}}$ & squared normalized violation of a 3\,cm arm--table clearance & 2.0 \\
+        $P^{\mathrm{contact}}$ & arm--table contact force above 2\,N, per newton & 0.05 \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%
+
+A proper grasp is simultaneous thumb and index contact within 1\,cm of the designated faces. Besides success and the time limit, an episode terminates when the nut leaves the bolt by more than 3\,cm, tilts by more than $60\degree$, or releases the thread, or when the latched grasp is lost. Each promotion of the success-hold curriculum requires a success rate of at least 50\,\% over completed episodes and at least five episode lengths since the previous change.
+
+\section{Hybrid Teacher}\label{sec:app-hybrid}
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Thresholds and timings of the scripted transitions of the hybrid teacher (Section~\ref{sec:hybrid-rollout}).}%
+    \label{tab:hybrid-params}%
+    \begin{tabular}{ll}
+        \toprule
+        Parameter & Value \\
+        \midrule
+        release trigger & nut rotation within $5\degree$ of the target turn \\
+        release waypoints & 4, interpolated over 0.7\,s each \\
+        return segment & 1.0\,s \\
+        return gate & grasp frame within 5\,mm and $5\degree$, hand joints within 0.15\,rad \\
+        return timeout & 16\,s (transition failure) \\
+        target turn clamp & $[55\degree,65\degree]$ \\
+        \bottomrule
+    \end{tabular}
 \end{table}%
 
 \section{Teacher Hyperparameters}\label{sec:app-ppo}
@@ -81,14 +165,18 @@
         \toprule
         Parameter & Value \\
         \midrule
-        action contract & 9-D filtered Cartesian target, fixed scale, $[-1,1]$ \\
+        action contract & 9-D filtered Cartesian target divided by $[3,4,16,3,3,3,2,2,2]$, in $[-1,1]$ \\
+        normalization & none for actions and proprioception, dataset statistics for the auxiliary nut position \\
         action horizon $H$ & 8 (0.53\,s at 15\,Hz) \\
         target offset & 0 (pre-step alignment) \\
         terminal-hold padding & yes \\
         proprioception & 29-D (10 $q$, 10 $\dot{q}$, previous action) \\ % TODO(unsure): 26-D if the running student omits the hand velocities
         proprioception encoder & \acs{MLP} 128--128, ELU \\
         visual feature & 64-D (\ac{DP3}: 4096 XYZRGB points, PointNet 64--128--256, max pool) \\
+        point-cloud preprocessing & depth in $[0.10,2.0]$\,m, workspace crop box with 40\,mm margin, RGB in $[-1,1]$ \\
         encoder initialization & pose-regression pretraining in 16 parallel scenes, fine-tuned end to end \\
+        encoder pretraining & 32\,000 frames, 2000 steps, noise-free depth, checkpoint at step 1000 \\
+        pretraining validation & 5.87\,mm position error, $46.2\degree$ symmetry-aware rotation error \\
         condition width & 256 \\
         progress / phase embeddings & \acs{MLP} 1--256--256 / 3--256--256, ELU \\
         flow-time embedding & sinusoidal, 64-D \\
@@ -96,10 +184,13 @@
         probability path & conditional optimal transport (linear interpolant) \\
         optimizer & AdamW, learning rate $10^{-4}$, gradient clip 1.0, batch 64, 300 epochs \\
         parameter \acs{EMA} decay & 0.999 \\
-        auxiliary loss & nut position from visual feature, weight 1.0 \\
+        auxiliary loss & nut position from visual feature, \acs{MLP} 64--128--3, weight 1.0 \\
         RGB augmentation & saturation/contrast/brightness $[0.5,1.5]$, hue $[-0.15,0.15]$, blur $p=0.1$ \\
+        depth augmentation & noise $\sigma=5\,\mathrm{mm}+0.002\,\mathrm{m}^{-1}d^{2}$, smooth offset 3\,mm, quantization 1\,mm, \\
+         & dropout at edges above 15\,mm $p=0.35$, correlated holes $p=0.12$ (11\,px), pixels $p=0.01$ \\
         sampler & Euler, $N=16$ steps (online training: 8; CPU deployment: 2) \\
         temporal-ensemble decay & 0.5 \\
+        online variant & auxiliary weight 0.01, encoder learning rate $10^{-5}$, 8 Euler steps \\
         \bottomrule
     \end{tabular}}
 \end{table}%
@@ -121,9 +212,12 @@
         start state & nominal pose, no initial yaw, nut at the top of the thread \\
         per-cycle target & $60\degree$ grid, release $5\degree$ before the target \\
         task randomization & active as in Table~\ref{tab:dr}, except initial yaw, height, and target turn \\
-        impulses per episode & 30 (one per policy, waypoint, and return segment), 0.05--0.25\,N\,s \\
+        impulses per episode & 30 (one per policy, waypoint, and return segment), 0.05--0.25\,N\,s, 0.05--0.20\,s after segment start \\
         visual randomization & dome light, table, nut/bolt, floor textures, background \\
-        image size & $320\times180$ RGB and metric depth \\
+        material sampling & per environment and reset, roughness $U(0.3,0.9)$, metallicity $U(0,0.15)$ \\
+        dome light and floor & shared, redrawn with $p=0.3$ per reset, light intensity $U(1000,4000)$ \\
+        background image & $p=0.5$ per environment and reset, replaces pixels at 1.5\,m or beyond or without depth \\
+        image size & $320\times180$ RGB and metric depth ($640\times480$ sensor, centered $640\times360$ crop, downscaled by two) \\
         \ac{DP3} points per frame & \tbd{} valid (min / median / max); 4096 sampled \\
         \bottomrule
     \end{tabular}}

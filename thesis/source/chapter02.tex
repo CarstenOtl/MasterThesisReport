@@ -110,7 +110,7 @@ In a policy, the flow-matching action head sits on top of a backbone. The backbo
     \centering%
     % TODO(figure): two panels side by side over the same 2-D toy action space with a bimodal data distribution p_1 (two clusters, e.g. approaching the nut from two sides) and a Gaussian source p_0. (a) Diffusion: forward process adds noise to a data sample over many steps; the reverse process denoises along curved, stochastic trajectories with tens to hundreds of steps. (b) Conditional flow matching: linear interpolant x^lambda = (1-lambda) x^0 + lambda x^1 between a source sample and a data sample, target velocity x^1 - x^0, learned velocity field v_theta(x, lambda | c) shown as arrows, and nearly straight ODE trajectories integrated with a few Euler steps. Mark the conditioning c (observation) in both panels.
     \fbox{\parbox[c][5cm][c]{0.9\textwidth}{\centering\small Placeholder:\ (a) diffusion: noising and many-step denoising along curved paths\quad (b) conditional flow matching: linear interpolant, velocity field, few-step \acs{ODE} integration}}%
-    \caption{Diffusion and conditional flow matching for a bimodal action distribution. (a) A diffusion model adds noise to demonstrated actions and learns to reverse this process over many denoising steps along curved trajectories. (b) Conditional flow matching regresses a velocity field onto the straight path between a Gaussian sample and a data sample; integrating the learned field from noise reaches either mode in a few \acs{ODE} steps.}%
+    \caption{Diffusion and conditional flow matching for a bimodal action distribution. (a) A diffusion model adds noise to demonstrated actions and learns to reverse this process over many denoising steps along curved trajectories. (b) Conditional flow matching regresses a velocity field onto the straight path between a Gaussian sample and a data sample. Integrating the learned field from noise reaches either mode in a few \acs{ODE} steps.}%
     \label{fig:diffusion-vs-fm}%
 \end{figure}%
 
@@ -126,7 +126,7 @@ Task-space motion control with torque inputs and impedance control are treated i
 \begin{equation}\label{eq:joint-impedance}
   \vec{\tau}=\mat{K}_{q}\left(\vec{q}_{\mathrm{ref}}-\vec{q}\right)-\mat{D}_{q}\dot{\vec{q}}
 \end{equation}
-makes every joint behave like a spring with stiffness $\mat{K}_{q}$ and a damper with damping $\mat{D}_{q}$ around its reference $\vec{q}_{\mathrm{ref}}$, where $\vec{q}$ are the joint positions. The spring then acts on the joints, not on the end effector, and the stiffness felt at the end effector changes with the arm configuration. Operational-space impedance control instead defines the spring and the damper directly in the six-dimensional task space and maps them to the joints with the Jacobian. Joint space and operational space are related by the forward kinematics
+makes every joint behave like a spring with stiffness $\mat{K}_{q}$ and a damper with damping $\mat{D}_{q}$ around its reference $\vec{q}_{\mathrm{ref}}$, where $\vec{q}$ are the joint positions (Figure~\subref*{fig:impedance-model-joint}). The spring then acts on the joints, not on the end effector, and the stiffness felt at the end effector changes with the arm configuration. Operational-space impedance control instead defines the spring and the damper directly in the six-dimensional task space and maps them to the joints with the Jacobian. Joint space and operational space are related by the forward kinematics
 \begin{equation}\label{eq:fk}
   \vec{x}=\vec{f}(\vec{q}),
 \end{equation}
@@ -134,11 +134,30 @@ which gives the pose $\vec{x}$ of a frame on the robot for the joint positions $
 \begin{equation}\label{eq:jacobian}
   \dot{\vec{x}}=\frac{\partial\vec{f}}{\partial\vec{q}}\,\frac{\mathrm{d}\vec{q}}{\mathrm{d}t}=\mat{J}(\vec{q})\,\dot{\vec{q}}.
 \end{equation}
-The relation is linear in the joint velocities, but the Jacobian itself changes with the configuration. For the orientation, the time derivative of a parameterization such as Euler angles is not the angular velocity of the frame. Controllers therefore use the geometric Jacobian, which maps the joint velocities to the twist $\dot{\vec{x}}$ of the frame, its linear and angular velocity~\cite{Lynch2017}. By the principle of virtual work, its transpose maps a wrench $\vec{F}$ at the frame to the joint torques that produce it, $\vec{\tau}=\mat{J}^{\mathrm{T}}\vec{F}$~\cite{Lynch2017}. The frame can be any point on the robot, for example the point between the fingertips at which the hand holds the nut. A virtual spring and damper at this frame, $\vec{F}=\mat{K}_p\vec{e}-\mat{K}_d\dot{\vec{x}}$ with the position and axis-angle orientation error $\vec{e}\in\R^6$ between target and current pose, therefore translates directly into joint torques, and the controller computes them at every step from the current Jacobian. On the seven-DoF arm, the six task dimensions leave one redundant degree of freedom, which a second term controls. The complete law, in the form that the thesis uses, is
+The relation is linear in the joint velocities, but the Jacobian itself changes with the configuration. For the orientation, the time derivative of a parameterization such as Euler angles is not the angular velocity of the frame. Controllers therefore use the geometric Jacobian, which maps the joint velocities to the twist $\dot{\vec{x}}$ of the frame, its linear and angular velocity~\cite{Lynch2017}. By the principle of virtual work, its transpose maps a wrench $\vec{F}$ at the frame to the joint torques that produce it, $\vec{\tau}=\mat{J}^{\mathrm{T}}\vec{F}$~\cite{Lynch2017}. The frame can be any point on the robot, for example the point between the fingertips at which the hand holds the nut. A virtual spring and damper at this frame (Figure~\subref*{fig:impedance-model-task}), $\vec{F}=\mat{K}_p\vec{e}-\mat{K}_d\dot{\vec{x}}$ with the position and axis-angle orientation error $\vec{e}\in\R^6$ between target and current pose, therefore translates directly into joint torques, and the controller computes them at every step from the current Jacobian. On the seven-DoF arm, the six task dimensions leave one redundant degree of freedom, which a second term controls. The complete law, in the form that the thesis uses, is
 \begin{equation}\label{eq:osc}
   \vec{\tau}=\mat{J}^{\mathrm{T}}\!\left(\mat{K}_p\vec{e}-\mat{K}_d\dot{\vec{x}}\right)+\mat{N}^{\mathrm{T}}\mat{M}\!\left(\mat{K}_{p,0}(\vec{q}_0-\vec{q})-\mat{K}_{d,0}\dot{\vec{q}}\right),
 \end{equation}
 where $\mat{K}_p$ and $\mat{K}_d=2\sqrt{\mat{K}_p}$ are diagonal stiffness and critical-damping gains, and the second term pulls the redundant degree of freedom toward a rest posture $\vec{q}_0$ through a nullspace projector $\mat{N}$ with posture gains $\mat{K}_{p,0}$ and $\mat{K}_{d,0}$. The joint-space inertia $\mat{M}$ converts the posture term from a joint acceleration into a torque.
+
+\begin{figure}[htb]%
+    \centering%
+    % Source: figures/JointImpendanceControllerModel.svg and figures/ImpendanceControllerModel.svg, exported to PDF with Inkscape.
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/JointImpendanceControllerModel.pdf}
+        \caption{Joint-space impedance.}
+        \label{fig:impedance-model-joint}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ImpendanceControllerModel.pdf}
+        \caption{Operational-space impedance.}
+        \label{fig:impedance-model-task}
+    \end{subfigure}
+    \caption{Impedance control, illustrated on a planar arm with three joints. (a) A virtual spring and damper with stiffness $k_1,k_2,k_3$, the diagonal entries of $\mat{K}_q$, act directly on each joint, pulling it toward its reference $q_{\mathrm{ref}}$. (b) A virtual spring and damper with stiffness $k_x,k_y,k_\varphi$ and damping $d_x,d_y,d_\varphi$, the diagonal entries of $\mat{K}_p$ and $\mat{K}_d$, act on the controlled end-effector frame along each task direction instead. The resulting wrench $(F_x,F_y,M_z)$ is mapped to the joint torques $\tau_1,\tau_2,\tau_3$ through $\mat{J}^{\mathrm{T}}$.}%
+    \label{fig:impedance-model}%
+\end{figure}%
 
 The nullspace projector decides how strongly the posture term interferes with the task. It is dynamically consistent when $\mat{N}^{\mathrm{T}}=\mat{I}-\mat{J}^{\mathrm{T}}\bar{\mat{J}}^{\mathrm{T}}$ with the inertia-weighted pseudoinverse $\bar{\mat{J}}=\mat{M}^{-1}\mat{J}^{\mathrm{T}}(\mat{J}\mat{M}^{-1}\mat{J}^{\mathrm{T}})^{-1}$ and joint-space inertia $\mat{M}$~\cite{Dietrich2015,RoboticSystemsLab2019}. Torques in the nullspace then produce no acceleration of the controlled frame. A projector built from a pseudoinverse of the Jacobian without inertia weighting needs no inertia model, but it decouples the nullspace from the task only statically, so that posture torques can still disturb the task during motion~\cite{Dietrich2015}. The controllers in simulation and on the physical robot both use the dynamically consistent projector (Section~\ref{sec:real-setup}). Equation~\eqref{eq:osc} is the Factory and FORGE controller~\cite{Narang2022,Noseworthy2025}. Scaling the spring and damper term by the task-space inertia $\mat{\Lambda}=(\mat{J}\mat{M}^{-1}\mat{J}^{\mathrm{T}})^{-1}$ and compensating the nonlinear dynamics yields the full operational-space formulation, in which the closed loop becomes a decoupled unit-mass system in every task direction~\cite{Lynch2017}.
 

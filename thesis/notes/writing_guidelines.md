@@ -15,6 +15,7 @@
 - This is a thesis on <topic in one sentence>. Include only what serves that question.
 - No irrelevant side facts, no unpublished work, no speculation about features that were not built.
 - Introduce background only if the reader needs it to follow the method or results.
+- The methodology describes what the method does and why. Keep engineering implementation details out of the prose: hyperparameters, network widths, simulator settings, timings, thresholds, library and API names, and the history of earlier implementations. Put the facts needed for reproduction in appendix tables and reference them from the text.
 - In the theoretical background, state what a method does, why it is used, and what it is generally used for. Leave specific experimental results of other works to the related work and results chapters.
 
 ## Facts and claims
@@ -33,4 +34,5 @@
 ## Style
 - Formal but plain. No marketing language ("novel", "significant", "state-of-the-art") unless backed by a comparison.
 - No dashes as sentence punctuation. Use a comma or split the sentence.
+- No semicolons. Never join two clauses with ";". Write two sentences. Do not use semicolons to separate list items either. Rewrite the list as sentences or an itemized list.
 - Keep tense consistent: past for what was done, present for what the thesis shows or states.
