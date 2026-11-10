@@ -1,59 +1,86 @@
-% Student architecture block diagram.
-\resizebox{\textwidth}{!}{%
+% Student architecture block diagram (styled after figures/Distillation-Pipeline.png).
 \begin{tikzpicture}[
-  font=\small,
-  box/.style={draw, rounded corners=2pt, align=center, minimum height=8mm, inner sep=3pt, fill=white},
-  inp/.style={box, fill=TUMBlack!30},
-  enc/.style={box, fill=TUMBlue!12},
-  cnd/.style={box, fill=TUMOrange!15},
-  net/.style={box, fill=TUMGreen!15},
-  arr/.style={-{Latex[length=2mm]}, thick},
-  node distance=4mm and 6mm,
+  font=\scriptsize,
+  x=1mm, y=1mm,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=7mm, inner sep=1.5pt, fill=white},
+  inp/.style={box, rounded corners=0pt, draw=TUMGray2, fill=TUMGray3!70, text width=21mm},
+  lrn/.style={box, draw=TUMDiagGreen2, fill=TUMDiagGreen2!15, text width=19mm},
+  op/.style={box, text width=19mm},
+  grp/.style={dashed, line width=1pt, rounded corners=1pt},
+  ttl/.style={font=\footnotesize\bfseries, anchor=south west, inner sep=1pt},
+  arr/.style={-{Latex[length=1.8mm]}, semithick},
+  pics/fvec/.style={code={
+    \draw[rounded corners=1.5pt, fill=white] (-2.2,-6.5) rectangle (2.2,6.5);
+    \foreach \yy in {4.2,1.4,-4.2} \fill[#1, rounded corners=0.4pt] (-1.3,\yy-1) rectangle (1.3,\yy+1);
+    \foreach \yy in {-0.8,-1.7,-2.6} \fill (0,\yy) circle (0.22);
+    \coordinate (-n) at (0,6.5); \coordinate (-s) at (0,-6.5);
+    \coordinate (-e) at (2.2,0); \coordinate (-w) at (-2.2,0);
+  }},
 ]
-% inputs
-\node[inp] (rgbd) {aligned RGB-D\\$320\times180$};
-\node[inp, below=of rgbd] (prop) {proprioception $\vec{s}_t$\\(29-D)};
-\node[inp, below=of prop] (prog) {progress $p_t\in[0,1]$};
-\node[inp, below=of prog] (phase) {process phase $\vec{e}^{m}_t$\\(one-hot, 3)};
-% encoders
-\node[enc, right=of rgbd] (pc) {back-projection,\\crop, 4096 points};
-\node[enc, right=of pc] (dp3) {PointNet\\64--128--256, max};
-\node[enc, right=of prop, xshift=0mm] (pmlp) {MLP 128--128\\ELU};
-\node[cnd, right=of prog] (pemb) {MLP 1--256--256};
-\node[cnd, right=of phase] (eemb) {MLP 3--256--256};
-% fusion
-\node[cnd, right=of pmlp, xshift=14mm] (fuse) {concat $[\vec{v}_t\;\|\;\text{MLP}(\vec{s}_t)]$\\linear $\rightarrow$ 256, ELU};
-\node[cnd, right=of fuse] (sum) {$\oplus$};
-\node[cnd, right=2mm of sum] (cond) {$\cond_t\in\R^{256}$};
-% velocity network
-\node[net, below=10mm of cond, xshift=-20mm, minimum width=62mm] (tf)
-  {trajectory Transformer: tokens $[\cond_t,\;\lambda,\;\act^{\lambda}_1,\dots,\act^{\lambda}_8]$\\4 layers, 8 heads, width 512, FF 2048, non-causal};
-\node[inp, left=of tf] (noise) {noisy chunk $\Uc^{\lambda}$\\$8\times9$};
-\node[inp, below=of noise] (time) {flow time $\lambda$\\sinusoidal (64)};
-\node[net, right=of tf] (vel) {velocity\\$\vfield\in\R^{8\times9}$};
-\node[net, below=of vel] (ode) {Euler ODE, $N$ steps\\$\rightarrow$ chunk $\Uc_t$};
-\node[net, below=of ode] (ens) {temporal ensemble\\$0.5^{k}$, clip $[-1,1]$};
-% aux
-\node[enc, above=of dp3, xshift=18mm] (aux) {aux. head 64--128--3:\\nut position (training only)};
-% edges
-\draw[arr] (rgbd) -- (pc);
-\draw[arr] (pc) -- (dp3);
-\draw[arr] (dp3) -| node[pos=0.3, above] {$\vec{v}_t$ (64-D)} (fuse.north);
-\draw[arr] (dp3.east) -- ++(4mm,0) |- (aux.west);
+% ---------------- vision encoding ----------------
+\node[inner sep=0pt] (rgb)   at (13,15) {\includegraphics[height=12mm]{figures/student/rgb_stack.png}};
+\node[inner sep=0pt] (depth) at (13,2)  {\includegraphics[height=12mm]{figures/student/depth_stack.png}};
+\node at (3.5,15) {RGB};
+\node at (3.5,2)  {D};
+\node[inner sep=0pt] at (13,-6.5) {aligned, $320\times180$};
+\node[inner sep=0pt] (pcimg) at (40,0) {\includegraphics[height=12mm]{figures/student/nut_pointcloud.png}};
+\node[above=1mm of pcimg, align=center, inner sep=0pt] {back-projection, crop,\\4096 points};
+\node[lrn] (dp3)  at (64.5,0) {PointNet\\64--128--256,\\max pooling};
+\pic (v) at (87.5,0) {fvec=TUMBlue3};
+\node[anchor=west, align=left, inner sep=0pt] at (91,0) {$\vec{v}_t$\\64-D};
+\node[lrn, dashed, text width=32mm] (aux) at (84,14) {aux.\ head 64--128--3:\\nut position (training only)};
+\draw[arr] (rgb.east) -- ++(7,0) |- ([yshift=2mm]pcimg.west);
+\draw[arr] (depth.east) -- ++(3,0) |- ([yshift=-2mm]pcimg.west);
+\draw[arr] (pcimg) -- (dp3);
+\draw[arr] (dp3) -- (v-w);
+\draw[arr, dashed] (v-n) -- (v-n |- aux.south);
+
+% ---------------- state and task encoding ----------------
+\node[inp] (prop)  at (13.5,-28) {proprioception\\$\vec{s}_t$ (29-D)};
+\node[inp] (phase) at (13.5,-40) {process phase\\$\vec{e}^{m}_t$ (one-hot, 3)};
+\node[inp] (prog)  at (13.5,-52) {progress\\$p_t\in[0,1]$};
+\node[lrn] (pmlp)  at (40,-28) {MLP\\128--128, ELU};
+\node[lrn] (eemb)  at (40,-40) {MLP\\3--256--256};
+\node[lrn] (pemb)  at (40,-52) {MLP\\1--256--256};
+\pic (s) at (62,-28) {fvec=TUMDiagGreen2!60};
+\node[below=0.5mm of s-s, inner sep=0pt] {128-D};
+\node[lrn, text width=24mm] (fuse) at (87.5,-28) {concat $[\vec{v}_t\,\|\,\cdot\,]$\\linear $\rightarrow$ 256, ELU};
+\node[op, circle, text width=, minimum height=0pt, inner sep=0.3pt, font=\footnotesize] (sum) at (87.5,-46) {$+$};
+\pic (c) at (100,-46) {fvec=TUMDiagGreen2!60};
+\node[above=0.5mm of c-n, inner sep=0pt] {$\cond_t$};
+\node[below=0.5mm of c-s, inner sep=0pt] {256-D};
 \draw[arr] (prop) -- (pmlp);
-\draw[arr] (pmlp) -- (fuse);
-\draw[arr] (fuse) -- (sum);
-\draw[arr] (prog) -- (pemb);
 \draw[arr] (phase) -- (eemb);
-\draw[arr] (pemb.east) -- ++(6mm,0) -| (sum.south);
-\draw[arr] (eemb.east) -- ++(10mm,0) |- (sum.south west);
-\draw[arr] (sum) -- (cond);
-\draw[arr] (cond.south) |- (tf.east);
-\draw[arr] (noise) -- (tf);
-\draw[arr] (time.east) -| (tf.south west);
+\draw[arr] (prog) -- (pemb);
+\draw[arr] (pmlp) -- (s-w);
+\draw[arr] (s-e) -- (fuse);
+\draw[arr] (v-s) -- (fuse);
+\draw[arr] (fuse) -- (sum);
+\draw[arr] (eemb.east) -- (79,-40) |- (sum.west);
+\draw[arr] (pemb.east) -| (sum.south);
+\draw[arr] (sum) -- (c-w);
+
+% ---------------- flow-matching action head ----------------
+\node[inp, text width=15mm, anchor=north, minimum height=12mm] (time)  at (120.5,21) {flow time $\lambda$\\sinusoidal\\(64)};
+\node[inp, text width=15mm, anchor=north, minimum height=12mm] (noise) at (141.5,21) {noisy chunk\\$\Uc^{\lambda}$\\$8\times9$};
+\node[lrn, text width=30mm] (tf) at (131.5,-7) {trajectory Transformer,\\non-causal\\$[\cond_t,\lambda,\act^{\lambda}_{1},\dots,\act^{\lambda}_{8}]$\\4 layers, 8 heads\\width 512, FF 2048};
+\node[op, text width=26mm] (vel) at (131.5,-26) {velocity $\vfield\in\R^{8\times9}$};
+\node[op, text width=26mm] (ode) at (131.5,-38) {Euler ODE, $N$ steps\\$\rightarrow$ chunk $\Uc_t$};
+\node[op, text width=26mm] (ens) at (131.5,-50) {temporal ensemble\\$0.5^{k}$, clip $[-1,1]$};
+\draw[arr] (time.south) -- (time.south |- tf.north);
+\draw[arr] (noise.south) -- (noise.south |- tf.north);
+\draw[arr] (c-e) -- (107,-46) |- (tf.west);
 \draw[arr] (tf) -- (vel);
 \draw[arr] (vel) -- (ode);
 \draw[arr] (ode) -- (ens);
-\draw[arr, dashed] (ode.west) -- ++(-6mm,0) |- node[pos=0.75, below, font=\footnotesize] {$N$ iterations} (noise.south east);
+\draw[arr, dashed] (ode.east) -- (152,-38) |- (noise.east);
+\node[rotate=90, inner sep=0pt] at (149,-28) {$N$ iterations};
+
+% ---------------- groups ----------------
+\draw[grp, TUMBlue]            (0,-9)      rectangle (105,23);
+\draw[grp, TUMDiagRed1!70]     (0,-60)     rectangle (105,-17);
+\draw[grp, TUMOrange!70!black] (109.5,-60) rectangle (154.5,23);
+\node[ttl] at (0,23)     {Vision encoding};
+\node[ttl] at (0,-17)    {State and task encoding};
+\node[ttl] at (109.5,23) {Flow-matching head};
 \end{tikzpicture}%
-}
