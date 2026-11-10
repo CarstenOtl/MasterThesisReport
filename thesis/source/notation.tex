@@ -36,6 +36,7 @@ $\obs_t = (\vec{O}^{\mathrm{RGBD}}_t, \vec{s}_t, p_t, \vec{e}^{m}_t)$ & student 
 $\mathcal{P}_t$, $\vec{v}_t\in\R^{64}$ & point cloud and visual feature \\
 $\cond_t \in \R^{256}$ & fused condition vector \\
 $H$ & action horizon (chunk length, $H=8$) \\
+$H_{\mathrm{e}}$ & execution horizon (actions executed per policy query) \\
 $\Uc^{D}_t = [\act_t,\dots,\act_{t+H-1}]$ & demonstrated action chunk \\
 $\Uc^{0}_t \sim \mathcal{N}(\vec{0},\mat{I})$ & Gaussian source sample \\
 $\lambda \in [0,1]$ & flow time \\
