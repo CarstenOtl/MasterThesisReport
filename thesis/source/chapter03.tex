@@ -363,7 +363,7 @@ A failed closed-loop rollout can originate in the supervised fit, in the command
 \begin{figure}[htb]%
     \centering%
     \input{figures/ladder.tikz}%
-    \caption{Evaluation ladder. Offline teacher-fit feeds recorded teacher observations to the student and compares predicted chunks with recorded commands without a simulator. Teacher-forced clock executes the student's commands in live physics while the student receives the recorded teacher observations on the recorded timeline, removing observation drift. Normal closed loop feeds live observations back to the student and is the only mode that measures compounding error.}%
+    \caption{Evaluation ladder. Each mode closes one more part of the control loop. A failure in a mode points to the causes listed below it.}%
     \label{fig:ladder}%
 \end{figure}%
 

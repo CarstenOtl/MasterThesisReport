@@ -1,19 +1,21 @@
 % Three-mode evaluation ladder.
 \begin{tikzpicture}[
   font=\small,
-  box/.style={draw, rounded corners=2pt, align=left, text width=44mm, inner sep=4pt, fill=white},
-  m1/.style={box, fill=TUMBlack!25},
-  m2/.style={box, fill=TUMBlue!12},
-  m3/.style={box, fill=TUMGreen!15},
+  x=1mm, y=1mm,
+  stage/.style={draw, rounded corners=3pt, align=center, text width=38mm, minimum height=12mm, inner sep=3pt},
+  fail/.style={draw, rounded corners=3pt, align=center, text width=38mm, inner sep=2pt, fill=red!10, font=\footnotesize},
   arr/.style={-{Latex[length=2mm]}, thick},
-  node distance=4mm and 6mm,
 ]
-\node[m1] (a) {\textbf{1. Offline teacher-fit}\\input: recorded teacher observations\\execution: none (no simulator)\\output: first-action and chunk RMSE, per-joint error, saturation\\proves: supervised fit and alignment};
-\node[m2, right=of a] (b) {\textbf{2. Teacher-forced clock}\\input: recorded observations on the recorded timeline\\execution: live physics\\output: realized joints, TCP, nut pose vs.\ nominal\\proves: action map, command conversion, controller, physics};
-\node[m3, right=of b] (c) {\textbf{3. Normal closed loop}\\input: live observations\\execution: live physics, errors feed back\\output: completed cycles, tracking errors, divergence\\proves: deployment-style stability and task success};
-\draw[arr] (a) -- node[above, align=center, font=\footnotesize] {pass} (b);
-\draw[arr] (b) -- node[above, align=center, font=\footnotesize] {pass} (c);
-\node[below=3mm of a, text width=44mm, align=center, font=\footnotesize] {fail $\rightarrow$ capacity, normalization, alignment};
-\node[below=3mm of b, text width=44mm, align=center, font=\footnotesize] {fail $\rightarrow$ command contract, controller, clock offset};
-\node[below=3mm of c, text width=44mm, align=center, font=\footnotesize] {fail $\rightarrow$ distribution shift and recovery};
-\end{tikzpicture}
+\node[stage, fill=TUMGray3!60] (a) at (0,0)  {\textbf{1. Offline teacher-fit}\\recorded obs., no physics};
+\node[stage, fill=TUMBlue!12]  (b) at (54,0) {\textbf{2. Teacher-forced clock}\\recorded obs., live physics};
+\node[stage, fill=TUMGreen!15] (c) at (108,0) {\textbf{3. Closed loop}\\live obs., live physics};
+
+\node[fail] (fa) at (0,-17)   {capacity, normalization, alignment};
+\node[fail] (fb) at (54,-17)  {command contract, controller};
+\node[fail] (fc) at (108,-17) {distribution shift, recovery};
+
+\draw[arr] (a) -- node[above, font=\footnotesize] {pass} (b);
+\draw[arr] (b) -- node[above, font=\footnotesize] {pass} (c);
+\foreach \s/\f in {a/fa, b/fb, c/fc}
+  \draw[arr, dashed] (\s) -- node[right, font=\footnotesize] {fail} (\f);
+\end{tikzpicture}%
