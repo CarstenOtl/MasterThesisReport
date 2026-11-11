@@ -9,7 +9,7 @@ The physical workcell, shown in Figure~\ref{fig:real-setup}, is the platform of 
 
 The simulated system is a model of this workcell. The transform of the adapter flange was measured and reproduced in the simulated asset. The hand asset was regenerated from the official robot URDF that ships with this hand, which carries the measured pivot geometry of the fingers. Joint limits and link inertias are those of the URDF, and linear mimic ratios approximate the linkage that couples the finger joints of the physical hand. The \ac{FR3} is the arm that replaced the earlier humanoid-arm platform of Section~\ref{sec:platform}.
 
-A fixed Intel RealSense D415 on a stand provides the \acs{RGBD} observation at $640\times480$. As in simulation, the stream is center-cropped and downscaled to the $320\times180$ policy input (Figure~\ref{fig:real-rgbd}). The pose of the camera relative to the robot base was deduced from twelve different poses of a calibrated AprilTag observed by the camera, with a translation fit \acs{RMSE} of 27\,mm and a rotation fit \acs{RMSE} of $3.5\degree$ over the calibration poses. The calibrated optical pose and the intrinsics are the ones used to render the simulated camera and to back-project the point cloud, so the student sees the same geometry in both domains.
+A fixed Intel RealSense D415 on a stand provides the \acs{RGBD} observation at $640\times480$. As in simulation, the stream is center-cropped and downscaled to the $320\times180$ policy input (Figure~\ref{fig:real-setup}). The pose of the camera relative to the robot base was deduced from twelve different poses of a calibrated AprilTag observed by the camera, with a translation fit \acs{RMSE} of 27\,mm and a rotation fit \acs{RMSE} of $3.5\degree$ over the calibration poses. The calibrated optical pose and the intrinsics are the ones used to render the simulated camera and to back-project the point cloud, so the student sees the same geometry in both domains.
 % TODO(unsure): the calibration artifact is labeled "measured", not "deployment validated"; confirm whether a refined calibration was used for the reported hardware trials. The 27 mm / 3.5 deg RMSE here and in Chapter 6 come from the 2026-09-10 calibration. The current forgeUltra camera_info.yaml holds the 2026-10-29 calibration: 12 samples collected, 11 used, 9.7 mm / 0.98 deg.
 
 Robot commands use the same Cartesian impedance law as in simulation, so the student's bounded action reaches the arm through the shared action path of Section~\ref{sec:action-contract}. The deployment controller is derived from the libfranka Cartesian-impedance example controller and modified to follow \eqref{eq:osc}, including the axis-angle orientation error and the dynamically consistent nullspace term. The modifications are described below. Gravity is compensated by libfranka, which matches the simulation, where gravity is disabled for the arm. The controller runs at the 1\,kHz rate of the Franka control interface, while the student commands targets at 15\,Hz. The hand is position-controlled through its serial interface. The task-space gains equal those of the simulation, 565\,N/m and 28\,N\,m/rad with critical damping, and the nullspace stiffness is 10. The mapping of the student's bounded action to the controller target is \tbd.
@@ -25,22 +25,6 @@ The metrics of Section~\ref{sec:metrics} require the nut angle. It is read from 
 
 \begin{figure}[htb]%
     \centering%
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/hardware_setup_annotated.png}
-        \caption{Physical workcell.}
-    \end{subfigure}\hfill
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/NutBoltHolderFamilyOnly2_annotated.png}
-        \caption{Test-object family.}
-    \end{subfigure}
-    \caption{Hardware setup. Left: the \acs{FR3} arm with the Inspire RH56DFX hand, the bolts on their holders in front of the robot, and the fixed RealSense D415 on its stand. Right: M24, M30, and M36 bolts with the hexagonal, octagonal, rectangular, and round nuts of each size. Only the hexagonal nuts are used for training.}%
-    \label{fig:real-setup}%
-\end{figure}%
-
-\begin{figure}[htb]%
-    \centering%
     \includegraphics[width=0.19\textwidth]{figures/photos/real_approach.png}\hfill
     \includegraphics[width=0.19\textwidth]{figures/photos/real_grasp.png}\hfill
     \includegraphics[width=0.19\textwidth]{figures/photos/real_rotate.png}\hfill
@@ -53,14 +37,6 @@ The metrics of Section~\ref{sec:metrics} require the nut angle. It is read from 
     \label{fig:real-phases}%
 \end{figure}%
 % TODO(figure): these photos were taken during the earlier hardware trials; retake them with the zero-shot student, or confirm that they are suitable as an illustration of the phases.
-
-\begin{figure}[htb]%
-    \centering%
-    \includegraphics[height=0.3\textwidth]{figures/photos/real_rgb.png}\hspace{6mm}%
-    \includegraphics[height=0.3\textwidth]{figures/photos/real_depth.png}
-    \caption{Student observation on the physical system: the RGB image (left) and the metric depth image (right) of the RealSense D415 after center-cropping and downscaling to $320\times180$. The depth image is back-projected through the calibrated intrinsics into the point cloud that the student encodes.}%
-    \label{fig:real-rgbd}%
-\end{figure}%
 
 \section{Zero-Shot Transfer Protocol}\label{sec:real-transfer}
 
