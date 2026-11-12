@@ -8,26 +8,12 @@ Threaded fasteners such as a nut on a bolt join parts so that the joint can be r
 These applications have the same needs. The product has to be manufacturable in modules, assembled in a defined process, and opened again without damage for inspection, maintenance, repair, and development.
 
 The vast majority of people have also met threaded fasteners in everyday life, for example when assembling IKEA furniture or fixing household objects and appliances. For a human, the process is intuitive. You pick up a screw, find the hole, set the tip of a Philips screwdriver into the screw head, and turn. If the screw does not bite, you back off, straighten it in the hole, and turn again.
-Industry solves the same task differently. In industrial production, turning the fastener along the thread is done by dedicated equipment, as Figure~\ref{fig:threading-automation} illustrates. Handheld and stationary nutrunners drive the fastener with a powered spindle, multi-spindle stations tighten several fasteners of one part at once, and robots carry screwdriving end effectors that feed and drive fasteners.
+Industry solves the same task differently. In industrial production, turning the fastener along the thread is done by dedicated equipment. Handheld and stationary nutrunners drive the fastener with a powered spindle, multi-spindle stations tighten several fasteners of one part at once, and robots carry screwdriving end effectors that feed and drive fasteners.
 % TODO(cite): industrial threading automation (nutrunners, multi-spindle stations, robotic screwdriving end effectors).
 None of these machines has to find the hole. A fixture clamps the part in a known pose, so the hole is always at the same place. The screw or nut arrives from a feeder in a known orientation, and the tool is matched to that one fastener type.
 % TODO(cite): dependence of automated fastening on fixtures, fixed part poses, and fastener feeding.
 This setup pays off in high-volume production. It stops working where parts vary, where the cell is not built around one product, and where batches are small. It also stops working in maintenance and disassembly, where the hole is wherever the part happens to be, as it is for a person kneeling next to a half-built wardrobe.
 % TODO(cite): limits of dedicated fastening automation for product variants, small batches, maintenance, and disassembly.
-
-\begin{figure}[htb]%
-    \centering%
-    % TODO(figure): replace each \fbox placeholder by a photograph. Images need a license or a citable source; manufacturer press images usually allow use with attribution, which then goes into the caption.
-    \parbox[c][3cm][c]{0.21\textwidth}{\centering\includegraphics[width=\linewidth,height=2.6cm,keepaspectratio]{figures/additional/stationaryNutRunner.png}\\[2pt]\small (a)}\hfill%
-    % TODO(figure): panel (b), a multi-spindle tightening station.
-    \fbox{\parbox[c][3cm][c]{0.21\textwidth}{\centering\small (b) Placeholder:\\ multi-spindle station}}\hfill%
-    % TODO(figure): panel (c), an industrial robot with a screwdriving end effector.
-    \fbox{\parbox[c][3cm][c]{0.21\textwidth}{\centering\small (c) Placeholder:\\ robot with screwdriving end effector}}\hfill%
-    % TODO(figure): panel (d), a fixture that presents the part in a fixed pose.
-    \fbox{\parbox[c][3cm][c]{0.21\textwidth}{\centering\small (d) Placeholder:\\ fixture presenting the part}}%
-    \caption{How threading is automated today: (a) a stationary nutrunner (image from~\cite{IntlAirTool}), (b) a multi-spindle station that tightens several fasteners of one part at once, (c) a robot with a screwdriving end effector, and (d) a fixture that presents the part in a fixed pose. Each solution is built for one fastener type and a known part pose.}%
-    \label{fig:threading-automation}%
-\end{figure}%
 
 People handle the cases that dedicated equipment cannot. They pick up a nut, place it on a bolt, and turn it with their fingers, and they use the same hands to operate a wrench or a screwdriver. A robot with a dexterous, multi-fingered hand could in principle do the same. It could work with the parts and tools that were designed for people, in workcells that were designed for people, without a dedicated tool for every fastener~\cite{BicchiKumar2000,Weinberg2024}. Learning-based control has made in-hand manipulation with such hands practical in simulation and on hardware~\cite{Chen2021,Handa2024,Weinberg2024}. Robots have fastened screws with manual screwdrivers~\cite{Tang2023,Tang2024screwdriving}, and a single learned policy has manipulated a range of everyday tools with a dexterous hand~\cite{Kedia2026}. The vision behind this thesis is a dexterous robot that helps in manufacturing and assembly in a world built for humans. Threading a nut by hand is one of the basic skills such a robot needs. For humans the skill is trivial, but it is not for robots. This is an instance of Moravec's paradox: it is comparatively easy to make computers perform well on tasks that people find intellectually demanding, and difficult to give them the perception and mobility skills of a small child~\cite{Moravec1988}. Industrial fastening shows both sides of this paradox. A nutrunner on a fixture drives a fastener without difficulty, because the cell design has already solved the hard part: the part is held in a known pose and the fastener is presented in a known orientation. Without this structure, a robot has to find the hole, align the fastener, and engage the thread, which a person does without thinking. If a dexterous robot is to thread, it has to learn the skill, and the next section explains why that is hard.
 
@@ -41,29 +27,11 @@ Learning a contact-rich skill directly on hardware is slow and unsafe. \Ac{RL} n
 
 Thread contact, however, is among the hardest interactions to simulate. Engaged threads produce thousands of simultaneous contacts, and simulating them faithfully needs dedicated contact methods, such as the signed-distance-field contacts with which Factory simulates 1000 nut-and-bolt assemblies in real time on one GPU~\cite{Narang2022}.
 
-The GPU-parallel engines that make this scale possible, such as PhysX and MuJoCo, model contact through interpenetration. When two bodies overlap, the solver measures the penetration depth and generates a repulsive force that pushes the bodies apart again (Figure~\ref{fig:depenetration}).
+The GPU-parallel engines that make this scale possible, such as PhysX and MuJoCo, resolve contact by letting bodies overlap slightly and then pushing them apart again.
 % TODO(cite): penetration-based contact resolution in PhysX and MuJoCo (soft or penalty-like contact, depenetration velocity, contact offsets).
-Contact is therefore never strictly rigid. It tolerates a small overlap, and the repulsive force grows with that overlap.
+For large bodies this overlap is harmless. For threads it is not, because the thread geometry is small: the pitch is 3 to 4\,mm for the nuts used in this thesis. In simulation, a nut that is pressed along the bolt can therefore slip through the threads into the next groove instead of following the helix (Section~\ref{sec:thread-model}).
 
-\begin{figure}[htb]%
-    \centering%
-    % TODO(figure): illustrate depenetration in a physics engine. Two bodies overlap by a penetration depth d, the solver generates a repulsive force or velocity along the contact normal that grows with d, and the bodies are pushed apart again.
-    \fbox{\parbox[c][4cm][c]{0.7\textwidth}{\centering\small Placeholder:\ depenetration in a physics engine\ (penetration depth, contact normal, repulsive force)}}%
-    \caption{How a physics engine resolves contact. Two bodies that overlap by a penetration depth $d$ receive a repulsive force along the contact normal that grows with $d$ and pushes them apart.}%
-    \label{fig:depenetration}%
-\end{figure}%
-
-For large bodies this tolerance is harmless. For threads it is not, because the thread geometry is small. The pitch is 3 to 4\,mm for the nuts used in this thesis, and the flanks and crests are smaller still. At this scale, the overlap that the solver tolerates is no longer negligible against the geometry. A nut that is pushed along the axis can sink into the opposing flank and slide across the crest into the next groove, instead of following the helix. The repulsive force does not forbid this path, it only makes it more expensive. In simulation, the nut can thus phase through the threads.
-
-A learning policy finds such shortcuts. If the reward pays for axial progress of the nut, the policy can collect it by pushing the nut through the threads rather than by turning it along the helix (Figure~\ref{fig:thread-exploit}). The resulting behavior solves the simulated task and fails on hardware, where the threads are rigid and the nut advances only by rotating. Faithful thread contact therefore needs dedicated contact methods and is easy to exploit, and any simplification of the thread opens a gap in contact between simulation and reality. A deployed policy also has to perceive the nut through a camera, and rendered images differ from real ones, which opens a second gap in perception. Collecting real data to close these gaps would bring back the cost that simulation was meant to avoid.
-
-\begin{figure}[htb]%
-    \centering%
-    % TODO(figure): short illustration of thread geometry. Show the nut and bolt thread profiles with pitch and flank, a reward that pays for axial progress, and the exploit path in which the nut interpenetrates the flank and crosses into the next groove instead of following the helix.
-    \fbox{\parbox[c][4cm][c]{0.7\textwidth}{\centering\small Placeholder:\ thread geometry and the interpenetration exploit\ (pitch, flank, helical path versus path through the thread)}}%
-    \caption{How interpenetration can be exploited in thread simulation. A reward for axial progress of the nut is collected on the helical path by turning the nut, but also on a shortcut in which the nut interpenetrates the thread flank and crosses the crest into the next groove.}%
-    \label{fig:thread-exploit}%
-\end{figure}%
+A learning policy finds such shortcuts. If the reward pays for axial progress of the nut, the policy can collect it by pushing the nut through the threads rather than by turning it. The resulting behavior solves the simulated task and fails on hardware, where the threads are rigid and the nut advances only by rotating. Faithful thread contact therefore needs dedicated contact methods and is easy to exploit, and any simplification of the thread opens a gap in contact between simulation and reality. A deployed policy also has to perceive the nut through a camera, and rendered images differ from real ones, which opens a second gap in perception. Collecting real data to close these gaps would bring back the cost that simulation was meant to avoid.
 
 \emph{Requirement:} a thread model that is cheap enough for massively parallel \ac{RL} and cannot be exploited through interpenetration, and a transfer recipe that carries the learned skill to hardware without real-world data.
 
@@ -98,16 +66,12 @@ A single visuomotor student is then distilled from these demonstrations by \ac{C
 
 \begin{figure}[htb]%
     \centering%
-    \includegraphics[width=\textwidth,trim=17bp 85bp 5bp 117bp,clip]{figures/SimThreadTeaser.pdf}%
+    \includegraphics[width=\textwidth,trim=0bp 45bp 6bp 0bp,clip]{figures/teaser.png}%
     \caption{Overview of the approach: decompose during data generation, unify at deployment. Top: a privileged \acs{RL} teacher is trained in parallel simulated workcells. During data collection its rollouts are chained with scripted release-and-reset controllers into long-horizon demonstrations $\Dsim$. A conditional flow-matching student is distilled from them and acts from RGB and depth. Bottom: the phases of one cycle on the physical robot, approach, grasp, rotation, goal reaching, and release-and-reset, after which the hand returns for the next cycle.}%
     \label{fig:overview}%
 \end{figure}%
-% TODO(figure): the teaser graphic is the project's publication figure; check that it does not show a real-world replay or correction branch, and edit it if it does. Also check that it does not print robot, hand, or camera product names, which first appear in Chapter 4.
 
 \section{Research Questions}\label{sec:research-questions}
-% TODO(note): temporary review note, remove before submission.
-\noindent\colorbox{yellow}{\parbox{\dimexpr\linewidth-2\fboxsep}{\textbf{Note:} Perhaps this section should be removed from the introduction.}}
-
 The approach rests on two claims, that one student can replace a chain of policies and that it can be trained on simulated data alone, and on one design choice, the student that performs the unification. Three research questions test them.
 
 \begin{description}
@@ -124,9 +88,9 @@ The thesis makes the following contributions.
 
 \begin{enumerate}
   \item A formulation of cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged \ac{RL} policy for approach, grasp, rotation, and goal reaching with scripted controllers for release and return. The hybrid teacher generates coherent multi-cycle demonstrations with physically gated phase boundaries.
-  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Ablations compare it with a single-cycle student, deterministic regression heads, and an alternative vision encoder. Their results are \tbd.
+  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Ablations compare it with a single-cycle student, deterministic regression heads, and an alternative vision encoder. In simulation, the full student completes all ten cycles in every trial, and every ablation fails earlier.
   \item A zero-shot sim-to-real recipe for the student: a camera model calibrated against the physical cell, a metric point cloud cropped to the workspace, visual randomization of the rendered demonstrations, and a Cartesian action path shared by teacher, student, and robot.
-  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, of which only the M24 hexagonal nut appears in the training data. The simulation results are reported in Chapter~\ref{ch:experiments}. The hardware results are \tbd.
+  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles. Both are reported in Chapter~\ref{ch:experiments}. On hardware, the student completes all ten cycles in every trial on the hexagonal nuts of all three sizes and on the held-out octagonal and round profiles, and it fails on the rectangular profile.
 \end{enumerate}
 
 This work was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments. The acknowledgments state this attribution.

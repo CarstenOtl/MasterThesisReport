@@ -28,15 +28,13 @@
 \node[lrn] (dp3)  at (64.5,0) {PointNet\\64--128--256,\\max pooling};
 \pic (v) at (87.5,0) {fvec=TUMBlue3};
 \node[anchor=west, align=left, inner sep=0pt] at (91,0) {$\vec{v}_t$\\64-D};
-\node[lrn, dashed, text width=32mm] (aux) at (84,14) {aux.\ head 64--128--3:\\nut position (training only)};
 \draw[arr] (rgb.east) -- ++(7,0) |- ([yshift=2mm]pcimg.west);
 \draw[arr] (depth.east) -- ++(3,0) |- ([yshift=-2mm]pcimg.west);
 \draw[arr] (pcimg) -- (dp3);
 \draw[arr] (dp3) -- (v-w);
-\draw[arr, dashed] (v-n) -- (v-n |- aux.south);
 
 % ---------------- state and task encoding ----------------
-\node[inp] (prop)  at (13.5,-28) {proprioception\\$\vec{s}_t$ (29-D)};
+\node[inp] (prop)  at (13.5,-28) {proprioception\\$\vec{s}_t$ (35-D)};
 \node[inp] (phase) at (13.5,-40) {process phase\\$\vec{e}^{m}_t$ (one-hot, 3)};
 \node[inp] (prog)  at (13.5,-52) {progress\\$p_t\in[0,1]$};
 \node[lrn] (pmlp)  at (40,-28) {MLP\\128--128, ELU};

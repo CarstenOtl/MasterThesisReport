@@ -34,6 +34,8 @@
 %
 % Define additional commands
 \newcommand{\code}[1]{\texttt{#1}}%
+% Typewriter paths and identifiers that may break after / _ - . (no escaping of _ needed)
+\DeclareUrlCommand\cpath{\urlstyle{tt}\def\UrlBreaks{\do\/\do\_\do\-\do\.}}%
 \newcommand{\degree}[0]{\ensuremath{^\circ}}%
 % Draft placeholders: every missing number, figure, or citation is marked with \tbd
 % and a "% TODO(...)" comment. All of them are collected in thesis/TODO_draft.md.
@@ -117,6 +119,7 @@
 % --------
 \appendix%
 \include{source/appendix}%
+\include{source/appendix_controller}%
 %
 % References
 % ----------

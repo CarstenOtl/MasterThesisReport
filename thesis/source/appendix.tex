@@ -22,7 +22,11 @@
         prismatic lower limit & 0.2\,mm above the physical stop \\
         \midrule
         pinch-joint effort limit & 0.5\,N\,m (hand drives otherwise 20\,N\,m) \\
-        pad friction coefficient & 1.5 (robot 0.75, nut 1.0, averaged pad--nut 1.25) \\
+        pad friction coefficient & 1.5 nominal, randomized (Table~\ref{tab:dr}); robot 0.75, nut 1.0 \\
+        \midrule
+        arm joint dynamics & identified \ac{FR3}: friction 0.2\,N\,m, armature 0.195\,kg\,m$^{2}$, damping 0.003\,N\,m\,s/rad per joint \\
+        joint-limit guard & episode ends when an arm joint is within 0.15\,rad of its limit \\
+        reset pose & hand wound $45\degree$ about the bolt against the threading direction and tilted $30\degree$ wrist-up; bolt on the hardware holder \\
         \bottomrule
     \end{tabular}}
 \end{table}%
@@ -30,8 +34,6 @@
 The pinch-joint effort limit bounds the grip force. A replay of a policy trained without the limit gave median pad forces of about 43\,N at the thumb and 38\,N at the index. Limits of 1.0\,N\,m and 0.3\,N\,m reduced them to about 27/21\,N and 12/7\,N, whereas 0.1\,N\,m let the grip collapse. The retained limit of 0.5\,N\,m lies between the two working values.
 
 The force channels of the teacher have the following counterparts on the physical system. The simulated joint torques are the reaction torques that PhysX projects onto the arm joint axes, not the commanded torques, so contact loads appear in them. Because the simulated arm carries no gravity load, their counterpart on the \ac{FR3} is the external-torque estimate \texttt{tau\_ext\_hat\_filtered} of libfranka, not the raw sensor torque. The fingertip forces are the pad contact forces along the pad normal, the only component that the fingertip sensors of the hand measure. In simulation, the Jacobian of the controller is the flange Jacobian shifted to the grasp point by the lever arm $\vec{r}$, $\mat{J}_v=\mat{J}_{v,\mathrm{flange}}-[\vec{r}]_\times\mat{J}_{\omega,\mathrm{flange}}$, and the mass matrix is the arm block of the generalized mass matrix, which includes the inertia of the attached hand.
-
-% TODO(unsure): the deployment controller source is not in forgeUltra; confirm that its Jacobian also comes from the libfranka model and is shifted to the grasp point, and that its nullspace damping is critical (2*sqrt(10)).
 \begin{table}[htb]%
     \centering%
     \caption{Action decoding and controller of the shared Cartesian contract. The values are nominal. The per-episode randomization of the simulated controller is listed in Table~\ref{tab:dr}. In the physical column, ``same'' marks values shared with simulation.}%
@@ -59,7 +61,7 @@ The force channels of the teacher have the following counterparts on the physica
         control rate & 120\,Hz (physics rate) & 1\,kHz \\
         \midrule
         \multicolumn{3}{l}{\emph{Model quantities}} \\
-        Jacobian $\mat{J}$ & PhysX flange Jacobian, shifted to the grasp point & libfranka robot model \\
+        Jacobian $\mat{J}$ & PhysX flange Jacobian, shifted to the grasp point & libfranka robot model, shifted to the grasp point \\
         mass matrix $\mat{M}$ & PhysX generalized mass matrix, arm block & libfranka robot model, hand as end-effector load \\
         gravity & disabled for the arm links & compensated by libfranka \\
         Coriolis term & none & none \\
@@ -74,8 +76,11 @@ The force channels of the teacher have the following counterparts on the physica
 
 \section{Robot Assets}\label{sec:app-assets}
 
-The simulated arm is the fr3\_v2 model of the \acs{FR3} from MuJoCo Menagerie. The adapter flange between arm and hand was measured on the physical robot and reproduced in the simulated asset. The hand asset starts from the URDF of the RH56DFX. Its linear mimic ratios, which approximate the linkage that couples the finger joints, were identified by a visual system identification against the physical hand rather than taken from the official URDF.
-% TODO(content): add the asset analysis here: the Menagerie quality grade of fr3_v2 (verify), the procedure of the visual system identification of the hand (images, fitted joints), the identified mimic ratios and joint limits compared with the official URDF values, and the remaining residual (see forgeUltra docs/experiments/exp_20_hw_fit_hand_teacher.md and HANDOVER.md, Inspire-hand kinematic and software-mimic calibration).
+The simulated robot is composed of three parts: the \acs{FR3} arm, an adapter flange, and the RH56DFX hand. The geometry and colliders of the arm come from the base USD asset of the robot. This asset authors no link inertia, so PhysX derives mass and inertia from the convex-hull colliders, which do not describe the real link masses. The arm dynamics are therefore taken from the fr3\_v2 model of MuJoCo Menagerie, which is derived from the public \texttt{franka\_description} URDF of Franka Robotics. A layer on top of the base asset overrides, for links 1 to 7, the mass, the center of mass, and the principal inertia with its principal axes, and for joints 1 to 7 the position limits, which follow the limits of the current Franka system image. Geometry, colliders, the hand, and its mount are unchanged. The joint friction of 0.2\,N\,m, the armature of 0.195\,kg\,m$^{2}$, and the viscous damping of 0.003\,N\,m\,s/rad of the Menagerie model (Table~\ref{tab:sim-params}) are not part of the layer and are applied to every environment at runtime, which lets the dataset collection scale the joint friction per environment (Table~\ref{tab:datasets}).
+
+The hand is mounted on the arm flange through an adapter flange of 76\,mm diameter and 10\,mm thickness. The flange-to-palm transform of the simulated asset is a 10\,mm offset along the flange axis and a rotation of $180\degree$ about it, as on the physical installation. Mass and inertia of the hand enter the controller of the physical robot as the end-effector load, so that the mass matrix of the deployment controller matches that of the simulated arm with the attached hand (Table~\ref{tab:controller}).
+
+The hand asset starts from the vendor URDF of the RH56DFX. Its finger couplings, register maps, and joint limits were identified from camera images of the physical hand, and Section~\ref{sec:app-hand} describes the procedure, the fitted parameters, the remaining fingertip errors, and the effect of the fitted model on teacher training.
 
 \section{Finger Kinematics of the Simulated Hand}\label{sec:app-hand}
 
@@ -183,8 +188,7 @@ The coupling check in the lower half of Table~\ref{tab:hand-fit-tips} keeps the 
 
 In the simulation, the fitted model replaces the couplings and joint limits of Table~\ref{tab:hand-fit-params}, so that a simulated joint angle means the physical joint angle. Geometry, masses, and the pinch ranges of the action decoder are unchanged, so the action scale stays the same. Three further changes make the simulated linkage behave like the physical one. First, each following joint tracks the measured angle of its leading joint instead of the leading joint's target. With targets, a leading joint held at its effort limit left its follower closing on its own, which a rigid linkage cannot do. Second, the drives of the following joints are stiffened to 30\,N\,m/rad and 3\,N\,m\,s/rad, from 4.76 and 0.21 for $q_{\mathrm{t}2}$ and 0.9 and 0.042 for $q_{\mathrm{t}3}$ and $q_{\mathrm{i}1}$. Third, the collision between the palm and the proximal thumb link is filtered. In the vendor model, this contact held the thumb at an abduction of 1.07\,rad when the reset commanded 1.185\,rad, an angle that the physical thumb reaches.
 
-In a reset probe with eight environments, the fitted model reached the commanded abduction of 1.185\,rad. Under a pinch command, its thumb flexion moved from 0.05 to 0.12\,rad with $q_{\mathrm{t}2}$ within 0.002\,rad of its coupling. The vendor model under the same command kept the thumb flexion at 0.025\,rad, while $q_{\mathrm{t}2}$ closed alone, 0.12\,rad away from its coupling. At reset, the two models place the thumb tip 7.7\,mm apart and the grasp-frame origin 4.0\,mm apart. A teacher trained with the same recipe and seed on both models reached a threading success rate of 0.87 on the fitted model and 0.82 on the vendor model after 200 epochs, averaged over the last ten iterations of one run each. On the fitted model, the grasp was learned about ten iterations later.
-% TODO(unsure): state which hand model the teacher and student of the reported results were trained on. The run06 teacher (2026-10-22) predates the fit (2026-11-09); the fitted model is forgeUltra's FR3_INSPIREHAND_HW_FIT=1 switch (docs/experiments/exp_20_hw_fit_hand_teacher.md). Chapter 5, Section sec:real-setup, currently says the joint limits are those of the URDF.
+In a reset probe with eight environments, the fitted model reached the commanded abduction of 1.185\,rad. Under a pinch command, its thumb flexion moved from 0.05 to 0.12\,rad with $q_{\mathrm{t}2}$ within 0.002\,rad of its coupling. The vendor model under the same command kept the thumb flexion at 0.025\,rad, while $q_{\mathrm{t}2}$ closed alone, 0.12\,rad away from its coupling. At reset, the two models place the thumb tip 7.7\,mm apart and the grasp-frame origin 4.0\,mm apart. A teacher trained with the same recipe and seed on both models reached a threading success rate of 0.87 on the fitted model and 0.82 on the vendor model after 200 epochs, averaged over the last ten iterations of one run each. On the fitted model, the grasp was learned about ten iterations later. The teacher and the student of this thesis are trained on the fitted model.
 
 The fit has three limits. It covers free motion only, so the compliance of the linkages under grip load is not measured. The distal thumb coupling is the least certain parameter. The index coupling is linear only below $q_{\mathrm{i}0}=0.8$\,rad.
 
@@ -201,10 +205,10 @@ The fit has three limits. It covers free motion only, so the compliance of the l
         \midrule
         $R^{\mathrm{center}}$ & newly achieved fraction of the initial grasp-center--nut-center gap, until the grasp latches & 30 \\
         $R^{\mathrm{face}}$ & newly achieved fraction of the initial pad--face gap, until the grasp latches & 30 \\
-        $R^{\mathrm{grasp}}$ & one-time bonus when the proper grasp has held for 10 consecutive steps & 150 \\
-        $R^{\mathrm{hold}}$ & per step with proper grasp and both pads pressing with at least 1\,N & 0.2 \\
-        $R^{\mathrm{turn}}$ & newly achieved fraction of the keypoint distance to the target pose remaining at latch, while the grasp is live & 60 \\
-        $R^{\mathrm{target}}$ & one-time bonus on success & 250 \\
+        $R^{\mathrm{grasp}}$ & one-time bonus when the proper grasp has held for 10 consecutive steps & 180 \\
+        $R^{\mathrm{hold}}$ & per step with proper grasp and both pads pressing with at least 1\,N & 0.24 \\
+        $R^{\mathrm{turn}}$ & newly achieved fraction of the keypoint distance to the target pose remaining at latch, while the grasp is live & 72 \\
+        $R^{\mathrm{target}}$ & one-time bonus on success & 300 \\
         \midrule
         $P^{\mathrm{magnitude}}$ & normalized commanded translation and yaw & $10^{-3}$ \\
         $P^{\Delta a}$ & action change & 0.1 \\
@@ -214,11 +218,12 @@ The fit has three limits. It covers free motion only, so the compliance of the l
         $P^{\mathrm{wrench}}$ & lateral force above 2\,N and axial force above 5\,N per newton, tilting torque above 0.05\,N\,m per N\,m & 0.05 / 0.05 / 1.0 \\
         $P^{\mathrm{clear}}$ & squared normalized violation of a 3\,cm arm--table clearance & 2.0 \\
         $P^{\mathrm{contact}}$ & arm--table contact force above 2\,N, per newton & 0.05 \\
+        $P^{\mathrm{limit}}$ & barrier on each arm joint from 0.5\,rad of headroom down to the 0.15\,rad guard & 0.5 (per joint and step at the guard) \\
         \bottomrule
     \end{tabular}}
 \end{table}%
 
-A proper grasp is simultaneous thumb and index contact within 1\,cm of the designated faces. Besides success and the time limit, an episode terminates when the nut leaves the bolt by more than 3\,cm, tilts by more than $60\degree$, or releases the thread, or when the latched grasp is lost. Each promotion of the success-hold curriculum requires a success rate of at least 50\,\% over completed episodes and at least five episode lengths since the previous change.
+A proper grasp is simultaneous thumb and index contact within 1\,cm of the designated faces. Besides success and the time limit, an episode terminates when the nut leaves the bolt by more than 3\,cm, tilts by more than $60\degree$, or releases the thread, when an arm joint comes within 0.15\,rad of its limit, or when the latched grasp is lost. Each promotion of the success-hold curriculum requires a success rate of at least 80\,\% over completed episodes and at least five episode lengths since the previous change.
 
 \section{Hybrid Teacher}\label{sec:app-hybrid}
 
@@ -233,7 +238,9 @@ A proper grasp is simultaneous thumb and index contact within 1\,cm of the desig
         release trigger & nut rotation within $5\degree$ of the target turn \\
         release waypoints & 4, interpolated over 0.7\,s each \\
         return segment & 1.0\,s \\
-        return gate & grasp frame within 5\,mm and $5\degree$, hand joints within 0.15\,rad \\
+        return gate & grasp frame within a tolerance drawn per return between 5 and 15\,mm and between $5\degree$ and $10\degree$, hand joints within 0.15\,rad; accepted after 2.5\,s of settling inside the upper limits \\
+        transition pose clip & 0.05\,m and 0.25\,rad per axis on release and return rows (policy rows: 0.02\,m, 0.097\,rad) \\
+        transition dead zone & task space, drawn per transition up to 7.5\,N and 1\,N\,m \\
         return timeout & 16\,s (transition failure) \\
         target turn clamp & $[55\degree,65\degree]$ \\
         \bottomrule
@@ -250,7 +257,7 @@ A proper grasp is simultaneous thumb and index contact within 1\,cm of the desig
         \toprule
         Parameter & Value \\
         \midrule
-        parallel environments & \tbd \\ % TODO(results): environment count of the retained M24 teacher run
+        parallel environments & 500 \\
         epochs & 200 \\
         rollout horizon & 256 steps \\
         minibatch size & 512 \\
@@ -282,26 +289,25 @@ A proper grasp is simultaneous thumb and index contact within 1\,cm of the desig
         Parameter & Value \\
         \midrule
         action contract & 9-D filtered Cartesian target divided by $[3,4,16,3,3,3,2,2,2]$, in $[-1,1]$ \\
-        normalization & none for actions and proprioception, dataset statistics for the auxiliary nut position \\
+        normalization & none for actions; fingertip forces divided by 20\,N, joint torques by the joint effort limits \\
         action horizon $H$ & 8 (0.53\,s at 15\,Hz) \\
+        training data & 36 ten-cycle episodes, no validation split \\
         target offset & 0 (pre-step alignment) \\
         terminal-hold padding & yes \\
-        proprioception & 29-D (10 $q$, 10 $\dot{q}$, previous action) \\ % TODO(unsure): 26-D if the running student omits the hand velocities
+        proprioception & 35-D (10 $q$, 7 arm $\dot{q}$, previous action, 2 fingertip forces, 7 arm joint torques) \\
         proprioception encoder & \acs{MLP} 128--128, ELU \\
         visual feature & 64-D (\ac{DP3}: 4096 XYZRGB points, PointNet 64--128--256, max pool) \\
         point-cloud preprocessing & depth in $[0.10,2.0]$\,m, workspace crop box with 40\,mm margin, RGB in $[-1,1]$ \\
-        encoder initialization & pose-regression pretraining in 16 parallel scenes, fine-tuned end to end \\
-        encoder pretraining & 32\,000 frames, 2000 steps, noise-free depth, checkpoint at step 1000 \\
-        pretraining validation & 5.87\,mm position error, $46.2\degree$ symmetry-aware rotation error \\
+        encoder initialization & none, trained from scratch jointly with the flow head \\
         condition width & 256 \\
-        progress / phase embeddings & \acs{MLP} 1--256--256 / 3--256--256, ELU \\
+        progress / phase embeddings & \acs{MLP} 1--256--256 / 3--256--256, ELU; clock normalized by 98.2\,s (1473 steps) \\
         flow-time embedding & sinusoidal, 64-D \\
         velocity network & Transformer, 4 layers, 8 heads, width 512, FF 2048, GELU, pre-norm \\
         probability path & conditional optimal transport (linear interpolant) \\
-        optimizer & AdamW, learning rate $10^{-4}$, gradient clip 1.0, batch 64, 300 epochs \\
+        optimizer & AdamW, learning rate $10^{-4}$, gradient clip 1.0, batch 64, 100 epochs, seed 0 \\
         parameter \acs{EMA} decay & 0.999 \\
-        auxiliary loss & nut position from visual feature, \acs{MLP} 64--128--3, weight 1.0 \\
-        RGB augmentation & saturation/contrast/brightness $[0.5,1.5]$, hue $[-0.15,0.15]$, blur $p=0.1$ \\
+        auxiliary loss & none \\
+        RGB augmentation & none \\
         depth augmentation & noise $\sigma=5\,\mathrm{mm}+0.002\,\mathrm{m}^{-1}d^{2}$, smooth offset 3\,mm, quantization 1\,mm, \\
          & dropout at edges above 15\,mm $p=0.35$, correlated holes $p=0.12$ (11\,px), pixels $p=0.01$ \\
         sampler & Euler, $N=16$ steps (online training: 8; CPU deployment: 2) \\
@@ -323,19 +329,22 @@ A proper grasp is simultaneous thumb and index contact within 1\,cm of the desig
         Property & Value \\
         \midrule
         teacher & single-size M24 teacher of Section~\ref{sec:teacher}, mean action, $\beta=1$ \\
-        simulated demonstrations & 20 successful ten-cycle episodes from 32 parallel environments \\
-        frames (15\,Hz) & \tbd \\
+        simulated demonstrations & 36 successful ten-cycle episodes from one rollout of 16 parallel environments (6400 control steps, seed 1; 14 environments contributed) \\
+        frames (15\,Hz) & 53\,408 (per episode 1341 / 1474 / 1838 min / median / max) \\
+        cycle rollback & failed cycle retried from the last completed return, at most 3 times; 20 episodes contain a retried cycle, 10\,136 rows dropped in total \\
         start state & nominal pose, no initial yaw, nut at the top of the thread \\
         per-cycle target & $60\degree$ grid, release $5\degree$ before the target \\
-        task randomization & active as in Table~\ref{tab:dr}, except initial yaw, height, and target turn \\
+        task randomization & none: nut mass, nut and thread friction, controller parameters, start poses, and target turn fixed at nominal values \\
+        proprioception noise & fingertip pose $\mathcal{N}(0,0.5\,\mathrm{mm})$ and $\mathcal{N}(0,0.2\degree)$ per step; fingertip forces gain $U(0.6,1.4)$, offset $U(-2,2)$\,N per episode, $\mathcal{N}(0,2\,\mathrm{N})$ per step; arm joint torques gain $U(0.8,1.2)$, offset $U(-0.02,0.02)$ per episode, $\mathcal{N}(0,0.01)$ per step, in units of the effort limits \\
+        joint and pad friction & arm joint friction scaled by $U(0.8,2.0)$, finger pad friction $U(1.2,1.8)$, once per environment \\
+        head camera pose & per episode, uniform per axis within $\pm11.2$\,mm and $\pm1.13\degree$ \\
+        release and return & thresholds, clip, and dead zone of Table~\ref{tab:hybrid-params} \\
         impulses per episode & 30 (one per policy, waypoint, and return segment), 0.05--0.25\,N\,s, 0.05--0.20\,s after segment start \\
         visual randomization & dome light, table, nut/bolt, floor textures, background \\
         material sampling & per environment and reset, roughness $U(0.3,0.9)$, metallicity $U(0,0.15)$ \\
         dome light and floor & shared, redrawn with $p=0.3$ per reset, light intensity $U(1000,4000)$ \\
         background image & $p=0.5$ per environment and reset, replaces pixels at 1.5\,m or beyond or without depth \\
         image size & $320\times180$ RGB and metric depth ($640\times480$ sensor, centered $640\times360$ crop, downscaled by two) \\
-        \ac{DP3} points per frame & \tbd{} valid (min / median / max); 4096 sampled \\
         \bottomrule
     \end{tabular}}
 \end{table}%
-% TODO(results): frame count and DP3 valid-point audit (depth_audit_dp3.json) of the M24 ten-cycle collection.

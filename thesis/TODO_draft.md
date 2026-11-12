@@ -25,7 +25,7 @@ The former ablation (e) "simulated data only" is now the full method (e); the ol
 | Ch. 3, Sec. 3.4.4 | fit sim camera randomization to measured D415 statistics (depth failures, exposure, blur, latency; forgeUltra `todo.md` P2); confirm which depth-noise model the retained DP3 pretraining used |
 | Ch. 5, Sec. 5.2 | document deployment settings of the zero-shot trials |
 | Abstract, Ch. 1 contributions, Ch. 6 Q1–Q4, Ch. 7 | fill in the hardware sentence / update interpretations once the above exist |
-| Figures | `SimThreadTeaser.pdf` (Fig. 1.1) and `mainpipeline.pdf` (Fig. 3.1) are publication figures that may still draw the real-world replay / human-correction branch; edit them. The hardware photos in Fig. 5.2 were taken during the earlier trials; retake or confirm |
+| Figures | `SimThreadTeaser.pdf` (Fig. 1.1) is a publication figure that may still draw the real-world replay / human-correction branch; edit it (`mainpipeline.pdf`, Fig. 3.1, done 2026-11-12: real-world branch removed). The hardware photos in Fig. 5.2 were taken during the earlier trials; retake or confirm |
 
 Revision 2026-10-25: Chapter 3 and the appendix tables now describe the forgeUltra
 `force-observations` branch (HEAD 304d4d9). Teacher = the M24 V2 teacher trained with
@@ -46,7 +46,7 @@ metrics, cycle definition).
 
 | Location | What is needed |
 | --- | --- |
-| Ch. 3, Sec. 3.3 last paragraph; Table A.2 | teacher run: parallel environments, wall-clock time, final initial-yaw level and success-hold length (`params/adr_state.yaml`), and whether run06 was initialized from the run05 checkpoint (if so, say so in the text) |
+| Ch. 3, Sec. 3.3 last paragraph; Table A.2 | teacher run: wall-clock time, final initial-yaw level and success-hold length (`params/adr_state.yaml`), and whether run06 was initialized from the run05 checkpoint (if so, say so in the text) |
 | Ch. 3, Sec. 3.4.5; Table A.4 | frame count, candidate/rejected episodes, DP3 valid-point audit of the ten-cycle M24 collection |
 | Ch. 3, Sec. 3.5.3; Fig. 3.4; Table A.3 | proprioception width of the running student (29-D baseline vs 26-D `--hand-velocity-observation omitted`), whether the auxiliary nut head is on, and which pretraining checkpoint initializes the encoder |
 
