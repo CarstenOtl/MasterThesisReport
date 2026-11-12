@@ -102,7 +102,7 @@ A single visuomotor student is then distilled from these demonstrations by \ac{C
     \caption{Overview of the approach: decompose during data generation, unify at deployment. Top: a privileged \acs{RL} teacher is trained in parallel simulated workcells. During data collection its rollouts are chained with scripted release-and-reset controllers into long-horizon demonstrations $\Dsim$. A conditional flow-matching student is distilled from them and acts from RGB and depth. Bottom: the phases of one cycle on the physical robot, approach, grasp, rotation, goal reaching, and release-and-reset, after which the hand returns for the next cycle.}%
     \label{fig:overview}%
 \end{figure}%
-% TODO(figure): the teaser graphic is the project's publication figure; check that it does not show a real-world replay or correction branch, and edit it if it does. Also check that it does not print robot, hand, or camera product names, which first appear in Chapter 5.
+% TODO(figure): the teaser graphic is the project's publication figure; check that it does not show a real-world replay or correction branch, and edit it if it does. Also check that it does not print robot, hand, or camera product names, which first appear in Chapter 4.
 
 \section{Research Questions}\label{sec:research-questions}
 % TODO(note): temporary review note, remove before submission.
@@ -116,7 +116,7 @@ The approach rests on two claims, that one student can replace a chain of polici
   \item[RQ3 (sim-to-real).] Can a student trained on simulated demonstrations only transfer zero-shot to the physical hand--arm system?
 \end{description}
 
-RQ1 tests the answer to the long-horizon difficulty, RQ2 asks which student makes the unification work, and RQ3 tests the answer to the transfer difficulty. The experiments for RQ1 and RQ2 run in simulation (Chapter~\ref{ch:sim}), and those for RQ3 on hardware (Chapter~\ref{ch:real}). The answer to the dexterity difficulty, the privileged teacher, is tested by the teacher training that Chapter~\ref{ch:sim} reports before the student experiments.
+RQ1 tests the answer to the long-horizon difficulty, RQ2 asks which student makes the unification work, and RQ3 tests the answer to the transfer difficulty. Chapter~\ref{ch:experiments} answers all three, RQ1 and RQ2 in simulation and RQ3 on hardware. The answer to the dexterity difficulty, the privileged teacher, is tested by the teacher training that Chapter~\ref{ch:experiments} reports before the student experiments.
 
 \section{Contributions}\label{sec:contributions}
 
@@ -126,22 +126,21 @@ The thesis makes the following contributions.
   \item A formulation of cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged \ac{RL} policy for approach, grasp, rotation, and goal reaching with scripted controllers for release and return. The hybrid teacher generates coherent multi-cycle demonstrations with physically gated phase boundaries.
   \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Ablations compare it with a single-cycle student, deterministic regression heads, and an alternative vision encoder. Their results are \tbd.
   \item A zero-shot sim-to-real recipe for the student: a camera model calibrated against the physical cell, a metric point cloud cropped to the workspace, visual randomization of the rendered demonstrations, and a Cartesian action path shared by teacher, student, and robot.
-  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, of which only the M24 hexagonal nut appears in the training data. The simulation results are reported in Chapter~\ref{ch:sim}. The hardware results are \tbd.
+  \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, of which only the M24 hexagonal nut appears in the training data. The simulation results are reported in Chapter~\ref{ch:experiments}. The hardware results are \tbd.
 \end{enumerate}
 
 This work was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments. The acknowledgments state this attribution.
 
 \section{Outline}\label{sec:outline}
 
-This thesis comprises seven chapters: Introduction, State of the Art, Methodology, Experiments in Simulation, Experiments on Real Hardware, Discussion, and Conclusion and Future Work. This chapter motivated threading as a skill for dexterous robots, named the difficulties of learning it, and stated the approach and the research questions. Chapter~\ref{ch:sota} reviews the background and related work, Chapter~\ref{ch:method} presents the method, Chapters~\ref{ch:sim} and~\ref{ch:real} report the experiments in simulation and on hardware, Chapter~\ref{ch:discussion} interprets the results, and Chapter~\ref{ch:conclusion} concludes the thesis. The remainder of this section outlines these chapters in more detail.
+This thesis comprises six chapters: Introduction, State of the Art, Methodology, Experiments, Discussion, and Conclusion and Future Work. This chapter motivated threading as a skill for dexterous robots, named the difficulties of learning it, and stated the approach and the research questions. Chapter~\ref{ch:sota} reviews the background and related work, Chapter~\ref{ch:method} presents the method, Chapter~\ref{ch:experiments} reports the experiments in simulation and on hardware, Chapter~\ref{ch:discussion} interprets the results, and Chapter~\ref{ch:conclusion} concludes the thesis. The remainder of this section outlines these chapters in more detail.
 
 Chapter~\ref{ch:sota} provides the background that the method builds on: the thread geometry that the thread model uses, \ac{RL} with privileged information, imitation learning and compounding error, generative action heads, and operational-space control. It then reviews related work on robotic assembly and threading, dexterous manipulation, visual representations for manipulation, long-horizon tasks and policy chaining, and teacher--student distillation.
 
 Chapter~\ref{ch:method} presents the method, with each part answering one difficulty of Section~\ref{sec:problem-setup}: the problem formulation, the simulated system with its thread model and controller, the privileged teacher, the hybrid teacher and the generation of demonstrations, the distillation of the student by conditional flow matching, and the evaluation protocol.
 
-Chapter~\ref{ch:sim} reports the experiments in simulation. It defines the evaluation metrics and reports the ablations for RQ1 and RQ2.
+Chapter~\ref{ch:experiments} reports the experiments. It defines the evaluation metrics and the experimental setup, including the physical system and the zero-shot transfer protocol. It then reports the ablations for RQ1 and RQ2 in simulation and on hardware, and the real-world evaluation for RQ3 on the training nut, across nut sizes and geometries, and under long-horizon stress.
 
-Chapter~\ref{ch:real} describes the hardware setup, the zero-shot transfer protocol, and the real-world evaluation for RQ3 on the training nut, across nut sizes and geometries, and under long-horizon stress.
 
 Chapter~\ref{ch:discussion} interprets the results with respect to the research questions, discusses what they mean for robotic assembly, and states the limitations of the work.
 

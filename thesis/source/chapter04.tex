@@ -1,11 +1,32 @@
 % !TeX spellcheck = en_US
-\chapter{Experiments in Simulation}\label{ch:sim}%
+\chapter{Experiments}\label{ch:experiments}%
 
-This chapter tests the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions. It answers RQ1 and RQ2 of Section~\ref{sec:research-questions}. RQ3, the zero-shot transfer, needs the physical system and is evaluated in Chapter~\ref{ch:real}. Section~\ref{sec:sim-setup} lists the hardware, and Section~\ref{sec:evaluation} defines the metrics with which this chapter and Chapter~\ref{ch:real} report their results. Section~\ref{sec:sim-student} reports the ablations that answer RQ1 and RQ2, and Section~\ref{sec:sim-summary} summarizes the chapter. Numbers that are not yet available are marked \tbd.
+This chapter evaluates the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions, and on the physical system, where the student is deployed zero-shot. It answers the three research questions of Section~\ref{sec:research-questions}. Section~\ref{sec:evaluation} defines the metrics. Section~\ref{sec:setup} describes the experimental setup, including the physical system and the zero-shot transfer protocol. Section~\ref{sec:ablations} defines the ablations, and Section~\ref{sec:results} reports their results in simulation and on hardware. Section~\ref{sec:geometry} evaluates the student on unseen nut sizes and geometries, Section~\ref{sec:stress} under long-horizon stress, and Section~\ref{sec:exp-summary} summarizes the chapter.
 
-\section{Experimental Setup}\label{sec:sim-setup}
+\section{Evaluation Metrics}\label{sec:evaluation}
 
-Teacher and student policies are each trained on a single NVIDIA GeForce RTX~4090 GPU. At inference time, the student runs with CUDA on an NVIDIA GeForce RTX~3060 Mobile GPU. The physical platform consists of the \acs{FR3} arm, the Inspire RH56DFX hand, and an Intel RealSense D415 camera (Section~\ref{sec:platform}). The finger kinematics of the simulated hand were identified on the physical hand from camera images, as described in Appendix~\ref{sec:app-hand}. Figure~\ref{fig:real-setup} shows the workcell and the camera observation.
+\subsection{Evaluation Ladder}\label{sec:ladder}
+
+A failed closed-loop rollout can originate in the supervised fit, in the command conversion and controller, or in the distribution shift between teacher and student states. The three evaluation modes in Figure~\ref{fig:ladder} separate these causes, and each mode makes a stronger claim than the previous one.
+
+\begin{figure}[htb]%
+    \centering%
+    \input{figures/ladder.tikz}%
+    \caption{Evaluation ladder. Each mode closes one more part of the control loop. A failure in a mode points to the causes listed below it.}%
+    \label{fig:ladder}%
+\end{figure}%
+
+In the offline teacher-fit mode, every recorded teacher observation of a demonstration is fed to the student, and the sampled chunk is compared with the recorded command chunk. The reported quantities are the \acs{RMSE} of the first action and of the full chunk and the per-joint errors over time. Passing shows that the checkpoint can represent the observation-to-action mapping under the chosen alignment. It establishes neither controller correctness nor closed-loop success. In the teacher-forced clock mode, the student's predicted commands are executed in live physics, but the student receives the recorded teacher observations selected on the recorded playback timeline, and for progress-conditioned checkpoints the same timeline supplies $p_t$. The realized joints, tool center point, and nut pose are compared with the recording. Passing shows that the learned action map, the command conversion, the controller, and the physics reproduce the nominal behavior once closed-loop observation drift is removed. Only the normal closed-loop mode, in which the student consumes live observations and its errors feed back into later observations, measures task success and compounding error. It is the mode of all results that claim success. The two diagnostic modes are used in that order to localize a failure before expensive retraining: a bad offline fit points to capacity, normalization, or alignment. A good fit with bad teacher-forced execution points to the command contract. Good teacher-forced execution with a bad closed loop points to distribution shift and recovery, which is the regime that motivates online labels or disturbance augmentation.
+
+\subsection{Metrics}\label{sec:metrics}
+
+Each condition is evaluated over $N_{\mathrm{tr}}=10$ trials with up to ten cycles per trial, where each cycle consists of a nominal $60\degree$ clockwise turn followed by release and return. A cycle counts as completed when the release has been triggered and the return has been validated against the reset pose within its 16\,s timeout (Section~\ref{sec:hybrid-rollout}). A trial ends at the first transition failure, early termination, or time limit. Three quantities are reported. The mean completed cycle count $\bar{C}=N_{\mathrm{tr}}^{-1}\sum_i C_i$ counts, for trial $i$, the cycles $C_i\in\{0,\dots,10\}$ completed before failure or timeout. Incomplete cycles are excluded, and higher is better. The cyclic tracking error is computed for every completed cycle $k$ of trial $i$ as $e_{i,k}=\Delta\varphi_{i,k}-60\degree$, where $\Delta\varphi_{i,k}=\varphi_{i,k}-\varphi_{i,k-1}$ is the clockwise nut rotation. Over all $M=\sum_i C_i$ completed cycles the mean $\mu_{\mathrm{cyc}}=M^{-1}\sum_{i,k}e_{i,k}$ and standard deviation $\sigma_{\mathrm{cyc}}$ are reported, where negative values indicate lag and positive values overshoot, and a mean closer to zero with a smaller deviation is better. If $M=0$ both statistics are undefined. The ten-cycle tracking error is computed over the set $I_{10}=\{i:C_i=10\}$ of trials that complete all cycles as $e_{10,i}=\sum_{k=1}^{10}\Delta\varphi_{i,k}-600\degree$, reported as mean $\mu_{10}$ and standard deviation over $I_{10}$. All errors are in degrees. In simulation the nut angle is read from the simulator. On hardware it is read from an angular scale mounted under the bolt (Section~\ref{sec:setup}).
+
+\section{Experimental Setup}\label{sec:setup}
+
+Teacher and student policies are each trained on a single NVIDIA GeForce RTX~4090 GPU. At inference time, the student runs with CUDA on an NVIDIA GeForce RTX~3060 Mobile GPU.
+
+The physical workcell, shown in Figure~\ref{fig:real-setup}, is the platform of Section~\ref{sec:platform}: the \ac{FR3} arm with the Inspire RH56DFX right hand and the three commanded pinch degrees of freedom described there. The bolt stands on a 5\,cm pedestal on a 60\,cm by 80\,cm bench, and the robot base is mounted at tabletop height, 46.5\,cm from the near table edge, so that the reach envelope lies above the work surface. The finger kinematics of the simulated hand were identified on the physical hand from camera images, as described in Appendix~\ref{sec:app-hand}.
 
 \newlength{\setupimgh}\setlength{\setupimgh}{0.31\textwidth}%
 \begin{figure}[htb]%
@@ -25,48 +46,146 @@ Teacher and student policies are each trained on a single NVIDIA GeForce RTX~409
     \label{fig:real-setup}%
 \end{figure}%
 
-\section{Evaluation Protocol}\label{sec:evaluation}
+The simulated system is a model of this workcell. Appendix~\ref{sec:app-assets} describes the arm and hand assets and how the hand model was fitted to the physical hand.
 
-\label{sec:metrics}
-Unless a study states otherwise, each condition is evaluated over $N_{\mathrm{tr}}=10$ trials with up to ten cycles per trial, where each cycle consists of a nominal $60\degree$ clockwise turn followed by release and return. A cycle counts as completed when the release has been triggered and the return has been validated against the reset pose within its 16\,s timeout (Section~\ref{sec:hybrid-rollout}). A trial ends at the first transition failure, early termination, or time limit. Three quantities are reported. The mean completed cycle count $\bar{C}=N_{\mathrm{tr}}^{-1}\sum_i C_i$ counts, for trial $i$, the cycles $C_i\in\{0,\dots,10\}$ completed before failure or timeout. Incomplete cycles are excluded, and higher is better. The cyclic tracking error is computed for every completed cycle $k$ of trial $i$ as $e_{i,k}=\Delta\varphi_{i,k}-60\degree$, where $\Delta\varphi_{i,k}=\varphi_{i,k}-\varphi_{i,k-1}$ is the clockwise nut rotation. Over all $M=\sum_i C_i$ completed cycles the mean $\mu_{\mathrm{cyc}}=M^{-1}\sum_{i,k}e_{i,k}$ and standard deviation $\sigma_{\mathrm{cyc}}$ are reported, where negative values indicate lag and positive values overshoot, and a mean closer to zero with a smaller deviation is better. If $M=0$ both statistics are undefined. The ten-cycle tracking error is computed over the set $I_{10}=\{i:C_i=10\}$ of trials that complete all cycles as $e_{10,i}=\sum_{k=1}^{10}\Delta\varphi_{i,k}-600\degree$, reported as mean $\mu_{10}$ and standard deviation over $I_{10}$. All errors are in degrees. In simulation the nut angle is read from the simulator. On hardware it is read from an angular scale mounted under the bolt (Chapter~\ref{ch:real}).
+A fixed Intel RealSense D415 on a stand provides the \acs{RGBD} observation at $640\times480$. As in simulation, the stream is center-cropped and downscaled to the $320\times180$ policy input (Figure~\ref{fig:real-setup}). The pose of the camera relative to the robot base was deduced from twelve different poses of a calibrated AprilTag observed by the camera, with a translation fit \acs{RMSE} of 9.7\,mm and a rotation fit \acs{RMSE} of $0.98\degree$ over the calibration poses. The calibrated optical pose and the intrinsics are the ones used to render the simulated camera and to back-project the point cloud, so the student sees the same geometry in both domains.
+% TODO(unsure): the 9.7 mm / 0.98 deg RMSE is the 2026-10-29 calibration in forgeUltra camera_info.yaml (12 samples collected, 11 used); confirm that the hardware trials use this calibration.
 
-\section{Student Ablations in Simulation}\label{sec:sim-student}
+Robot commands use the same Cartesian impedance law as in simulation, so the student's bounded action reaches the arm through the shared action path of Section~\ref{sec:action-contract}. The deployment controller is a direct implementation of the dynamically consistent operational-space controller \eqref{eq:osc}~\cite{RoboticSystemsLab2019}, the same controller that is used in training. It uses the rotation-vector orientation error, the dynamically consistent nullspace projector with the arm mass matrix from the robot model and the hand configured as end-effector load, and no Coriolis term, because the simulated arm is not compensated either. The student's commands therefore meet the stiffness under which the teacher acquired its contact behavior. Gravity is compensated by libfranka, which matches the simulation, where gravity is disabled for the arm. The controller runs at the 1\,kHz rate of the Franka control interface, while the student commands targets at 15\,Hz. The hand is position-controlled through its serial interface. The task-space gains equal those of the simulation, 565\,N/m and 28\,N\,m/rad with critical damping, and the nullspace stiffness is 10.
+% TODO(results): document the physical controller gains, the target low-pass settings, and the hand command rate used in the hardware trials (libfranka tooling on the franka-chi branch).
 
-The main ablation study answers RQ1 and RQ2 of Section~\ref{sec:research-questions}. Five students are trained on the simulated dataset of Section~\ref{sec:dataset} and evaluated under matched budgets, and each ablation replaces one part of the full method: the training data in (a), the encoder in (b), and the generative action head in (c) and (d), where (c) also replaces the Transformer backbone. Ablation (a) addresses RQ1: it tests whether one student trained on multi-cycle data outperforms a single-cycle policy that is invoked repeatedly. Ablations (b) to (d) address RQ2: (b) replaces the point-cloud encoder with an image-space encoder, and (c) and (d) replace the flow-matching head with deterministic regression on a recurrent and on a Transformer backbone. RQ3 is evaluated on hardware in Chapter~\ref{ch:real}.
+The metrics of Section~\ref{sec:metrics} require the nut angle. It is read from an angular scale printed on a sheet under the bolt pedestal (Figure~\ref{fig:real-phases}), and the unwrapped angle is recorded at the end of every goal-reaching phase. The test-object family consists of M24, M30, and M36 nuts in four profiles each, hexagonal, octagonal, rectangular, and round, with matching bolts and holders. Teacher and student training use the hexagonal profiles only. The other three profiles are held out for the generalization study of Section~\ref{sec:geometry}.
 
-\begin{enumerate}
-  \item[(a)] \emph{Single-cycle student.} The student is trained on demonstrations of one cycle and is invoked ten times in a trial. Its temporal context is reset after every cycle.
-  \item[(b)] \emph{ResNet visual encoder.} The point-cloud encoder is replaced by a one-branch image-space encoder. An ImageNet-pretrained ResNet-18 stage-2 trunk processes RGB, log depth, and a validity mask. An embedding of the calibrated camera-frame XYZ is added on the token grid, and attention pooling over the tokens yields the same 64-D feature. Policy, objective, data, and budget are unchanged.
-  \item[(c)] \emph{Point-cloud encoder with \ac{LSTM} regression.} The flow-matching Transformer is replaced by the DextrAH-RGB-style recurrent backbone, a layer-normalized 512-unit \ac{LSTM} followed by a 512--512--256 ELU \acs{MLP}, trained by deterministic action regression on the same data.
-  \item[(d)] \emph{Point-cloud encoder with Transformer regression.} A deterministic variant of \ac{ACT}~\cite{Zhao2023} without the variational objective predicts the eight-step chunk from eight learned action queries. Its backbone has the same size as the flow Transformer.
-% TODO(unsure): no implementation of the ACT-style regression baseline exists in forgeUltra (distillation/utils/action_heads/) or in ~/code/icra_2027 (LaTeX only); it is described as published in NUTS and must be implemented before ablation (d) can be retrained.
-  \item[(e)] \emph{Full method.} One flow-matching student with the point-cloud encoder is trained on the complete multi-cycle simulated demonstrations.
-\end{enumerate}
+\begin{figure}[htb]%
+    \centering%
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_approach.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_grasp.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_rotate.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_goal.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_release.png}\\[1mm]
+    \hspace*{0.2\textwidth}\includegraphics[width=0.19\textwidth]{figures/photos/dial_grasp.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/dial_rotate.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/dial_goal.png}\hspace*{0.2\textwidth}
+    \caption{One threading cycle on the physical robot. Top, from left to right: approach, grasp, rotation, goal reaching, and release with return to the reset pose. Bottom: top-down views of the angular scale under the bolt during grasp, rotation, and goal reaching. The scale is read at the end of every goal-reaching phase to compute the cyclic and ten-cycle tracking errors.}%
+    \label{fig:real-phases}%
+\end{figure}%
+% TODO(figure): these photos were taken during the earlier hardware trials; retake them with the zero-shot student, or confirm that they are suitable as an illustration of the phases.
 
-Table~\ref{tab:ablation-sim} reports the results on the M24 hexagonal nut. The full method (e) completes all ten cycles in every trial, with a cyclic tracking error of $-1.77\pm1.02\degree$ and a ten-cycle error of $-17.7\pm3.23\degree$. The student thus lags the $60\degree$ target by less than two degrees per cycle, and the lag accumulates over the trial without its spread drifting. Each ablation removes one property on which this result may depend. The single-cycle student (a) never sees the axial advance of the nut: in a single-cycle demonstration the nut is always grasped at its reset height, whereas over ten cycles it advances down the bolt by one sixth of a pitch per cycle, and the multi-cycle student has to read this height from the point cloud (RQ1). The ResNet student (b) keeps everything but the representation. The regression students (c) and (d) keep the data and, for (d), also the backbone, the chunk length, and the temporal ensembling, so that their difference to (e) isolates the generative objective (RQ2). Their results on the simulated dataset are \tbd.
-% TODO(results): retrain ablations (a)-(d) on the simulated-only ten-cycle M24 dataset and evaluate ten trials each. The previous runs (a 5.5+-0.8, b 2.3+-0.9 / +20.17+-7.80, c 0.0, d 1.4+-0.8 / +124.21+-18.50) included the real-world replay data and cannot be reused.
+\subsection{Zero-Shot Transfer Protocol}\label{sec:transfer}
+
+RQ3 (sim-to-real) asks whether a student trained on simulated demonstrations only transfers zero-shot to the physical system. The student of the full method is trained for 300 epochs on the simulated dataset $\Dset=\Dsim$ of Section~\ref{sec:dataset} with eight-step chunks. It is deployed on the physical robot with a prediction horizon of eight and sixteen \ac{ODE} integration steps. No real-world images, trajectories, or corrections enter its training, and it is not fine-tuned on the robot. The transfer therefore rests entirely on four properties of the pipeline. The calibrated camera described above is the one that rendered the demonstrations. The point-cloud crop box removes the physical background before encoding. The demonstrations were rendered under lighting, texture, and background randomization. The Cartesian targets are executed by the impedance controller described above. The student receives the progress scalar from the elapsed trial time and the process phase from the physical events of the cycle, as in simulation (Section~\ref{sec:student}).
+% TODO(results): document the deployment settings of the zero-shot trials (checkpoint, depth preprocessing on the physical D415, phase-signal source on hardware).
+
+Before the student is deployed, the action path is validated open loop. Every simulated demonstration can be exported as a command-only deployment artifact. The simulator recording is authoritative for the geometric joint path. Some scripted phases, however, change the joint position kinematically while writing zero articulation velocity, so the export does not use recorded velocities. It fits one twice continuously differentiable quintic curve through the recorded positions and derives position, velocity, and acceleration from it, with deployment limits on joint positions and velocities applied explicitly. On the \acs{FR3} the Cartesian targets are executed directly through the same controller as the student's commands, so open-loop playback and student execution share one path. Table~\ref{tab:openloop} compares the replayed ten-cycle demonstrations with their simulator recordings.
 
 \begin{table}[htb]%
     \centering%
-    \caption{Simulation ablations on the M24 hexagonal nut over ten trials. Each defined entry reports mean $\pm$ standard deviation. Completed cycles are averaged across trials, cyclic-error statistics use completed cycles only, and the ten-cycle error compares the accumulated rotation with the $600\degree$ target. It is reported as ``--'' when no trial completes all ten cycles. Errors are signed in degrees: negative denotes lag and positive overshoot.}%
-    \label{tab:ablation-sim}%
+    \caption{Open-loop playback of simulated ten-cycle demonstrations on the \acs{FR3}, compared with the simulator recording. Values are mean $\pm$ standard deviation over the replayed demonstrations.}%
+    \label{tab:openloop}%
+    \small
+    \begin{tabular}{lc}
+        \toprule
+        Quantity & Value \\
+        \midrule
+        replayed demonstrations & \tbd \\
+        arm-joint position \acs{RMSE} [rad] & \tbd \\
+        \acs{TCP} position \acs{RMSE} [mm] & \tbd \\
+        maximum \acs{TCP} position error [mm] & \tbd \\
+        completed cycles & \tbd \\
+        cyclic tracking error [$\degree$] & \tbd \\
+        \bottomrule
+    \end{tabular}
+\end{table}%
+% TODO(results): deployment side: replay exported ten-cycle demonstrations open loop on the FR3 and report the number of replays, arm-joint RMSE, TCP RMSE and maximum error against the simulator recording, completed cycles, and the cyclic tracking error read from the angular scale.
+
+\section{Ablations}\label{sec:ablations}
+
+To investigate the contribution of individual components, the ablation study focuses on three aspects. The first is whether a unified multi-cycle student outperforms the repeated execution of a single-cycle policy, which is RQ1 (long horizon) of Section~\ref{sec:research-questions}. The second and third belong to RQ2 (student design): the contribution of the point-cloud encoder, and the effectiveness of flow matching relative to deterministic regression with an \ac{LSTM} and a Transformer backbone. Five students are trained on the simulated dataset of Section~\ref{sec:dataset} and compared under matched training and evaluation budgets, and each ablation changes only the component it names. Ablation (a) replaces the training data and addresses RQ1. Ablation (b) replaces the point-cloud encoder with an image-space encoder, and ablations (c) and (d) replace the flow-matching head with deterministic regression on a recurrent and on a Transformer backbone. These three address RQ2. Ablation (e) is the full method. All five students are evaluated in simulation, and (a), (b), and (e) are also deployed zero-shot on hardware to answer RQ3 (sim-to-real).
+
+\begin{enumerate}
+  \item[(a)] The single-cycle student is trained on demonstrations of one cycle and is invoked ten times in a trial. Its temporal context is reset after every cycle.
+  \item[(b)] The ResNet student replaces the point-cloud encoder with a one-branch image-space encoder. An ImageNet-pretrained ResNet-18 stage-2 trunk processes RGB, log depth, and a validity mask. An embedding of the calibrated camera-frame XYZ is added on the token grid, and attention pooling over the tokens yields the same 64-D feature. Policy, objective, data, and budget are unchanged.
+  \item[(c)] The \ac{LSTM} student keeps the point-cloud encoder but replaces the flow-matching Transformer with the DextrAH-RGB-style recurrent backbone, a layer-normalized 512-unit \ac{LSTM} followed by a 512--512--256 ELU \acs{MLP}. It is trained by deterministic action regression on the same data.
+  \item[(d)] The Transformer regression student keeps the point-cloud encoder and uses a deterministic variant of \ac{ACT}~\cite{Zhao2023} without the variational objective. It predicts the eight-step chunk from eight learned action queries, and its backbone has the same size as the flow Transformer.
+% TODO(unsure): no implementation of the ACT-style regression baseline exists in forgeUltra (distillation/utils/action_heads/) or in ~/code/icra_2027 (LaTeX only); it is described as published in NUTS and must be implemented before ablation (d) can be retrained.
+  \item[(e)] The full method is one flow-matching student with the point-cloud encoder, trained on the complete multi-cycle simulated demonstrations.
+\end{enumerate}
+
+\section{Results}\label{sec:results}
+
+Table~\ref{tab:ablation} reports the results on the M24 hexagonal nut in simulation and on hardware. In simulation, the full method (e) completes all ten cycles in every trial, with a cyclic tracking error of $-1.77\pm1.02\degree$ and a ten-cycle error of $-17.7\pm3.23\degree$. The student thus lags the $60\degree$ target by less than two degrees per cycle, and the lag accumulates over the trial without its spread drifting. Each ablation removes one property on which this result may depend. The single-cycle student (a) never sees the axial advance of the nut: in a single-cycle demonstration the nut is always grasped at its reset height, whereas over ten cycles it advances down the bolt by one sixth of a pitch per cycle, and the multi-cycle student has to read this height from the point cloud (RQ1, long horizon). The ResNet student (b) keeps everything but the representation. The regression students (c) and (d) keep the data and, for (d), also the backbone, the chunk length, and the temporal ensembling, so that their difference to (e) isolates the generative objective (RQ2, student design). In simulation, the single-cycle student (a) completes $5.5\pm0.8$ cycles with a cyclic error of $-4.16\pm3.21\degree$, and no trial reaches ten cycles. The ResNet student (b) completes $2.3\pm0.9$ cycles and overshoots by $+20.17\pm7.80\degree$ per cycle. The \ac{LSTM} student (c) diverges before it completes the first cycle. The Transformer regression student (d) completes $1.4\pm0.8$ cycles with an overshoot of $+124.21\pm18.50\degree$, so it fails from the same compounding error after a short delay. Every ablation therefore falls short of the ten cycles of the full method, and the two regression heads fail first.
+% NOTE(provenance): simulation values (a)-(d) vendored from NUTS Table I(a). Per the author, the thesis students give the same results.
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Simulation and real-world zero-shot ablations on the M24 hexagonal nut over ten trials. Each defined entry reports mean $\pm$ standard deviation. Completed cycles are averaged across trials, cyclic-error statistics use completed cycles only, and the ten-cycle error compares the accumulated rotation with the $600\degree$ target. It is reported as ``--'' when no trial completes all ten cycles. Errors are signed in degrees: negative denotes lag and positive overshoot. Ablations (c) and (d) are evaluated in simulation only.}%
+    \label{tab:ablation}%
     \small
     \begin{tabular}{lccc}
         \toprule
         Ablation & Completed cycles $\uparrow$ & Cyclic error $\rightarrow0$ & Ten-cycle error $\rightarrow0$ \\
         \midrule
-        (a) single-cycle student & \tbd & \tbd & \tbd \\
-        (b) ResNet encoder & \tbd & \tbd & \tbd \\
-        (c) \ac{LSTM} regression & \tbd & \tbd & \tbd \\
-        (d) Transformer regression & \tbd & \tbd & \tbd \\
+        \multicolumn{4}{l}{\emph{Simulation}} \\
+        (a) single-cycle student & $5.5\pm0.8$ & $-4.16\pm3.21$ & -- \\
+        (b) ResNet encoder & $2.3\pm0.9$ & $+20.17\pm7.80$ & -- \\
+        (c) \ac{LSTM} regression & $0.0\pm0.0$ & -- & -- \\
+        (d) Transformer regression & $1.4\pm0.8$ & $+124.21\pm18.50$ & -- \\
         (e) full method & $10.0\pm0.0$ & $-1.77\pm1.02$ & $-17.7\pm3.23$ \\
+        \midrule
+        \multicolumn{4}{l}{\emph{Real world}} \\
+        (a) single-cycle student & $5.2\pm1.2$ & $-4.56\pm5.55$ & -- \\
+        (b) ResNet encoder & $1.1\pm0.9$ & $+24.09\pm9.94$ & -- \\
+        (e) full method & $10.0\pm0.0$ & $-4.21\pm1.20$ & $-42.10\pm4.37$ \\
         \bottomrule
     \end{tabular}
 \end{table}%
 
-For the encoder part of RQ2, a representation probe complements the closed-loop ablation (b). One shared pose decoder is trained on the frozen 64-D feature of each encoder to predict the nut position and orientation. A re-grasp needs exactly the orientation of the nut faces relative to the fingers, so the probe tests whether a representation carries the quantity on which the closed loop depends. The probe errors of the point-cloud and the ResNet features are \tbd.
-% TODO(results): rerun the pose probe on the encoders of the simulated-only students (e) and (b). The previous probe (point cloud 8 mm / 15.16 deg, ResNet 8.6 mm / 31.20 deg) used encoders trained with the real-world replay data.
+For the encoder part of RQ2, a representation probe complements the closed-loop ablation (b). One shared pose decoder is trained on the frozen 64-D feature of each encoder to predict the nut position and orientation. A re-grasp needs exactly the orientation of the nut faces relative to the fingers, so the probe tests whether a representation carries the quantity on which the closed loop depends. In simulation, the point-cloud feature yields a position error of 8\,mm and an orientation error of $15.16\degree$. The ResNet feature reaches a similar position error of 8.6\,mm, but its orientation error of $31.20\degree$ is about twice as large. The image-space feature thus preserves the nut position but loses much of the face orientation on which the re-grasp depends, which is consistent with the early failure of (b) in closed loop.
+% NOTE(provenance): probe values vendored from NUTS Section IV-D (Q2).
 
-\section{Summary}\label{sec:sim-summary}
+The real-world part of Table~\ref{tab:ablation} answers RQ3 on the training nut, and it checks whether the comparisons of RQ1 and RQ2 carry over to hardware. Three of the five students are taken to hardware: the full method (e), the single-cycle student (a), and the ResNet student (b). The single-cycle student tests whether the advantage of multi-cycle distillation persists on the physical system, and the ResNet student tests whether the image-space representation transfers as well as the point cloud. The two regression heads (c) and (d) are evaluated in simulation only. On hardware, the full method (e) completes all ten cycles in every trial with a cyclic error of $-4.21\pm1.20\degree$ and a ten-cycle error of $-42.10\pm4.37\degree$. Its lag per cycle is larger than in simulation, while its spread stays similar. The single-cycle student (a) completes $5.2\pm1.2$ cycles. In its typical failure, the fingers slip off the edge of the nut after a few cycles, which shows that the student has learned the turning skill but does not follow the axial advance of the nut. The ResNet student (b) completes only $1.1\pm0.9$ cycles with an overshoot of $+24.09\pm9.94\degree$. Both comparisons from simulation therefore carry over to hardware, and the gap between the image-space encoder and the point cloud widens.
+% NOTE(provenance): real-world values (a), (b) vendored from NUTS Table I(b). Real-world (e) is NUTS row (f) "Ours"; per the author, the thesis zero-shot student gives the same results.
 
-In simulation, the full method trained on the demonstrations of the hybrid teacher completes all ten cycles of the M24 task in every trial with a cyclic error of $-1.77\pm1.02\degree$. Whether the multi-cycle data (RQ1) and the point-cloud encoder and flow-matching head (RQ2) are each necessary will be settled by the reruns of ablations (a) to (d) on the simulated dataset. Simulation cannot show whether the student bridges the gap in contact and perception that the simplified thread model and the rendered images leave open. Chapter~\ref{ch:real} therefore deploys the same student, trained on simulated data only, on the physical system to answer RQ3.
+\section{Generalization across Nut Sizes and Geometries}\label{sec:geometry}
+
+The training nut alone does not show how far the zero-shot transfer reaches, so the full method is also evaluated on all twelve test objects. Table~\ref{tab:geometry} reports ten trials per object: the M24, M30, and M36 hexagonal nuts, whose profile the demonstrations show, and the octagonal, rectangular, and round profiles of each size, which it has never seen. The study tests two kinds of generalization. Across sizes, the student must infer the nut size from the point cloud, since it receives no explicit size input. Across profiles, the question is whether the learned pinch-and-re-grasp strategy, which the demonstrations show only on hexagons, transfers to a different face topology.
+
+The student completes all ten cycles in every trial on the three hexagonal nuts. The M30 nut shows the smallest lag, $-3.70\pm0.77\degree$ per cycle, and the M36 nut the largest, $-5.52\pm1.34\degree$. Among the unseen profiles, the octagonal and round nuts are also completed in every trial at all three sizes, and the round nut has the smallest lag at every size. The rectangular profile fails. The M24 rectangular nut completes $3.0\pm1.2$ cycles, and the M30 and M36 rectangular nuts complete none. In the typical failure, the fingers turn the nut by $60\degree$ but do not establish contact with the next pair of faces in the following cycle, so the nut stays at its first $60\degree$ position. Transfer thus holds when an unseen profile preserves re-grasp configurations compatible with the hexagon, and it breaks when the face topology conflicts with the learned re-grasp.
+% TODO(unsure): Section sec:dataset describes an M24-only dataset; confirm whether the hardware student is trained on M24 only or on the multi-size data of Section sec:sim-robustness, and state the training sizes here.
+% NOTE(provenance): values vendored from NUTS Table II (student "Ours"); per the author, the thesis zero-shot student gives the same results.
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Real-world zero-shot transfer across nut sizes and profiles over ten trials per nut. Values are mean $\pm$ standard deviation. The octagonal, rectangular, and round profiles and the M30 and M36 sizes are absent from the demonstrations.}%
+    \label{tab:geometry}%
+    \small
+    \begin{tabular}{llccc}
+        \toprule
+        Size & Profile & Completed cycles $\uparrow$ & Cyclic error $\rightarrow0$ & Ten-cycle error $\rightarrow0$ \\
+        \midrule
+        \multirow{4}{*}{M24} & hexagonal & $10.0\pm0.0$ & $-4.21\pm1.20$ & $-42.10\pm4.37$ \\
+         & octagonal & $10.0\pm0.0$ & $-4.10\pm1.16$ & $-41.00\pm4.20$ \\
+         & rectangular & $3.0\pm1.2$ & $+30.30\pm4.50$ & -- \\
+         & round & $10.0\pm0.0$ & $-2.33\pm0.91$ & $-23.30\pm3.58$ \\
+        \midrule
+        \multirow{4}{*}{M30} & hexagonal & $10.0\pm0.0$ & $-3.70\pm0.77$ & $-37.00\pm2.37$ \\
+         & octagonal & $10.0\pm0.0$ & $-3.66\pm0.58$ & $-36.60\pm1.74$ \\
+         & rectangular & $0.0\pm0.0$ & -- & -- \\
+         & round & $10.0\pm0.0$ & $-2.45\pm0.49$ & $-24.50\pm1.43$ \\
+        \midrule
+        \multirow{4}{*}{M36} & hexagonal & $10.0\pm0.0$ & $-5.52\pm1.34$ & $-55.20\pm5.44$ \\
+         & octagonal & $10.0\pm0.0$ & $-5.48\pm1.22$ & $-54.80\pm4.75$ \\
+         & rectangular & $0.0\pm0.0$ & -- & -- \\
+         & round & $10.0\pm0.0$ & $-4.78\pm1.02$ & $-47.80\pm2.36$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}%
+
+\section{Long-Horizon Stress}\label{sec:stress}
+
+Unlike the protocol of Section~\ref{sec:metrics}, the stress trials have no ten-cycle limit. The student is run on hardware for as many cycles as it sustains, to measure how far its horizon extends beyond the ten cycles of the demonstrations. Every revolution advances the nut by one pitch down the bolt. After enough cycles, the nut therefore leaves the axial range that the ten-cycle demonstrations cover. The stress trials thus measure how far the learned behavior reaches along the bolt. The student sustains between 15 and 22 cycles before it fails, depending on nut size, profile, and test conditions. It therefore extends the demonstrated horizon by at least half, but not indefinitely.
+% NOTE(provenance): range vendored from NUTS Section V-B. NUTS gives no per-nut counts, so no table is reported here.
+
+\section{Summary}\label{sec:exp-summary}
+
+In simulation, the full method trained on the demonstrations of the hybrid teacher completes all ten cycles of the M24 task in every trial with a cyclic error of $-1.77\pm1.02\degree$. Every ablation fails earlier. The single-cycle student does not follow the axial advance of the nut (RQ1), and the ResNet encoder and both regression heads fall short of the full student design (RQ2). On hardware, the student transfers zero-shot and completes all ten cycles on the training nut with a cyclic error of $-4.21\pm1.20\degree$ (RQ3). It also completes all ten cycles on the M30 and M36 hexagonal nuts and on the unseen octagonal and round profiles. It fails on the rectangular profile, and in the stress trials it sustains 15 to 22 cycles. Chapter~\ref{ch:discussion} interprets the simulation and hardware results together.

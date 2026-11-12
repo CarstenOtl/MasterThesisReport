@@ -72,6 +72,11 @@ The force channels of the teacher have the following counterparts on the physica
     \end{tabular}}
 \end{table}%
 
+\section{Robot Assets}\label{sec:app-assets}
+
+The simulated arm is the fr3\_v2 model of the \acs{FR3} from MuJoCo Menagerie. The adapter flange between arm and hand was measured on the physical robot and reproduced in the simulated asset. The hand asset starts from the URDF of the RH56DFX. Its linear mimic ratios, which approximate the linkage that couples the finger joints, were identified by a visual system identification against the physical hand rather than taken from the official URDF.
+% TODO(content): add the asset analysis here: the Menagerie quality grade of fr3_v2 (verify), the procedure of the visual system identification of the hand (images, fitted joints), the identified mimic ratios and joint limits compared with the official URDF values, and the remaining residual (see forgeUltra docs/experiments/exp_20_hw_fit_hand_teacher.md and HANDOVER.md, Inspire-hand kinematic and software-mimic calibration).
+
 \section{Finger Kinematics of the Simulated Hand}\label{sec:app-hand}
 
 The simulated hand of Section~\ref{sec:platform} is built from the vendor URDF of the RH56DFX. On the physical hand, one motor drives the proximal flexion joint of each finger and a second motor the thumb abduction, and the distal joints follow through a linkage. The URDF approximates each linkage with a linear mimic coupling, and the hand driver converts each motor register $r\in[0,1000]$, where 1000 is open and 0 is closed, into a URDF joint angle with a linear map. Both approximations decide where the fingertips are for a given command. The fingertips in turn define the grasp frame, whose origin is the midpoint of the thumb and index fingertips (Section~\ref{sec:action-contract}). This section measures the thumb and index joint angles of the physical hand from camera images, fits the couplings and register maps to them, and compares the fingertip positions of the vendor model and the fitted model with the measured ones.
