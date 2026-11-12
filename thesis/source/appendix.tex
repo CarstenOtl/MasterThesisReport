@@ -72,6 +72,117 @@ The force channels of the teacher have the following counterparts on the physica
     \end{tabular}}
 \end{table}%
 
+\section{Finger Kinematics of the Simulated Hand}\label{sec:app-hand}
+
+The simulated hand of Section~\ref{sec:platform} is built from the vendor URDF of the RH56DFX. On the physical hand, one motor drives the proximal flexion joint of each finger and a second motor the thumb abduction, and the distal joints follow through a linkage. The URDF approximates each linkage with a linear mimic coupling, and the hand driver converts each motor register $r\in[0,1000]$, where 1000 is open and 0 is closed, into a URDF joint angle with a linear map. Both approximations decide where the fingertips are for a given command. The fingertips in turn define the grasp frame, whose origin is the midpoint of the thumb and index fingertips (Section~\ref{sec:action-contract}). This section measures the thumb and index joint angles of the physical hand from camera images, fits the couplings and register maps to them, and compares the fingertip positions of the vendor model and the fitted model with the measured ones.
+
+\subsection{Method}
+
+The thumb has four joints: the abduction $q_{\mathrm{t}0}$, the actuated flexion $q_{\mathrm{t}1}$, and the coupled joints $q_{\mathrm{t}2}$ and $q_{\mathrm{t}3}$. The index has the actuated joint $q_{\mathrm{i}0}$ and the coupled joint $q_{\mathrm{i}1}$. A coupling is modeled as $q_{\mathrm{f}}=k\,q_{\mathrm{l}}+c$, where $q_{\mathrm{l}}$ is the leading joint and $q_{\mathrm{f}}$ the following one. The vendor model uses $c=0$.
+
+\paragraph{Capture.} Each sweep commands the motor registers directly, without the hand driver, and sets the force threshold of every finger to its firmware maximum so that no finger stops early. Middle, ring, and little finger stay open. The arm holds one pose for the whole sweep. At each stop, the sweep waits until no register has changed by more than two counts for 0.5\,s. It then records one $1920\times1080$ color image of the fixed workcell camera, the per-pixel median of eight aligned depth frames, and the register feedback of all fingers. A flexion sweep closes and reopens the thumb flexion in register steps of 250, with the abduction register at 250, where the thumb flexes nearly perpendicular to the line of sight of the camera. A second pass closes the thumb with the abduction register at 1000. The sweep then closes and reopens the index in steps of 200, and finally follows the pinch path of the policy toward its closed target. An abduction sweep moves the abduction register through six values from 1000 to 250 and back, at a second arm pose that views the abduction. Three sweeps are used: a flexion sweep for fitting (31 stops), a second flexion sweep held out for validation (33 stops), and an abduction sweep (11 stops).
+
+\paragraph{Joint fit per stop.} The hand meshes are posed by the forward kinematics of the arm and hand model and projected with the calibrated camera intrinsics and extrinsics. One rigid palm correction per arm pose, shared by all stops of a sweep, first absorbs the residual error of camera calibration and hand mounting. For the fitting sweep, it is $(1.2, 4.5, 1.4)$\,mm in translation and $(-1.6,-2.4,1.4)\degree$ in rotation. Then, for every stop, the joints of the thumb and of the index are fitted separately and without coupling, each finger by minimizing
+\begin{equation}\label{eq:hand-fit-cost}
+    c(\vec{q}) = \frac{1}{|V|}\sum_{p\in V}\frac{\min\left(|\hat{d}_p(\vec{q})-d_p|,\,\delta\right)}{\delta} + 0.6\,\frac{1}{|O|}\sum_{p\in O}\frac{\min\left(D_p,\,\gamma\right)}{\gamma}.
+\end{equation}
+Here $V$ is the set of pixels covered by the rendered finger and not occluded by another finger, $\hat{d}_p$ the rendered and $d_p$ the measured depth, $O$ the outline pixels of the rendered finger, and $D_p$ the image distance from pixel $p$ to the nearest edge of the color image. The caps $\delta=12$\,mm and $\gamma=18$\,px bound the influence of missing depth and of unrelated edges. A pixel without measured depth counts with the full cap. The minimization first scans the actuated joint, and for the thumb also the abduction when it is fitted, over $\pm0.4$\,rad around the vendor-model pose in steps of 0.05\,rad. A Nelder--Mead search refines the best scan point. A second pass restarts every stop from the solutions of its neighboring stops and keeps the lower cost. In the flexion sweeps, the abduction is not fitted. It is held at the value that the abduction sweep measured for the same register, because the abduction sweep views this joint better.
+
+\paragraph{Model parameters.} The couplings are least-squares lines through the fitted joint angles. The thumb couplings use the nine flexion stops at abduction register 250. The index coupling uses the seven stops with $q_{\mathrm{i}0}<0.8$\,rad, for the reason given in the results. The register maps are linear in $\tilde{r}=(1-r/1000)\,q_{\max}$, the register mapped onto the URDF joint range $[0,q_{\max}]$. The joint limits of the fitted model are the measured range of each joint, rounded outward to 0.01\,rad. The upper limit of $q_{\mathrm{i}1}$ stays at the URDF value.
+
+\paragraph{Validation.} Two checks test the fit. The first renders the hand at known joint angles and fits them from the vendor-model pose. Ten images are rendered at five register settings and two arm poses, with the true joint angles perturbed from the vendor-model pose by Gaussian noise of 0.12\,rad per joint and a further 0.1\,rad on the abduction and 0.15\,rad on $q_{\mathrm{i}1}$. The rendered depth receives Gaussian noise of 1.5\,mm and loses 5\,\% of its pixels. The starting poses are off by 0.09 to 0.15\,rad \acs{RMSE} per joint. The fit recovers the abduction, the actuated flexion joints, and $q_{\mathrm{i}1}$ to 0.002 to 0.005\,rad \acs{RMSE}, $q_{\mathrm{t}2}$ to 0.011\,rad, and $q_{\mathrm{t}3}$ to 0.028\,rad with a maximum of 0.077\,rad. The small distal thumb link is thus the least observable joint. The second check isolates the couplings. Given the measured leading joints, each coupling predicts the following joints, and the resulting fingertip positions in the palm frame are compared with the camera fit. This check runs on the fitting sweep and on the held-out sweep. Stops 30 to 32 of the held-out sweep are excluded, because thumb and index were in contact there and the index then failed to reopen.
+
+\subsection{Results}
+
+Table~\ref{tab:hand-fit-params} lists the fitted parameters next to those of the vendor model. The couplings of the thumb flexion chain and of the index differ from the vendor ratios by 6 to 26\,\%, and the register maps of all three actuated joints carry offsets. The thumb flexion coupling is nearly exactly linear, with a residual of 0.009\,rad. The distal thumb coupling is the weakest fit, with a residual of 0.031\,rad and $R^2=0.92$. For the actuated joints, opening and closing passes at the same register differ by at most 0.008\,rad, so the drives show no measurable hysteresis in free space.
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Finger kinematics of the vendor model and of the model fitted to the physical hand. The register maps give the joint angle as a function of $\tilde{r}=(1-r/1000)\,q_{\max}$, with $q_{\max}$ the URDF upper limit of the joint. The vendor maps are those of the hand driver before the fit. The residual is the standard deviation of the coupling fit. Angles in rad.}%
+    \label{tab:hand-fit-params}%
+    \small
+    \begin{tabular}{llll}
+        \toprule
+        Quantity & Vendor model & Fitted model & Residual \\
+        \midrule
+        \multicolumn{4}{l}{\emph{Register maps}} \\
+        thumb abduction $q_{\mathrm{t}0}$ & $\tilde{r}/0.75$, clipped to $[0,1.246]$ & $1.08\,\tilde{r}+0.246$ & \\
+        thumb flexion $q_{\mathrm{t}1}$ & $0.73\,\tilde{r}-0.03$, clipped to $[0,0.48]$ & $\tilde{r}-0.086$ & \\
+        index flexion $q_{\mathrm{i}0}$ & $\tilde{r}$ & $\tilde{r}-0.05$ & \\
+        \midrule
+        \multicolumn{4}{l}{\emph{Couplings}} \\
+        $q_{\mathrm{t}2}$ & $1.1425\,q_{\mathrm{t}1}$ & $1.2092\,q_{\mathrm{t}1}+0.0252$ & 0.009 \\
+        $q_{\mathrm{t}3}$ & $0.7508\,q_{\mathrm{t}2}$ & $0.5592\,q_{\mathrm{t}2}+0.0062$ & 0.031 \\
+        $q_{\mathrm{i}1}$ & $1.1169\,q_{\mathrm{i}0}$ & $0.8867\,q_{\mathrm{i}0}+0.0275$ & 0.034 \\
+        \midrule
+        \multicolumn{4}{l}{\emph{Joint limits}} \\
+        $q_{\mathrm{t}0}$ & $[0, 1.246]$ & $[0.25, 1.27]$ & \\
+        $q_{\mathrm{t}1}$ & $[0, 0.48]$ & $[-0.10, 0.38]$ & \\
+        $q_{\mathrm{t}2}$ & $[0, 0.358]$ & $[-0.11, 0.47]$ & \\
+        $q_{\mathrm{t}3}$ & $[0, 0.278]$ & $[-0.07, 0.31]$ & \\
+        $q_{\mathrm{i}0}$ & $[0, 1.333]$ & $[-0.11, 1.29]$ & \\
+        $q_{\mathrm{i}1}$ & $[0, 1.527]$ & $[-0.02, 1.527]$ & \\
+        \bottomrule
+    \end{tabular}
+\end{table}%
+
+Figures~\ref{fig:hand-fit-yaw} to~\ref{fig:hand-fit-index} overlay both models on the camera images of six stops per sweep, and Table~\ref{tab:hand-fit-tips} summarizes the fingertip errors. The thumb abduction has the largest error. The vendor map places the open thumb at 0\,rad, whereas the camera measures 0.258\,rad, and the gap closes toward full abduction, where the vendor map gives 1.246\,rad and the camera 1.263\,rad. Over the six stops, the vendor model misplaces the thumb tip by 18.3\,mm on average, and the fitted map stays within 0.016\,rad of the camera and within 4.8\,mm at the tip. In thumb flexion (Figure~\ref{fig:hand-fit-thumb}), the actuated joint of the physical thumb spans $-0.097$ to 0.374\,rad, whereas the vendor map covers 0 to 0.32\,rad, and the vendor coupling bends the outermost joint $q_{\mathrm{t}3}$ too far. The fitted model reduces the mean tip error from 8.9 to 2.1\,mm.
+
+\begin{figure}[htbp]%
+    \centering%
+    \includegraphics[width=\textwidth]{figures/hand_fit/thumb_yaw.jpg}%
+    \caption{Thumb abduction sweep on the physical hand, six stops from open (top left, register 979) to fully abducted (bottom right, register 242). Magenta outlines show the vendor model and cyan outlines the fitted model at the register of each stop, both projected into the camera image. Each label gives the fingertip distance of the vendor and the fitted model from the camera fit. Mean over the stops: 18.3\,mm for the vendor model, 3.7\,mm for the fitted model.}%
+    \label{fig:hand-fit-yaw}%
+\end{figure}%
+
+\begin{figure}[htbp]%
+    \centering%
+    \includegraphics[width=0.85\textwidth]{figures/hand_fit/thumb_flexion.jpg}%
+    \caption{Thumb flexion sweep at abduction register 250, six stops from open (register 994) through closed and back to open (register 991). Magenta outlines show the vendor model and cyan outlines the fitted model. Mean fingertip distance from the camera fit over the stops: 8.9\,mm for the vendor model, 2.1\,mm for the fitted model.}%
+    \label{fig:hand-fit-thumb}%
+\end{figure}%
+
+The index (Figure~\ref{fig:hand-fit-index}) shows the smallest register-map error. Its actuated joint lies 0.03 to 0.05\,rad below the vendor map over the closing range and 0.10\,rad below it when fully open. The vendor coupling of 1.12 overbends the distal joint, whereas the fitted coupling is 0.89. Above $q_{\mathrm{i}0}=0.8$\,rad, the measured distal angle departs from the line: at $q_{\mathrm{i}0}=1.03$\,rad the camera measures $q_{\mathrm{i}1}=1.02$\,rad where the fit predicts 0.94\,rad, and at full closure, $q_{\mathrm{i}0}=1.29$\,rad, it measures 1.42\,rad where the fit predicts 1.17\,rad. The coupling is therefore fitted below 0.8\,rad. On the pinch path of the fitting sweep, the index reached at most $q_{\mathrm{i}0}=0.52$\,rad, inside the fitted range.
+
+\begin{figure}[htbp]%
+    \centering%
+    \includegraphics[width=\textwidth]{figures/hand_fit/index_flexion.jpg}%
+    \caption{Index flexion sweep, six stops from register 800 through register 401 and back to open (register 999). Magenta outlines show the vendor model and cyan outlines the fitted model. Mean fingertip distance from the camera fit over the stops: 6.9\,mm for the vendor model, 1.4\,mm for the fitted model.}%
+    \label{fig:hand-fit-index}%
+\end{figure}%
+
+The coupling check in the lower half of Table~\ref{tab:hand-fit-tips} keeps the measured leading joints and changes only the couplings. On the held-out sweep, the fitted couplings reduce the mean thumb tip error from 5.5 to 3.9\,mm. The mean index tip error rises from 1.3 to 1.7\,mm, while its maximum falls from 4.2 to 3.8\,mm. With the measured leading joints, both index couplings thus place the fingertip within a few millimeters. Most of the 6.9\,mm index error of the vendor model in Figure~\ref{fig:hand-fit-index} therefore comes from its register map, not from its coupling.
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Fingertip distance from the camera fit in mm, mean / maximum over $n$ stops. Upper part: full models, each driven by the commanded registers, at the six stops of Figures~\ref{fig:hand-fit-yaw} to~\ref{fig:hand-fit-index}. Lower part: couplings only, applied to the measured leading joints, on the thumb flexion stops at abduction register 250, the index stops with $q_{\mathrm{i}0}\le0.85$\,rad, and the pinch stops of the fitting sweep and of the held-out sweep.}%
+    \label{tab:hand-fit-tips}%
+    \small
+    \begin{tabular}{llccc}
+        \toprule
+        Comparison & Fingertip & $n$ & Vendor model & Fitted model \\
+        \midrule
+        thumb abduction sweep & thumb & 6 & 18.3 / 23.2 & 3.7 / 4.8 \\
+        thumb flexion sweep & thumb & 6 & 8.9 / 13.7 & 2.1 / 3.9 \\
+        index flexion sweep & index & 6 & 6.9 / 8.2 & 1.4 / 3.6 \\
+        \midrule
+        couplings, fitting sweep & thumb & 20 & 5.8 / 14.8 & 4.0 / 13.1 \\
+         & index & 20 & 1.7 / 4.9 & 1.5 / 2.3 \\
+        couplings, held-out sweep & thumb & 20 & 5.5 / 14.9 & 3.9 / 12.7 \\
+         & index & 20 & 1.3 / 4.2 & 1.7 / 3.8 \\
+        \bottomrule
+    \end{tabular}
+\end{table}%
+
+\subsection{Fitted Model in Simulation}
+
+In the simulation, the fitted model replaces the couplings and joint limits of Table~\ref{tab:hand-fit-params}, so that a simulated joint angle means the physical joint angle. Geometry, masses, and the pinch ranges of the action decoder are unchanged, so the action scale stays the same. Three further changes make the simulated linkage behave like the physical one. First, each following joint tracks the measured angle of its leading joint instead of the leading joint's target. With targets, a leading joint held at its effort limit left its follower closing on its own, which a rigid linkage cannot do. Second, the drives of the following joints are stiffened to 30\,N\,m/rad and 3\,N\,m\,s/rad, from 4.76 and 0.21 for $q_{\mathrm{t}2}$ and 0.9 and 0.042 for $q_{\mathrm{t}3}$ and $q_{\mathrm{i}1}$. Third, the collision between the palm and the proximal thumb link is filtered. In the vendor model, this contact held the thumb at an abduction of 1.07\,rad when the reset commanded 1.185\,rad, an angle that the physical thumb reaches.
+
+In a reset probe with eight environments, the fitted model reached the commanded abduction of 1.185\,rad. Under a pinch command, its thumb flexion moved from 0.05 to 0.12\,rad with $q_{\mathrm{t}2}$ within 0.002\,rad of its coupling. The vendor model under the same command kept the thumb flexion at 0.025\,rad, while $q_{\mathrm{t}2}$ closed alone, 0.12\,rad away from its coupling. At reset, the two models place the thumb tip 7.7\,mm apart and the grasp-frame origin 4.0\,mm apart. A teacher trained with the same recipe and seed on both models reached a threading success rate of 0.87 on the fitted model and 0.82 on the vendor model after 200 epochs, averaged over the last ten iterations of one run each. On the fitted model, the grasp was learned about ten iterations later.
+% TODO(unsure): state which hand model the teacher and student of the reported results were trained on. The run06 teacher (2026-10-22) predates the fit (2026-11-09); the fitted model is forgeUltra's FR3_INSPIREHAND_HW_FIT=1 switch (docs/experiments/exp_20_hw_fit_hand_teacher.md). Chapter 5, Section sec:real-setup, currently says the joint limits are those of the URDF.
+
+The fit has three limits. It covers free motion only, so the compliance of the linkages under grip load is not measured. The distal thumb coupling is the least certain parameter. The index coupling is linear only below $q_{\mathrm{i}0}=0.8$\,rad.
+
 \section{Teacher Reward}\label{sec:app-reward}
 
 \begin{table}[htb]%

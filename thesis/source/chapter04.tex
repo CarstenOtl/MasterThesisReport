@@ -5,7 +5,7 @@ This chapter tests the method of Chapter~\ref{ch:method} in simulation, where ev
 
 \section{Experimental Setup}\label{sec:sim-setup}
 
-Teacher and student policies are each trained on a single NVIDIA GeForce RTX~4090 GPU. At inference time, the student runs with CUDA on an NVIDIA GeForce RTX~3060 Mobile GPU. The physical platform consists of the \acs{FR3} arm, the Inspire RH56DFX hand, and an Intel RealSense D415 camera (Section~\ref{sec:platform}). Figure~\ref{fig:real-setup} shows the workcell and the camera observation.
+Teacher and student policies are each trained on a single NVIDIA GeForce RTX~4090 GPU. At inference time, the student runs with CUDA on an NVIDIA GeForce RTX~3060 Mobile GPU. The physical platform consists of the \acs{FR3} arm, the Inspire RH56DFX hand, and an Intel RealSense D415 camera (Section~\ref{sec:platform}). The finger kinematics of the simulated hand were identified on the physical hand from camera images, as described in Appendix~\ref{sec:app-hand}. Figure~\ref{fig:real-setup} shows the workcell and the camera observation.
 
 \newlength{\setupimgh}\setlength{\setupimgh}{0.31\textwidth}%
 \begin{figure}[htb]%
