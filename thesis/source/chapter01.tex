@@ -124,7 +124,7 @@ The thesis makes the following contributions.
 
 \begin{enumerate}
   \item A formulation of cyclic nut threading as an ordered sequence of phases with explicit cyclic and episodic tracking errors, and a hybrid teacher that combines a privileged \ac{RL} policy for approach, grasp, rotation, and goal reaching with scripted controllers for release and return. The hybrid teacher generates coherent multi-cycle demonstrations with physically gated phase boundaries.
-  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Controlled single-seed design studies compare offline flow students with online \ac{DAgger} variants, privileged observations, and a joint-space action contract. The comparison with deterministic regression heads and alternative vision encoders is \tbd.
+  \item A unified visuomotor student distilled by conditional flow matching from a point-cloud representation of an aligned \acs{RGBD} view, proprioception, a global trajectory-progress scalar, and a process-phase encoding. Ablations compare it with a single-cycle student, deterministic regression heads, and an alternative vision encoder. Their results are \tbd.
   \item A zero-shot sim-to-real recipe for the student: a camera model calibrated against the physical cell, a metric point cloud cropped to the workspace, visual randomization of the rendered demonstrations, and a Cartesian action path shared by teacher, student, and robot.
   \item An evaluation of the student in simulation on the hexagonal training nut and on hardware across three nut sizes and four nut profiles, of which only the M24 hexagonal nut appears in the training data. The simulation results are reported in Chapter~\ref{ch:sim}. The hardware results are \tbd.
 \end{enumerate}
@@ -139,7 +139,7 @@ Chapter~\ref{ch:sota} provides the background that the method builds on: the thr
 
 Chapter~\ref{ch:method} presents the method, with each part answering one difficulty of Section~\ref{sec:problem-setup}: the problem formulation, the simulated system with its thread model and controller, the privileged teacher, the hybrid teacher and the generation of demonstrations, the distillation of the student by conditional flow matching, and the evaluation protocol.
 
-Chapter~\ref{ch:sim} reports the experiments in simulation. It covers teacher training, the main ablations for RQ1 and RQ2, the design ablations of the student, and the comparison of offline and online distillation.
+Chapter~\ref{ch:sim} reports the experiments in simulation. It defines the evaluation metrics and reports the ablations for RQ1 and RQ2.
 
 Chapter~\ref{ch:real} describes the hardware setup, the zero-shot transfer protocol, and the real-world evaluation for RQ3 on the training nut, across nut sizes and geometries, and under long-horizon stress.
 
