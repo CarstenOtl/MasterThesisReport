@@ -74,6 +74,24 @@ The force channels of the teacher have the following counterparts on the physica
     \end{tabular}}
 \end{table}%
 
+\section{Action Space and Controller}\label{sec:action-contract}
+
+The teacher acts in a 9-D action space. A fixed action decoder, maps each action to a Cartesian target for the hand's grasp frame and three pinch-joint targets. The student and the scripted transitions act in the same space and use the same decoder (Section~\ref{sec:hybrid-rollout}). The grasp frame has its origin at the midpoint of the thumb and index fingertips. Its $x$ axis is the thumb-to-index direction, along which the pinch closes, and its $z$ axis is the approach direction, fixed at reset in flange coordinates. The first three components set a position offset relative to a target frame placed on the tip of the bolt. Every action component is normalized to the range from $-1$ to $1$, and the position components are scaled by 50\,mm, so the raw position action deviates by at most 50\,mm per axis from this frame. Because the target is expressed relative to the bolt, the controller draws the grasped nut toward the bolt wherever nut and robot are, and a zero action does not hold the current pose. The next three components set roll, pitch, and yaw around a neutral grasp orientation, with up to $\pm57.3\degree$ in roll and pitch and a yaw range of $[-180\degree,90\degree]$, and the last three command thumb abduction, thumb flexion, and index flexion. The raw action $\vec{a}_t$ is smoothed by an exponential moving average,
+\begin{equation}\label{eq:ema}
+  \tilde{\vec{a}}_t=\vec{\alpha}\odot\vec{a}_t+(1-\vec{\alpha})\odot\tilde{\vec{a}}_{t-1},
+\end{equation}
+with $\alpha=0.0625$ for the arm components and $3\alpha$ for the finger components, so that a single command moves the filtered action by only a small fraction of its deviation and consecutive targets stay smooth. The filtered action is decoded to a desired pose $\vec{x}^{\mathrm{des}}$, and the target passed to the controller is clipped to a bounded step from the current pose $\vec{x}$,
+\begin{equation}\label{eq:steplimit}
+  \vec{x}^{\mathrm{tgt}}=\vec{x}+\operatorname{clip}\left(\vec{x}^{\mathrm{des}}-\vec{x},-\vec{\delta},\vec{\delta}\right),
+\end{equation}
+with $\delta=0.02$\,m per axis and $0.097$\,rad per Euler angle, applied at every physics step. One command therefore cannot demand a large jump. Table~\ref{tab:controller} lists the scales and limits. Both teacher and student act at 15\,Hz, while the low-level controller closes its loop at the physics rate. Simulator and timing settings are listed in Table~\ref{tab:sim-params}.
+
+The Cartesian target is tracked by an operational-space impedance controller~\cite{Khatib1987,Villani2016}. The controller makes the grasp frame behave as if it were attached to the target by a spring and a damper, so that a target placed a small distance behind a contact surface produces only a small contact force. The policy thus regulates contact forces by placing targets rather than by commanding forces, and an unexpected contact does not produce the large forces of a stiff position controller. With the geometric Jacobian $\mat{J}$ of the grasp frame, the position and axis-angle orientation error $\vec{e}\in\R^{6}$ between target and current pose, and the twist $\dot{\vec{x}}$ of the frame, the joint torques are
+\begin{equation}\label{eq:osc}
+  \vec{\tau}=\mat{J}^{\mathrm{T}}\!\left(\mat{K}_p\vec{e}-\mat{K}_d\dot{\vec{x}}\right)+\mat{N}^{\mathrm{T}}\mat{M}\!\left(\mat{K}_{p,0}(\vec{q}_0-\vec{q})-\mat{K}_{d,0}\dot{\vec{q}}\right),
+\end{equation}
+where the stiffness and damping gains $\mat{K}_p$ and $\mat{K}_d=2\sqrt{\mat{K}_p}$ are diagonal in world axes, with critical damping, and the second term pulls the redundant seventh joint of the arm toward a rest posture $\vec{q}_0$ with the posture gains $\mat{K}_{p,0}$ and $\mat{K}_{d,0}$ through the dynamically consistent nullspace projector $\mat{N}$ and the joint-space inertia $\mat{M}$~\cite{Dietrich2015,RoboticSystemsLab2019}. Section~\ref{sec:app-osc} derives this law and discusses the choice of the projector. The same law runs in simulation and on the physical \ac{FR3}. The two implementations differ only in where the model quantities $\mat{J}$ and $\mat{M}$ come from and in how gravity is handled, which Table~\ref{tab:controller} compares. The finger joints are position-controlled.
+
 \section{Operational-Space Impedance Control}\label{sec:app-osc}
 
 This section derives the impedance law \eqref{eq:osc} of Section~\ref{sec:action-contract} and explains the choice of its nullspace projector. A policy controls a robot arm through its action space, and the choice of this space decides how much of the motion the policy has to learn itself. The most direct choice is the joint space. On a seven-DoF arm, the policy outputs seven joint position targets at every step, and a joint position controller tracks them in simulation and on the hardware. The policy then learns the complete motion of the arm, including the coordination of the joints that moves the end effector to where the task needs it. Joint-space actions impose no structure on this motion and leave the policy free to explore. Grasping pipelines that train arm and hand together with \ac{RL} use them. For example, a humanoid with two seven-DoF arms learns to grasp, lift, and hand over objects with joint position targets for its arm and hand joints~\cite{Lin2025}.
@@ -234,6 +252,80 @@ In the simulation, the fitted model replaces the couplings and joint limits of T
 In a reset probe with eight environments, the fitted model reached the commanded abduction of 1.185\,rad. Under a pinch command, its thumb flexion moved from 0.05 to 0.12\,rad with $q_{\mathrm{t}2}$ within 0.002\,rad of its coupling. The vendor model under the same command kept the thumb flexion at 0.025\,rad, while $q_{\mathrm{t}2}$ closed alone, 0.12\,rad away from its coupling. At reset, the two models place the thumb tip 7.7\,mm apart and the grasp-frame origin 4.0\,mm apart. A teacher trained with the same recipe and seed on both models reached a threading success rate of 0.87 on the fitted model and 0.82 on the vendor model after 200 epochs, averaged over the last ten iterations of one run each. On the fitted model, the grasp was learned about ten iterations later. The teacher and the student of this thesis are trained on the fitted model.
 
 The fit has three limits. It covers free motion only, so the compliance of the linkages under grip load is not measured. The distal thumb coupling is the least certain parameter. The index coupling is linear only below $q_{\mathrm{i}0}=0.8$\,rad.
+
+\section{Teacher Observations and Domain Randomization}\label{sec:app-teacher-obs}
+
+Table~\ref{tab:teacher-obs} lists the actor and critic observations of the teacher of Section~\ref{sec:teacher-training}. Each fingertip force channel is the force that the thumb or index pad exerts along its pad normal, computed from the total contact force on the pad, because the physical fingertip sensors observe neither the other force components nor which body presses on them. Each torque channel is the reaction torque at one arm joint, normalized by the effort limit of that joint. Table~\ref{tab:dr} lists the domain randomization. A per-episode offset of the bolt frame models calibration error and forces the teacher to close the loop on the nut rather than on the bolt frame. The friction, thread, arm-dynamics, and start-pose randomization starts at nominal values and reaches its full range when the initial-yaw curriculum reaches $\pm30\degree$. Once the curriculum is complete, the required success hold grows from eight to twelve steps (0.53\,s to 0.8\,s).
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Actor and critic observations of the single-size M24 threading teacher. Noise is applied to the actor only. Joint torques are divided by the effort limits of 87\,N\,m (joints 1--4) and 12\,N\,m (joints 5--7).}%
+    \label{tab:teacher-obs}%
+    \resizebox{\textwidth}{!}{%
+\begin{tabular}{llcl}
+        \toprule
+        Input & Component & Dim & Noise (actor) \\
+        \midrule
+        actor (46-D) & fingertip position relative to bolt frame & 3 & $\mathcal{N}(0,0.5\,\mathrm{mm})$ per axis; bolt frame $\mathcal{N}(0,2\,\mathrm{mm})$ per reset \\
+         & fingertip quaternion (WXYZ, $w$ and $z$ zeroed) & 4 & random-axis angle $\mathcal{N}(0,0.2\degree)$ \\
+         & end-effector linear velocity & 3 & finite difference of noisy position \\
+         & end-effector angular velocity ($x$ and $y$ zeroed) & 3 & finite difference of noisy quaternion \\
+         & fingertip position relative to held nut & 3 & $\mathcal{N}(0,0.5\,\mathrm{mm})$ per axis, each body \\
+         & held-nut quaternion (WXYZ) & 4 & random-axis angle $\mathcal{N}(0,0.2\degree)$ \\
+         & target position error & 3 & inherits nut noise \\
+         & target quaternion error (WXYZ, $w\geq0$) & 4 & inherits nut noise \\
+         & grasp-phase flag & 1 & none \\
+         & thumb / index flexion force & 2 & gain $U(0.6,1.4)$, offset $U(-2,2)$\,N per reset; $\mathcal{N}(0,2\,\mathrm{N})$; $\ge0$ \\
+         & arm joint torques (normalized) & 7 & gain $U(0.8,1.2)$, offset $U(-0.02,0.02)$ per reset; $\mathcal{N}(0,0.01)$; in $[-1,1]$ \\
+         & previous filtered action (roll, pitch masked) & 9 & none \\
+        \midrule
+        critic (76-D) & fingertip position, quaternion, velocities & 13 & clean \\
+         & arm joint positions & 7 & clean \\
+         & held-nut position, position relative to bolt, quaternion & 10 & clean \\
+         & bolt position and quaternion & 7 & clean \\
+         & controller proportional gains & 6 & sampled per reset \\
+         & action smoothing factor & 1 & sampled per reset \\
+         & thumb / index flexion force & 2 & clean \\
+         & arm joint torques (normalized) & 7 & clean \\
+         & position and rotation action thresholds & 6 & sampled per reset \\
+         & target position, quaternion, progress & 8 & clean \\
+         & previous filtered action & 9 & none \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%
+
+\begin{table}[htb]%
+    \centering%
+    \caption{Domain randomization during teacher training. $U(a,b)$ denotes uniform sampling. Multiplicative factors are sampled as $1+U(0,\ell)$ or its reciprocal with equal probability. Joint torques are in units of the joint effort limits. Quantities marked $\dagger$ start at their nominal value and widen to the listed range with the initial-yaw curriculum.}%
+    \label{tab:dr}%
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lll}
+        \toprule
+        Group & Quantity & Range \\
+        \midrule
+        physics & nut mass offset & $U(-5,5)$\,g per reset \\
+         & bolt static friction & $U(0.25,1.25)$, 128 buckets, once per environment \\
+         & nut friction / finger pad friction$^{\dagger}$ & $U(0.6,1.4)$ / $U(1.0,2.0)$, once per environment \\
+         & thread resistance$^{\dagger}$ & $\times$ log-uniform in $[0.25,4]$ on the Coulomb and viscous terms \\
+         & arm joint friction / armature / damping$^{\dagger}$ & $\times U(0.8,2.0)$ / $\times U(0.7,1.3)$ / $\times U(0.7,1.3)$ of the nominal values \\
+        controller & proportional gains & multiplicative, $\ell=0.41$, per axis and reset \\
+         & action smoothing factor & $U(0.025,0.1)$ per reset; fingers $3\times$, capped at 1 \\
+         & position / rotation threshold & multiplicative, $\ell=0.25$ / $0.29$ \\
+         & dead zone & $U(0,[5,5,5,1,1,1])$ N, N\,m, resampled every 2\,s \\
+        observation & fingertip and nut position & $\mathcal{N}(0,0.5\,\mathrm{mm})$ per axis and step \\
+         & fingertip and nut orientation & random-axis angle $\mathcal{N}(0,0.2\degree)$ \\
+         & bolt frame & $\mathcal{N}(0,2\,\mathrm{mm})$ per axis and reset \\
+         & fingertip forces & gain $U(0.6,1.4)$, offset $U(-2,2)$\,N per reset; $\mathcal{N}(0,2\,\mathrm{N})$ per step; $\ge0$ \\
+         & arm joint torques & gain $U(0.8,1.2)$, offset $U(-0.02,0.02)$ per reset; $\mathcal{N}(0,0.01)$ per step; in $[-1,1]$ \\
+        reward & grip-force penalty threshold & $U(5,10)$\,N per reset \\
+        initial state & nut yaw & curriculum $0\rightarrow\pm30\degree$ in $5\degree$ steps at 80\,\% success \\
+         & nut axial height & $U(0,20)$\,mm below nominal, room for $65\degree$ reserved \\
+         & bolt position$^{\dagger}$ & $U(-5,5)$\,cm in $x$ and $y$ \\
+         & arm start pose$^{\dagger}$ & $U(-3,3)$\,cm per axis, $U(-10,10)\degree$ yaw of the grasp frame \\
+        task & target turn $\theta^{*}$ & $U(55\degree,65\degree)$ per episode \\
+        \bottomrule
+    \end{tabular}}
+\end{table}%
 
 \section{Teacher Reward}\label{sec:app-reward}
 
