@@ -71,13 +71,12 @@
     \AIRlayoutPutAtNorthWest{2.5cm}{5.5cm}{\fontfamily{phv}\fontsize{10pt}{12pt}\selectfont In collaboration with Agile Robots SE}%
 }%
 %
-% Add the industry supervisor to the title-page info table
+% Title-page info table (copied from AIRlatex.cls)
 \renewcommand{\AIRstudentthesisTitlePageFrontPageInfoTable}[4]{%
 \sffamily\fontsize{12pt}{14pt}\selectfont\noindent%
 \begin{tabular}{@{}p{0.22\textwidth}p{0.75\textwidth}}%
 	\bfseries \AIRlangGerEng{Themenstellende/r}{Supervisor} & #1\\\\%
 	\ifthenelse{\equal{#2}{}}{}{\bfseries \AIRlangGerEng{Betreuer/Betreuerin}{Advisor} & #2\\\\}% (Optional)
-	\bfseries \AIRlangGerEng{Industriebetreuer}{Industry supervisor} & Antonio Gonzales Marin, M.Sc.\newline Agile Robots SE\\\\%
 	\bfseries \AIRlangGerEng{Autor}{Author} & #3\\\\%
 	\bfseries \AIRlangGerEng{Datum}{Date} & #4 in \AIRaddressCityChair\\%
 \end{tabular}%
@@ -89,7 +88,7 @@
 \frontmatter%
 % Info: separate multiple supervisors by \newline
 % TODO(title): confirm final German/English title and submission date with the advisor.
-\AIRstudentthesisTitlePageCustomMastersThesis{Lernen langfristiger zyklischer Mutter-Gewindemontage mit einer geschickten Hand durch Policy-Destillation eines hybriden Lehrers}{Learning Long-Horizon Cyclic Nut Threading with a Dexterous Hand via Hybrid-Teacher Policy Distillation}{\AIRlangFieldOfStudyRoboticsCognitionIntelligence}{Carsten Oertel}{}{\AIRnamesProfKnoll}{Chi Zhang, M.Sc.}{\AIRutilsDate{15}{11}{2026}}%
+\AIRstudentthesisTitlePageCustomMastersThesis{Lernen langfristiger zyklischer Mutter-Gewindemontage mit einer geschickten Hand durch Policy-Destillation eines hybriden Lehrers}{Learning Long-Horizon Cyclic Nut Threading with a Dexterous Hand via Hybrid-Teacher Policy Distillation}{\AIRlangGerEng{Maschinenwesen}{Mechanical Engineering}}{Carsten Oertel}{}{\AIRnamesProfKnoll}{Chi Zhang, M.Sc.}{\AIRutilsDate{27}{11}{2026}}%
 %
 % Acknowledgments
 % ---------------
