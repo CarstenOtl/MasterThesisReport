@@ -1,14 +1,7 @@
 % !TeX spellcheck = en_US
 \chapter{Methodology}\label{ch:method}%
 
-This chapter presents the method. Section~\ref{sec:problem} formalizes cyclic nut threading. Section~\ref{sec:system} describes the simulated and physical system: the hand--arm platform, the simplified thread model that makes learning in simulation tractable, and the action contract with its controller. Section~\ref{sec:teacher} presents the privileged reinforcement-learning teacher that learns to grasp and turn the nut with the dexterous hand. Section~\ref{sec:hybrid} explains how the hybrid teacher chains this skill with scripted transitions into complete multi-cycle demonstrations, and how the visual observations of these demonstrations are collected and randomized. Section~\ref{sec:distillation} develops the central contribution, the distillation of these demonstrations into a single visuomotor student by conditional flow matching. Figure~\ref{fig:pipeline} gives an overview.
-
-\begin{figure}[htb]%
-    \centering%
-    \includegraphics[width=\textwidth]{figures/mainpipeline.pdf}%
-    \caption{The pipeline in detail. Left: the privileged \acs{RL} policy executes grasp, rotation, and goal reaching and a scripted controller executes release and reset. Chained in a loop, they form the hybrid teacher that generates the simulated demonstrations $\Dsim$. Right: the student encodes the aligned \acs{RGBD} observation into a 64-D point-cloud feature, fuses it with proprioception, the normalized global progress, and the process-phase encoding into a 256-D condition, and a conditional flow-matching Transformer predicts an eight-step action chunk.}%
-    \label{fig:pipeline}%
-\end{figure}%
+This chapter presents the method. Section~\ref{sec:problem} formalizes cyclic nut threading. Section~\ref{sec:pipeline} gives an overview of the distillation pipeline that the following sections detail. Section~\ref{sec:teacher} presents the privileged reinforcement-learning teacher that learns to grasp and turn the nut with the dexterous hand, together with the simplified thread model that makes its training in simulation tractable and the action contract that teacher, student, and robot share. Section~\ref{sec:hybrid} explains how the hybrid teacher chains this skill with scripted transitions into complete multi-cycle demonstrations, and how the visual observations of these demonstrations are collected and randomized. Section~\ref{sec:distillation} develops the central contribution, the distillation of these demonstrations into a single visuomotor student by conditional flow matching. The physical hand--arm system on which the method is deployed is described with the experimental setup in Section~\ref{sec:setup}.
 
 \section{Problem Formulation}\label{sec:problem}
 
@@ -33,35 +26,24 @@ Unless a study states otherwise, $K=10$ and $\Delta\varphi^{*}=60\degree$, which
 
 The task is partially observable at deployment, so it is a \ac{POMDP}: the \ac{MDP} of Section~\ref{sec:rl-background} is extended by an observation model $O(\vec{z}_t\mid\vec{x}_t)$, and the policy acts on observations $\vec{z}_t$ instead of states~\cite{Sutton2018}. The simulator state $\vec{x}_t$ contains the nut pose, the contact state, and the controller parameters. The student observes only an aligned \acs{RGBD} image, its proprioception, and two low-dimensional conditioning signals introduced in Section~\ref{sec:student}. A single observation is then no longer sufficient to act optimally, because the information that disambiguates the state may lie in earlier observations. The teacher--student structure of the method separates the two difficulties of this \ac{POMDP}: the teacher solves the control problem with privileged state, and the student learns to perceive and to reproduce the teacher's behavior from sensor data.
 
-\section{Simulated and Physical System}\label{sec:system}
+\section{Overview of the Distillation Pipeline}\label{sec:pipeline}
 
-The method is trained in simulation on a model of the physical hand--arm system and deployed on that system. This section describes the platform, the thread model that makes learning in simulation tractable, and the action contract that teacher, student, and robot share.
-
-\subsection{Platform}\label{sec:platform}
-
-The robot is a seven-DoF torque-controlled \ac{FR3} arm with a five-fingered Inspire RH56DFX right hand mounted on its flange (Figure~\ref{fig:platform}). The hand has twelve finger joints driven by six motors. The non-thumb fingers each have one actuated flexion joint with a mechanically coupled distal joint, and the thumb has an abduction joint and a coupled flexion chain. Only three hand degrees of freedom are commanded by the policy: thumb abduction, thumb flexion, and index flexion, which together form the pinch used for threading. The remaining fingers hold a curled posture. This restriction narrows the solution space of the dexterous hand to one grasp strategy, as difficulty~(b) of Section~\ref{sec:problem-setup} requires. The nut is threaded onto a bolt that stands on a bench in front of the robot. A fixed \acs{RGBD} camera provides the observation. Its extrinsic calibration relative to the robot base was measured on the physical cell and is reproduced in simulation.
+The policy $\pi^{*}$ of \eqref{eq:objective} is obtained in three steps, which Figure~\ref{fig:pipeline} summarizes and which follow one principle: decompose during data generation, unify at deployment. First, a privileged teacher $\piT$ is trained with \ac{RL} in simulation to execute the learned phases $\MRL$, approach, grasp, rotation, and goal reaching, from the simulator state. A simplified thread model makes this training tractable, and a shared Cartesian action contract bounds its commands. Second, the teacher is chained with the scripted controllers $\kappa$ for release and return into the hybrid teacher $\piHT$, which is rolled out in simulation to generate complete multi-cycle demonstrations $\Dsim$ under random disturbances and visual randomization. Third, the student's \acs{RGBD} observations are converted into point clouds, encoded together with the proprioceptive observations, and conditional flow matching distills the demonstrated action-chunk distribution into a single visuomotor policy that executes every phase of every cycle at deployment. Sections~\ref{sec:teacher} to~\ref{sec:distillation} describe the three steps in turn.
 
 \begin{figure}[htb]%
     \centering%
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[height=7cm]{figures/fr3_arm.png}%
-        \caption{\acs{FR3} arm.}
-    \end{subfigure}\hfill
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[height=7cm]{figures/inspire_hand.png}%
-        \caption{Inspire RH56DFX right hand.}
-    \end{subfigure}
-    \caption{The robot platform, rendered from the simulation models used in this work. In the assembled system the hand is mounted on the arm flange.}%
-    \label{fig:platform}%
+    \includegraphics[width=\textwidth]{figures/mainpipeline.pdf}%
+    \caption{The pipeline in detail. Left: the privileged \acs{RL} policy executes grasp, rotation, and goal reaching and a scripted controller executes release and reset. Chained in a loop, they form the hybrid teacher that generates the simulated demonstrations $\Dsim$. Right: the student encodes the aligned \acs{RGBD} observation into a 64-D point-cloud feature, fuses it with proprioception, the normalized global progress, and the process-phase encoding into a 256-D condition, and a conditional flow-matching Transformer predicts an eight-step action chunk.}%
+    \label{fig:pipeline}%
 \end{figure}%
 
-Both teacher and student act at 15\,Hz, while the low-level controller closes its loop at the physics rate. Simulator and timing settings are listed in Table~\ref{tab:sim-params} in the appendix.
+\section{Privileged Teacher Policy Training}\label{sec:teacher}
+
+The privileged teacher answers the dimensionality difficulty of Section~\ref{sec:difficulty-dexterity}. It learns to approach the nut, acquire the pinch grasp, keep it under load while turning, and stop at the target. Of the twelve finger joints of the hand, only three degrees of freedom are commanded, thumb abduction, thumb flexion, and index flexion, which together form the pinch used for threading. The remaining fingers hold a curled posture. This restriction narrows the solution space of the dexterous hand to one grasp strategy, as the dimensionality difficulty requires, and the arm is commanded through the six-dimensional Cartesian pose of the grasp frame. Because the teacher observes privileged simulator state, it solves this control problem without having to perceive the nut (Section~\ref{sec:problem}). This section first describes the two parts of the simulated system on which the teacher's training depends, the simplified thread model and the action contract with its controller, and then the observations, the reward, and the training of the teacher. The physical arm and hand that the simulation models are described in Section~\ref{sec:platform}.
 
 \subsection{Simplified Thread Simulation}\label{sec:thread-model}
 
-The thread model is the first answer to difficulty~(a) of Section~\ref{sec:problem-setup}: the skill is learned in simulation, so the simulated thread has to behave like a mating thread in each of the hundreds of parallel environments that \ac{PPO} needs. The default Isaac~Sim collision pipeline does not provide this, because of how it resolves contact.
+The thread model answers the contact difficulty of Section~\ref{sec:difficulty-contact}: the skill is learned in simulation, so the simulated thread has to behave like a mating thread in each of the hundreds of parallel environments that \ac{PPO} needs. The default Isaac~Sim collision pipeline does not provide this, because of how it resolves contact.
 
 PhysX, like other GPU-parallel engines, resolves contact through interpenetration (Figure~\ref{fig:depenetration}). Once the gap between two bodies falls below the contact offset, the engine creates a contact. Within one time step the bodies can sink into each other by a penetration depth $d$, and the solver then pushes them apart along the contact normal with a separating velocity that grows with $d/\Delta t$ and is capped at the maximum depenetration velocity. Contact is therefore never strictly rigid. It tolerates a small overlap, and the repulsive response grows with that overlap.
 
@@ -91,7 +73,7 @@ so that one revolution produces one pitch of axial travel. The prismatic joint t
 \begin{equation}\label{eq:friction}
   \bar{\tau}_{f,t}=-\tau_c\tanh\!\left(\frac{\omega_t}{\omega_s}\right)-c_v\,\omega_t,
 \end{equation}
-with revolute velocity $\omega_t$, Coulomb torque $\tau_c$, viscous coefficient $c_v$, and smoothing speed $\omega_s$. Table~\ref{tab:sim-params} lists the drive, friction, and pitch values. The model has one deliberate simplification beyond contact: the nut is initialized already engaged with the bolt. Thread engagement from a loose nut is a separate skill with a narrow entry configuration, and it is outside the scope of this thesis. The simplified contact opens a gap between the simulated and the physical thread, which the domain randomization of the teacher (Section~\ref{sec:teacher}) is meant to cover.
+with revolute velocity $\omega_t$, Coulomb torque $\tau_c$, viscous coefficient $c_v$, and smoothing speed $\omega_s$. Table~\ref{tab:sim-params} lists the drive, friction, and pitch values. The model has one deliberate simplification beyond contact: the nut is initialized already engaged with the bolt. Thread engagement from a loose nut is a separate skill with a narrow entry configuration, and it is outside the scope of this thesis. The simplified contact opens a gap between the simulated and the physical thread, which the domain randomization of the teacher (Section~\ref{sec:teacher-training}) is meant to cover.
 
 \begin{figure}[htb]%
     \centering%
@@ -110,13 +92,16 @@ with $\alpha=0.0625$ for the arm components and $3\alpha$ for the finger compone
 \begin{equation}\label{eq:steplimit}
   \vec{x}^{\mathrm{tgt}}=\vec{x}+\operatorname{clip}\left(\vec{x}^{\mathrm{des}}-\vec{x},-\vec{\delta},\vec{\delta}\right),
 \end{equation}
-with $\delta=0.02$\,m per axis and $0.097$\,rad per Euler angle, applied at every physics step. One command therefore cannot demand a large jump. Table~\ref{tab:controller} in the appendix lists the scales and limits.
+with $\delta=0.02$\,m per axis and $0.097$\,rad per Euler angle, applied at every physics step. One command therefore cannot demand a large jump. Table~\ref{tab:controller} in the appendix lists the scales and limits. Both teacher and student act at 15\,Hz, while the low-level controller closes its loop at the physics rate. Simulator and timing settings are listed in Table~\ref{tab:sim-params} in the appendix.
 
-The Cartesian target is tracked by the operational-space impedance controller of \eqref{eq:osc}. The stiffness and damping gains $\mat{K}_p$ and $\mat{K}_d$ are diagonal in world axes, with $\mat{K}_d=2\sqrt{\mat{K}_p}$ for critical damping, and the posture term uses the dynamically consistent nullspace projector of Section~\ref{sec:osc-background}. The same law runs in simulation and on the physical \ac{FR3}. The two implementations differ only in where the model quantities $\mat{J}$ and $\mat{M}$ come from and in how gravity is handled, which Table~\ref{tab:controller} in the appendix compares. The finger joints are position-controlled.
+The Cartesian target is tracked by an operational-space impedance controller~\cite{Khatib1987,Villani2016}. The controller makes the grasp frame behave as if it were attached to the target by a spring and a damper, so that a target placed a small distance behind a contact surface produces only a small contact force. The policy thus regulates contact forces by placing targets rather than by commanding forces, and an unexpected contact does not produce the large forces of a stiff position controller. With the geometric Jacobian $\mat{J}$ of the grasp frame, the position and axis-angle orientation error $\vec{e}\in\R^{6}$ between target and current pose, and the twist $\dot{\vec{x}}$ of the frame, the joint torques are
+\begin{equation}\label{eq:osc}
+  \vec{\tau}=\mat{J}^{\mathrm{T}}\!\left(\mat{K}_p\vec{e}-\mat{K}_d\dot{\vec{x}}\right)+\mat{N}^{\mathrm{T}}\mat{M}\!\left(\mat{K}_{p,0}(\vec{q}_0-\vec{q})-\mat{K}_{d,0}\dot{\vec{q}}\right),
+\end{equation}
+where the stiffness and damping gains $\mat{K}_p$ and $\mat{K}_d=2\sqrt{\mat{K}_p}$ are diagonal in world axes, with critical damping, and the second term pulls the redundant seventh joint of the arm toward a rest posture $\vec{q}_0$ with the posture gains $\mat{K}_{p,0}$ and $\mat{K}_{d,0}$ through the dynamically consistent nullspace projector $\mat{N}$ and the joint-space inertia $\mat{M}$~\cite{Dietrich2015,RoboticSystemsLab2019}. Appendix~\ref{sec:app-osc} derives this law and discusses the choice of the projector. The same law runs in simulation and on the physical \ac{FR3}. The two implementations differ only in where the model quantities $\mat{J}$ and $\mat{M}$ come from and in how gravity is handled, which Table~\ref{tab:controller} in the appendix compares. The finger joints are position-controlled.
 
-\section{Privileged Teacher Training}\label{sec:teacher}
+\subsection{Observations, Reward, and Training}\label{sec:teacher-training}
 
-The privileged teacher answers difficulty~(b) of Section~\ref{sec:problem-setup}. It learns to approach the nut, acquire the pinch grasp, keep it under load while turning, and stop at the target, all through the commanded hand and arm degrees of freedom of Section~\ref{sec:platform}. Because it observes privileged simulator state, it solves this control problem without having to perceive the nut (Section~\ref{sec:problem}).
 
 The teacher for the learned phases in $\MRL$ is a recurrent policy, which keeps a hidden state $\vec{h}_t$ that integrates the history of past observations. It is trained with \ac{PPO} (Section~\ref{sec:rl-background}) in an asymmetric actor--critic~\cite{Pinto2017}, in which the critic additionally receives privileged state that exists only in the simulator and cannot be measured on the hardware. This state includes the noise-free poses of the nut and bolt, the arm joint positions, and the randomized controller gains and smoothing factor of the episode (Table~\ref{tab:teacher-obs}). The actor receives only quantities with a counterpart on the physical system, with sensor noise applied. The critic enters only through the value estimates that shape the policy gradient and is discarded after training, so the privileged state informs the update of the actor without ever being an input to it. The actor observation $\vec{z}^{\pi}_t=g_\pi(\vec{x}_t,\vec{\xi}_t)$ selects the actor-visible components of the simulator state and applies observation noise $\vec{\xi}_t$. Its 46 dimensions form four groups. The pose group holds the fingertip (grasp-frame) position relative to the bolt frame and its quaternion, the end-effector linear and angular velocity, the fingertip position relative to the held nut, and the nut quaternion. The task group holds the position and quaternion error to the current turning target and a grasp-phase flag that indicates whether the proper grasp has latched. The force group holds two fingertip forces and seven arm joint torques. The last group is the previous filtered action.
 
@@ -210,9 +195,9 @@ Robustness is obtained by domain randomization of the nut mass, the contact fric
 The demonstrations of this thesis are collected with this single-size M24 teacher, which is trained from scratch with \ac{PPO} in 500 parallel environments for 200 epochs (Table~\ref{tab:ppo}). The initial-yaw range reaches $\pm30\degree$ at epoch 125, and the success rate over the last ten epochs is 0.87. At the end of training the required success hold has grown to its final twelve steps. The run takes 3.6\,h of wall-clock time.
 An earlier configuration of the same task, without the force group and without initial-yaw randomization, conditions one teacher on the M24, M30, and M36 nuts through a one-hot code and a round-robin assignment of sizes to environments.
 
-\section{Hybrid Teacher and Dataset Collection}\label{sec:hybrid}
+\section{Dataset Construction with the Hybrid Teacher}\label{sec:hybrid}
 
-The privileged teacher turns the nut once. The hybrid teacher answers the data side of difficulty~(c) of Section~\ref{sec:problem-setup}: it chains the learned turn with scripted release and return, so that each phase is specified by the mechanism that specifies it most simply, and it rolls the chain out in simulation to produce complete multi-cycle demonstrations. This section describes the cyclic rollout, the disturbance augmentation, the vision data collection, and the dataset format.
+The privileged teacher turns the nut once. The hybrid teacher answers the training side of the long-horizon difficulty of Section~\ref{sec:difficulty-horizon}: it chains the learned turn with scripted release and return, so that each phase is specified by the mechanism that specifies it most simply, and it rolls the chain out in simulation to produce complete multi-cycle demonstrations. This section describes the cyclic rollout, the disturbance augmentation, the vision data collection, and the dataset format.
 
 \subsection{Cyclic Teacher Rollout in Simulation}\label{sec:hybrid-rollout}
 
@@ -274,7 +259,7 @@ Each demonstration is materialized as one episode file with aligned 15\,Hz sampl
 
 \section{Student Policy Distillation by Conditional Flow Matching}\label{sec:distillation}
 
-The student answers the deployment side of difficulty~(c) of Section~\ref{sec:problem-setup}. The hybrid teacher cannot be deployed, because both its learned policy and its scripted controllers act on privileged simulator state \eqref{eq:hybrid}. The student replaces it with one visuomotor policy that executes every phase of every cycle from sensor data, without a phase switch or separate networks. RQ1 asks whether this unified student sustains consecutive cycles better than a single-cycle policy invoked repeatedly. RQ2 asks which student design distills the demonstrations best, and Chapter~\ref{ch:experiments} compares the design below with its ablations.
+The student answers the deployment side of the long-horizon difficulty of Section~\ref{sec:difficulty-horizon}. The hybrid teacher cannot be deployed, because both its learned policy and its scripted controllers act on privileged simulator state \eqref{eq:hybrid}. The student replaces it with one visuomotor policy that executes every phase of every cycle from sensor data, without a phase switch or separate networks. RQ1 asks whether this unified student sustains consecutive cycles better than a single-cycle policy invoked repeatedly. RQ2 asks which student design distills the demonstrations best, and Chapter~\ref{ch:experiments} compares the design below with its ablations.
 
 \subsection{Conditional Flow Matching}\label{sec:flow-matching}
 

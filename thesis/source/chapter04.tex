@@ -1,7 +1,7 @@
 % !TeX spellcheck = en_US
 \chapter{Experiments}\label{ch:experiments}%
 
-This chapter evaluates the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions, and on the physical system, where the student is deployed zero-shot. It answers the three research questions of Section~\ref{sec:research-questions}. Section~\ref{sec:evaluation} defines the metrics. Section~\ref{sec:setup} describes the experimental setup, including the physical system and the zero-shot transfer protocol. Section~\ref{sec:teacher-results} reports the teacher and the demonstrations it generates. Section~\ref{sec:ablations} defines the ablations, and Section~\ref{sec:results} reports their results in simulation and on hardware. Section~\ref{sec:geometry} evaluates the student on unseen nut sizes and geometries, Section~\ref{sec:stress} under long-horizon stress, and Section~\ref{sec:exp-summary} summarizes the chapter.
+This chapter evaluates the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions, and on the physical system, where the student is deployed zero-shot. It answers the three research questions of Section~\ref{sec:research-questions}. Section~\ref{sec:evaluation} defines the evaluation ladder and the metrics. Section~\ref{sec:setup} describes the experimental setup, including the hand--arm platform, the camera, the deployment controller, the test objects, and the zero-shot transfer protocol. Section~\ref{sec:ablations} reports the teacher and its demonstrations and defines the ablated students. Section~\ref{sec:results} reports the results in simulation and on hardware, across nut sizes and geometries, and under long-horizon stress, and Section~\ref{sec:exp-summary} summarizes the chapter.
 
 \section{Evaluation Metrics}\label{sec:evaluation}
 
@@ -24,9 +24,29 @@ Each condition is evaluated over $N_{\mathrm{tr}}=10$ trials with up to ten cycl
 
 \section{Experimental Setup}\label{sec:setup}
 
-Teacher and student policies are each trained on a single NVIDIA GeForce RTX~4090 GPU. At inference time, the student runs with CUDA on an NVIDIA GeForce RTX~3060 Mobile GPU. One inference pass, from the point-cloud construction through the sixteen integration steps of the flow head, takes 11.7\,ms on average and at most 12.0\,ms, less than a fifth of the 67\,ms control period at 15\,Hz.
+This section describes the physical system on which the student is deployed and its simulated model: the hand--arm platform, the camera and its calibration, the deployment controller, the test objects and the measurement of the nut angle, and the hardware on which the policies are trained and run. It closes with the zero-shot transfer protocol.
 
-The physical workcell, shown in Figure~\ref{fig:real-setup}, is the platform of Section~\ref{sec:platform}: the \ac{FR3} arm with the Inspire RH56DFX right hand and the three commanded pinch degrees of freedom described there. The bolt stands on a 5\,cm pedestal on a 60\,cm by 80\,cm bench, and the robot base is mounted at tabletop height, 46.5\,cm from the near table edge, so that the reach envelope lies above the work surface. The finger kinematics of the simulated hand were identified on the physical hand from camera images, as described in Appendix~\ref{sec:app-hand}.
+\subsection{Hand--Arm Platform}\label{sec:platform}
+
+The robot is a seven-DoF torque-controlled \ac{FR3} arm with a five-fingered Inspire RH56DFX right hand mounted on its flange (Figure~\ref{fig:platform}). The hand has twelve finger joints driven by six motors. The non-thumb fingers each have one actuated flexion joint with a mechanically coupled distal joint, and the thumb has an abduction joint and a coupled flexion chain. Only three hand degrees of freedom are commanded by the policies, thumb abduction, thumb flexion, and index flexion, which together form the pinch used for threading, and the remaining fingers hold a curled posture (Section~\ref{sec:teacher}). The hand is position-controlled through its serial interface, and the arm is torque-controlled through the Franka control interface at 1\,kHz. Both teacher and student command targets at 15\,Hz.
+
+\begin{figure}[htb]%
+    \centering%
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[height=7cm]{figures/fr3_arm.png}%
+        \caption{\acs{FR3} arm.}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[height=7cm]{figures/inspire_hand.png}%
+        \caption{Inspire RH56DFX right hand.}
+    \end{subfigure}
+    \caption{The robot platform, rendered from the simulation models used in this work. In the assembled system the hand is mounted on the arm flange.}%
+    \label{fig:platform}%
+\end{figure}%
+
+The physical workcell is shown in Figure~\ref{fig:real-setup}. The bolt stands on a 5\,cm pedestal on a 60\,cm by 80\,cm bench, and the robot base is mounted at tabletop height, 46.5\,cm from the near table edge, so that the reach envelope lies above the work surface. The simulated system is a model of this workcell. Appendix~\ref{sec:app-assets} describes the arm and hand assets, Appendix~\ref{sec:app-hand} describes how the finger kinematics of the simulated hand were identified on the physical hand from camera images, and Table~\ref{tab:sim-params} lists the simulator and timing settings.
 
 \newlength{\setupimgh}\setlength{\setupimgh}{0.31\textwidth}%
 \begin{figure}[htb]%
@@ -46,11 +66,15 @@ The physical workcell, shown in Figure~\ref{fig:real-setup}, is the platform of 
     \label{fig:real-setup}%
 \end{figure}%
 
-The simulated system is a model of this workcell. Appendix~\ref{sec:app-assets} describes the arm and hand assets and how the hand model was fitted to the physical hand.
+\subsection{Perception and Calibration}\label{sec:perception-setup}
 
 A fixed Intel RealSense D415 on a stand provides the \acs{RGBD} observation at $640\times480$. As in simulation, the stream is center-cropped and downscaled to the $320\times180$ policy input (Figure~\ref{fig:real-setup}). The pose of the camera relative to the robot base was deduced from twelve different poses of a calibrated AprilTag observed by the camera, with a translation fit \acs{RMSE} of 9.7\,mm and a rotation fit \acs{RMSE} of $0.98\degree$ over the calibration poses. The calibrated optical pose and the intrinsics are the ones used to render the simulated camera and to back-project the point cloud, so the student sees the same geometry in both domains.
 
-Robot commands use the same Cartesian impedance law as in simulation, so the student's bounded action reaches the arm through the shared action path of Section~\ref{sec:action-contract}. The deployment controller is a direct implementation of the dynamically consistent operational-space controller \eqref{eq:osc}~\cite{RoboticSystemsLab2019}, the same controller that is used in training. It uses the rotation-vector orientation error, the dynamically consistent nullspace projector with the arm mass matrix from the robot model and the hand configured as end-effector load, and no Coriolis term, because the simulated arm is not compensated either. The student's commands therefore meet the stiffness under which the teacher acquired its contact behavior. Gravity is compensated by libfranka, which matches the simulation, where gravity is disabled for the arm. The controller runs at the 1\,kHz rate of the Franka control interface, while the student commands targets at 15\,Hz. The hand is position-controlled through its serial interface and receives its pinch targets once per policy step, also at 15\,Hz. The task-space gains equal those of the simulation, 565\,N/m and 28\,N\,m/rad with critical damping, and the nullspace stiffness is 10 with critical damping. The targets pass through the same action smoothing as in training and no further low-pass filter, and the controller applies the step limit of Table~\ref{tab:controller} against the measured grasp pose in every 1\,kHz cycle. On top of the impedance law, the deployment controller adds a Coulomb friction feedforward of 0.3\,N\,m per joint (Section~\ref{sec:app-ctrl-additions}).
+\subsection{Deployment Controller}\label{sec:controller-setup}
+
+Robot commands use the same Cartesian impedance law as in simulation, so the student's bounded action reaches the arm through the shared action path of Section~\ref{sec:action-contract}. The deployment controller is a direct implementation of the dynamically consistent operational-space controller \eqref{eq:osc}~\cite{RoboticSystemsLab2019}, the same controller that is used in training. It uses the rotation-vector orientation error, the dynamically consistent nullspace projector with the arm mass matrix from the robot model and the hand configured as end-effector load, and no Coriolis term, because the simulated arm is not compensated either. The student's commands therefore meet the stiffness under which the teacher acquired its contact behavior. Gravity is compensated by libfranka, which matches the simulation, where gravity is disabled for the arm. The controller runs at the 1\,kHz rate of the Franka control interface, while the student commands targets at 15\,Hz. The hand receives its pinch targets once per policy step. The task-space gains equal those of the simulation, 565\,N/m and 28\,N\,m/rad with critical damping, and the nullspace stiffness is 10 with critical damping. The targets pass through the same action smoothing as in training and no further low-pass filter, and the controller applies the step limit of Table~\ref{tab:controller} against the measured grasp pose in every 1\,kHz cycle. On top of the impedance law, the deployment controller adds a Coulomb friction feedforward of 0.3\,N\,m per joint (Section~\ref{sec:app-ctrl-additions}).
+
+\subsection{Test Objects and Angle Measurement}\label{sec:objects-setup}
 
 The metrics of Section~\ref{sec:metrics} require the nut angle. It is read from an angular scale printed on a sheet under the bolt pedestal (Figure~\ref{fig:real-phases}), and the unwrapped angle is recorded at the end of every goal-reaching phase. The test-object family consists of M24, M30, and M36 nuts in four profiles each, hexagonal, octagonal, rectangular, and round, with matching bolts and holders (Figure~\ref{fig:nut-family}). Teacher and student training use the hexagonal profiles only. The other three profiles are held out for the generalization study of Section~\ref{sec:geometry}.
 
@@ -76,6 +100,10 @@ The metrics of Section~\ref{sec:metrics} require the nut angle. It is read from 
 \end{figure}%
 % TODO(figure): these photos were taken during the earlier hardware trials; retake them with the zero-shot student, or confirm that they are suitable as an illustration of the phases.
 
+\subsection{Training and Inference Hardware}\label{sec:compute-setup}
+
+Teacher and student policies are each trained on a single NVIDIA GeForce RTX~4090 GPU. At inference time, the student runs with CUDA on an NVIDIA GeForce RTX~3060 Mobile GPU. One inference pass, from the point-cloud construction through the sixteen integration steps of the flow head, takes 11.7\,ms on average and at most 12.0\,ms, less than a fifth of the 67\,ms control period at 15\,Hz.
+
 \subsection{Zero-Shot Transfer Protocol}\label{sec:transfer}
 
 RQ3 (sim-to-real) asks whether a student trained on simulated demonstrations only transfers zero-shot to the physical system. The student of the full method is trained for 100 epochs on the 36 simulated demonstrations $\Dset=\Dsim$ of Section~\ref{sec:dataset} with eight-step chunks. It is deployed on the physical robot with a prediction horizon of eight and sixteen \ac{ODE} integration steps. No real-world images, trajectories, or corrections enter its training, and it is not fine-tuned on the robot. The transfer therefore rests entirely on four properties of the pipeline. The calibrated camera described above is the one that rendered the demonstrations. The point-cloud crop box removes the physical background before encoding. The demonstrations were rendered under lighting, texture, and background randomization. The Cartesian targets are executed by the impedance controller described above. The student receives the progress scalar from the elapsed trial time and the process phase from the physical events of the cycle, as in simulation (Section~\ref{sec:student}). The progress scalar is normalized by the median demonstration duration of 98.2\,s, and the phase is published by the release proxy and the return gate of the cyclic coordinator. The deployed network uses the \acs{EMA} weights after the final epoch. The D415 depth is aligned to the color image and used raw: the spatial, temporal, and hole-filling filters of the driver are off, and depths outside the 0.01--5\,m clipping range of the simulated camera are marked invalid, as in rendering.
@@ -100,7 +128,11 @@ Figure~\ref{fig:dp3-real} shows what the point-cloud encoder receives on the phy
 
 Before the student is deployed, the shared action path is characterized on the physical arm, and Appendix~\ref{ch:app-controller} reports these measurements. The same impedance law runs in training and on the \acs{FR3}, but the two arms behind it differ: the simulated arm has no gearbox friction, whereas the physical joints show 0.2--1\,N\,m of Coulomb friction (Section~\ref{sec:app-ctrl-fit}) and a loss that grows with speed (Section~\ref{sec:app-ctrl-sweep}). Commanded to a target, the physical arm returns to it within 1.7--3.3\,mm from the same side but rests 6--9\,mm from it on average (Section~\ref{sec:app-ctrl-repeat}). The transition clip of Section~\ref{sec:app-ctrl-tclip} widens the target step during the scripted release and return. In five hardware runs with it, every return that passed the reset gate did so within 2.0--2.7\,s, and the three of these runs that re-homed between cycles completed all 12 of their cycles. Every hardware rollout is first rehearsed in ros-sim, a MuJoCo model of the workcell that runs the same ROS~2 stack and controller as the physical robot.
 
-\section{Teacher and Demonstrations}\label{sec:teacher-results}
+\section{Ablations}\label{sec:ablations}
+
+The ablation study varies one component of the pipeline at a time. Its starting point is the teacher, whose training result and demonstrations are reported first, because every student is distilled from them. The ablated students are then defined.
+
+\subsection{Teacher and Demonstrations}\label{sec:teacher-results}
 
 The teacher of Section~\ref{sec:teacher} is the starting point of the pipeline, so its result is reported before the students. Table~\ref{tab:teacher-results} summarizes the last ten of its 200 training epochs. The values are training statistics of the stochastic policy under the full randomization of Table~\ref{tab:dr}, not a separate evaluation.
 
@@ -128,7 +160,7 @@ The teacher reaches a success rate of 0.87 under the full initial-yaw range, whi
 
 Chained into the hybrid teacher, this policy produced the demonstration dataset of Section~\ref{sec:dataset}. One rollout of 16 parallel environments yielded 36 ten-cycle demonstrations with explicit teacher success, 14 of the 16 environments contributing at least one. Twenty of the 36 demonstrations contain at least one cycle that was retried from the last completed return, 40 retries in total. The demonstrations hold between 1341 and 1838 frames each, and the median demonstration lasts 98\,s.
 
-\section{Ablations}\label{sec:ablations}
+\subsection{Ablated Students}\label{sec:ablation-design}
 
 To investigate the contribution of individual components, the ablation study focuses on three aspects. The first is whether a unified multi-cycle student outperforms the repeated execution of a single-cycle policy, which is RQ1 (long horizon) of Section~\ref{sec:research-questions}. The second and third belong to RQ2 (student design): the contribution of the point-cloud encoder, and the effectiveness of flow matching relative to deterministic regression with an \ac{LSTM} and a Transformer backbone. Five students are trained on the simulated dataset of Section~\ref{sec:dataset} and compared under matched training and evaluation budgets, and each ablation changes only the component it names. Ablation (a) replaces the training data and addresses RQ1. Ablation (b) replaces the point-cloud encoder with an image-space encoder, and ablations (c) and (d) replace the flow-matching head with deterministic regression on a recurrent and on a Transformer backbone. These three address RQ2. Ablation (e) is the full method. All five students are evaluated in simulation, and (a), (b), and (e) are also deployed zero-shot on hardware to answer RQ3 (sim-to-real).
 
@@ -142,6 +174,8 @@ To investigate the contribution of individual components, the ablation study foc
 \end{enumerate}
 
 \section{Results}\label{sec:results}
+
+\subsection{Ablations in Simulation}\label{sec:results-sim}
 
 Table~\ref{tab:ablation} reports the results on the M24 hexagonal nut in simulation and on hardware. In simulation, the full method (e) completes all ten cycles in every trial, with a cyclic tracking error of $-1.77\pm1.02\degree$ and a ten-cycle error of $-17.7\pm3.23\degree$. The student thus lags the $60\degree$ target by less than two degrees per cycle, and the lag accumulates over the trial without its spread drifting. Each ablation removes one property on which this result may depend. The single-cycle student (a) never sees the axial advance of the nut: in a single-cycle demonstration the nut is always grasped at its reset height, whereas over ten cycles it advances down the bolt by one sixth of a pitch per cycle, and the multi-cycle student has to read this height from the point cloud (RQ1, long horizon). The ResNet student (b) keeps everything but the representation. The regression students (c) and (d) keep the data and, for (d), also the backbone, the chunk length, and the temporal ensembling, so that their difference to (e) isolates the generative objective (RQ2, student design). In simulation, the single-cycle student (a) completes $5.5\pm0.8$ cycles with a cyclic error of $-4.16\pm3.21\degree$, and no trial reaches ten cycles. The ResNet student (b) completes $2.3\pm0.9$ cycles and overshoots by $+20.17\pm7.80\degree$ per cycle. The \ac{LSTM} student (c) diverges before it completes the first cycle. The Transformer regression student (d) completes $1.4\pm0.8$ cycles with an overshoot of $+124.21\pm18.50\degree$, so it fails from the same compounding error after a short delay. Every ablation therefore falls short of the ten cycles of the full method, and the two regression heads fail first.
 % NOTE(provenance): simulation values (a)-(d) vendored from NUTS Table I(a). Per the author, the thesis students give the same results.
@@ -173,10 +207,12 @@ Table~\ref{tab:ablation} reports the results on the M24 hexagonal nut in simulat
 For the encoder part of RQ2, a representation probe complements the closed-loop ablation (b). One shared pose decoder is trained on the frozen 64-D feature of each encoder to predict the nut position and orientation. A re-grasp needs exactly the orientation of the nut faces relative to the fingers, so the probe tests whether a representation carries the quantity on which the closed loop depends. In simulation, the point-cloud feature yields a position error of 8\,mm and an orientation error of $15.16\degree$. The ResNet feature reaches a similar position error of 8.6\,mm, but its orientation error of $31.20\degree$ is about twice as large. The image-space feature thus preserves the nut position but loses much of the face orientation on which the re-grasp depends, which is consistent with the early failure of (b) in closed loop.
 % NOTE(provenance): probe values vendored from NUTS Section IV-D (Q2).
 
+\subsection{Zero-Shot Transfer on the Training Nut}\label{sec:results-real}
+
 The real-world part of Table~\ref{tab:ablation} answers RQ3 on the training nut, and it checks whether the comparisons of RQ1 and RQ2 carry over to hardware. Three of the five students are taken to hardware: the full method (e), the single-cycle student (a), and the ResNet student (b). The single-cycle student tests whether the advantage of multi-cycle distillation persists on the physical system, and the ResNet student tests whether the image-space representation transfers as well as the point cloud. The two regression heads (c) and (d) are evaluated in simulation only. On hardware, the full method (e) completes all ten cycles in every trial with a cyclic error of $-4.21\pm1.20\degree$ and a ten-cycle error of $-42.10\pm4.37\degree$. Its lag per cycle is larger than in simulation, while its spread stays similar. The single-cycle student (a) completes $5.2\pm1.2$ cycles. In its typical failure, the fingers slip off the edge of the nut after a few cycles, which shows that the student has learned the turning skill but does not follow the axial advance of the nut. The ResNet student (b) completes only $1.1\pm0.9$ cycles with an overshoot of $+24.09\pm9.94\degree$. Both comparisons from simulation therefore carry over to hardware, and the gap between the image-space encoder and the point cloud widens.
 % NOTE(provenance): real-world values (a), (b) vendored from NUTS Table I(b). Real-world (e) is NUTS row (f) "Ours"; per the author, the thesis zero-shot student gives the same results.
 
-\section{Generalization across Nut Sizes and Geometries}\label{sec:geometry}
+\subsection{Generalization across Nut Sizes and Geometries}\label{sec:geometry}
 
 The training nut alone does not show how far the zero-shot transfer reaches, so the full method is also evaluated on all twelve test objects (Figure~\ref{fig:nut-family}). Table~\ref{tab:geometry} reports ten trials per object: the M24, M30, and M36 hexagonal nuts, whose profile the demonstrations show, and the octagonal, rectangular, and round profiles of each size, which it has never seen. The study tests two kinds of generalization. Across sizes, the student must infer the nut size from the point cloud, since it receives no explicit size input. Across profiles, the question is whether the learned pinch-and-re-grasp strategy, which the demonstrations show only on hexagons, transfers to a different face topology.
 
@@ -210,7 +246,7 @@ The student completes all ten cycles in every trial on the three hexagonal nuts.
     \end{tabular}
 \end{table}%
 
-\section{Long-Horizon Stress}\label{sec:stress}
+\subsection{Long-Horizon Stress}\label{sec:stress}
 
 Unlike the protocol of Section~\ref{sec:metrics}, the stress trials have no ten-cycle limit. The student is run on hardware for as many cycles as it sustains, to measure how far its horizon extends beyond the ten cycles of the demonstrations. Every revolution advances the nut by one pitch down the bolt. After enough cycles, the nut therefore leaves the axial range that the ten-cycle demonstrations cover. The stress trials thus measure how far the learned behavior reaches along the bolt. The student sustains between 15 and 22 cycles before it fails, depending on nut size, profile, and test conditions. It therefore extends the demonstrated horizon by at least half, but not indefinitely.
 % NOTE(provenance): range vendored from NUTS Section V-B. NUTS gives no per-nut counts, so no table is reported here.

@@ -5,7 +5,7 @@
 
 \begin{table}[htb]%
     \centering%
-    \caption{Simulation settings, thread model, and simulated hand of Section~\ref{sec:system}.}%
+    \caption{Simulation settings, thread model, and simulated hand of Section~\ref{sec:teacher}.}%
     \label{tab:sim-params}%
     \resizebox{\textwidth}{!}{%
 \begin{tabular}{ll}
@@ -73,6 +73,49 @@ The force channels of the teacher have the following counterparts on the physica
         \bottomrule
     \end{tabular}}
 \end{table}%
+
+\section{Operational-Space Impedance Control}\label{sec:app-osc}
+
+This section derives the impedance law \eqref{eq:osc} of Section~\ref{sec:action-contract} and explains the choice of its nullspace projector. A policy controls a robot arm through its action space, and the choice of this space decides how much of the motion the policy has to learn itself. The most direct choice is the joint space. On a seven-DoF arm, the policy outputs seven joint position targets at every step, and a joint position controller tracks them in simulation and on the hardware. The policy then learns the complete motion of the arm, including the coordination of the joints that moves the end effector to where the task needs it. Joint-space actions impose no structure on this motion and leave the policy free to explore. Grasping pipelines that train arm and hand together with \ac{RL} use them. For example, a humanoid with two seven-DoF arms learns to grasp, lift, and hand over objects with joint position targets for its arm and hand joints~\cite{Lin2025}.
+
+The alternative moves part of the motion into a controller that runs both during training and at deployment. The policy then commands a target in the operational space, the space in which the task is described~\cite{Khatib1987}. For assembly, this is the six-dimensional pose of the end effector, its position and orientation in Cartesian space, and the controller computes the joint torques that move the end effector toward the commanded pose. The action space shrinks from the number of joints to six dimensions, and it is expressed in the coordinates of the task, for example relative to a bolt. With an impedance controller in end-effector space, \ac{RL} learns contact-rich tasks with fewer samples than with joint-space actions~\cite{MartinMartin2019}.
+
+Impedance is the second reason for this choice. A stiff position controller drives through an unexpected contact and can produce forces that damage the robot or the parts. An impedance controller instead makes the end effector behave as if it were attached to the target by a spring and a damper~\cite{Villani2016}. In steady contact, the force on the environment equals the stiffness times the deviation of the end effector from its target, so a small target offset produces only a small force. This protects the robot and the environment. It also gives the policy a way to apply force: a target that lies a small distance behind a contact surface presses the end effector against the surface with the stiffness times that distance. The policy thus regulates contact forces by placing targets, without commanding forces directly.
+
+Task-space motion control with torque inputs and impedance control are treated in standard references~\cite{Lynch2017,Chung2016,Villani2016}. Impedance control is simplest in joint space. Assuming that gravity is compensated, the law
+\begin{equation}\label{eq:joint-impedance}
+  \vec{\tau}=\mat{K}_{q}\left(\vec{q}_{\mathrm{ref}}-\vec{q}\right)-\mat{D}_{q}\dot{\vec{q}}
+\end{equation}
+makes every joint behave like a spring with stiffness $\mat{K}_{q}$ and a damper with damping $\mat{D}_{q}$ around its reference $\vec{q}_{\mathrm{ref}}$, where $\vec{q}$ are the joint positions (Figure~\subref*{fig:impedance-model-joint}). The spring then acts on the joints, not on the end effector, and the stiffness felt at the end effector changes with the arm configuration. Operational-space impedance control instead defines the spring and the damper directly in the six-dimensional task space and maps them to the joints with the Jacobian. Joint space and operational space are related by the forward kinematics
+\begin{equation}\label{eq:fk}
+  \vec{x}=\vec{f}(\vec{q}),
+\end{equation}
+which gives the pose $\vec{x}$ of a frame on the robot for the joint positions $\vec{q}$. The Jacobian is the derivative of this map, $\mat{J}(\vec{q})=\partial\vec{f}/\partial\vec{q}\in\R^{6\times7}$. By the chain rule, it relates the velocities in the two spaces,
+\begin{equation}\label{eq:jacobian}
+  \dot{\vec{x}}=\frac{\partial\vec{f}}{\partial\vec{q}}\,\frac{\mathrm{d}\vec{q}}{\mathrm{d}t}=\mat{J}(\vec{q})\,\dot{\vec{q}}.
+\end{equation}
+The relation is linear in the joint velocities, but the Jacobian itself changes with the configuration. For the orientation, the time derivative of a parameterization such as Euler angles is not the angular velocity of the frame. Controllers therefore use the geometric Jacobian, which maps the joint velocities to the twist $\dot{\vec{x}}$ of the frame, its linear and angular velocity~\cite{Lynch2017}. By the principle of virtual work, its transpose maps a wrench $\vec{F}$ at the frame to the joint torques that produce it, $\vec{\tau}=\mat{J}^{\mathrm{T}}\vec{F}$~\cite{Lynch2017}. The frame can be any point on the robot, for example the point between the fingertips at which the hand holds the nut. A virtual spring and damper at this frame (Figure~\subref*{fig:impedance-model-task}), $\vec{F}=\mat{K}_p\vec{e}-\mat{K}_d\dot{\vec{x}}$ with the position and axis-angle orientation error $\vec{e}\in\R^6$ between target and current pose, therefore translates directly into joint torques, and the controller computes them at every step from the current Jacobian. On the seven-DoF arm, the six task dimensions leave one redundant degree of freedom, which the second term of \eqref{eq:osc} controls by pulling the joints toward a rest posture through the nullspace projector $\mat{N}$.
+
+\begin{figure}[htb]%
+    \centering%
+    % Source: figures/JointImpendanceControllerModel.svg and figures/ImpendanceControllerModel.svg, exported to PDF with Inkscape.
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/JointImpendanceControllerModel.pdf}
+        \caption{Joint-space impedance.}
+        \label{fig:impedance-model-joint}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ImpendanceControllerModel.pdf}
+        \caption{Operational-space impedance.}
+        \label{fig:impedance-model-task}
+    \end{subfigure}
+    \caption{Impedance control, illustrated on a planar arm with three joints. (a) A virtual spring and damper with stiffness $k_1,k_2,k_3$, the diagonal entries of $\mat{K}_q$, act directly on each joint, pulling it toward its reference $q_{\mathrm{ref}}$. (b) A virtual spring and damper with stiffness $k_x,k_y,k_\varphi$ and damping $d_x,d_y,d_\varphi$, the diagonal entries of $\mat{K}_p$ and $\mat{K}_d$, act on the controlled end-effector frame along each task direction instead. The resulting wrench $(F_x,F_y,M_z)$ is mapped to the joint torques $\tau_1,\tau_2,\tau_3$ through $\mat{J}^{\mathrm{T}}$.}%
+    \label{fig:impedance-model}%
+\end{figure}%
+
+The nullspace projector decides how strongly the posture term interferes with the task. It is dynamically consistent when $\mat{N}^{\mathrm{T}}=\mat{I}-\mat{J}^{\mathrm{T}}\bar{\mat{J}}^{\mathrm{T}}$ with the inertia-weighted pseudoinverse $\bar{\mat{J}}=\mat{M}^{-1}\mat{J}^{\mathrm{T}}(\mat{J}\mat{M}^{-1}\mat{J}^{\mathrm{T}})^{-1}$ and joint-space inertia $\mat{M}$~\cite{Dietrich2015,RoboticSystemsLab2019}. Torques in the nullspace then produce no acceleration of the controlled frame. A projector built from a pseudoinverse of the Jacobian without inertia weighting needs no inertia model, but it decouples the nullspace from the task only statically, so that posture torques can still disturb the task during motion~\cite{Dietrich2015}. The controllers in simulation and on the physical robot both use the dynamically consistent projector (Section~\ref{sec:setup}). Equation~\eqref{eq:osc} is the Factory and FORGE controller~\cite{Narang2022,Noseworthy2025}. Scaling the spring and damper term by the task-space inertia $\mat{\Lambda}=(\mat{J}\mat{M}^{-1}\mat{J}^{\mathrm{T}})^{-1}$ and compensating the nonlinear dynamics yields the full operational-space formulation, in which the closed loop becomes a decoupled unit-mass system in every task direction~\cite{Lynch2017}.
 
 \section{Robot Assets}\label{sec:app-assets}
 

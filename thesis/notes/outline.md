@@ -17,162 +17,81 @@ Working document for the logic of the thesis, top to bottom. Each section has a 
 
 ## 1. Introduction
 
-Goal: lead a reader with an engineering background from "why threading matters" to "why it is hard for a robot" to "how this thesis solves it". This chapter sets the tone for all later reasoning.
+Goal: lead a reader with an engineering background from "why threading matters" to "why it is hard for a robot" to the research questions, and only then to the approach. Structure after the advisor's review (November 2026): problem, then research questions, then approach and contributions together.
 
-### 1.1 Motivation: threaded joints in assembly
+### 1.1 Motivation
 
-What a threaded joint is and why it matters in assembly: it can be released again (field assembly, disassembly, maintenance, adjustment), its threads are standardized, and the thread turns a large rotation into a small axial travel, so assembling the joint means turning the nut along the thread. Kept to one paragraph, using only the verified claims in [threading_sources.md](threading_sources.md).
+Threaded joints in assembly, how threading is automated today and where that stops working, the vision of dexterous robots in a world built for humans, Moravec's paradox. Formal register, no colloquial examples.
 
-Then: how threading is automated today (nutrunners, screwdriving spindles, fixtures, parts presented in a fixed pose) and where that stops working (varying parts, unstructured cells, small batches, maintenance and disassembly). This leads to the vision: dexterous hands that use the same parts and tools as people, so that robots can help in manufacturing and assembly in a world built for humans.
+### 1.2 Problem Statement
 
-Handover: if a dexterous robot should thread, it has to learn the skill. How?
+Four difficulties with scientific subsection titles. Each ends with the requirement it puts on the method.
 
-Sources: Niemann et al. (Maschinenelemente 1, Ch. 10) and Shigley (Ch. 8). Only verified claims are used; see [threading_sources.md](threading_sources.md).
-Figure placeholder instead of a statistic: one figure with three or four examples of how threading is automated today (for example a handheld or stationary nutrunner, a multi-spindle station, a robot with a screwdriving end effector, a fixture that presents the part in a fixed pose). In the .tex: a `\fbox` filler per panel and a `% TODO(figure)` note. Images need a license or a citable source; manufacturer press images usually allow this with attribution.
+- 1.2.1 Contact Explosion in Thread Simulation: thousands of contacts, SDF contact (Factory), penetration-based solvers, exploitable shortcut through the flanks. Requirement: a cheap, non-exploitable thread model.
+- 1.2.2 Curse of Dimensionality of a Multi-Fingered Hand: action-space dimension, solution space of grasp strategies, grasp acquisition and release that parallel-jaw systems avoid. Requirement: one learned hand-arm policy narrowed to the pinch.
+- 1.2.3 Compounding Error in a Long-Horizon Cyclic Task: definition, relevance, compounding error, transitions, reward shaping and credit assignment, policy chaining and whole-task imitation as the two answers. Requirement: a per-phase training signal and one deployable policy.
+- 1.2.4 Sim-to-Real Transfer without Real-World Data: contact, perception, and actuation gaps, cost of real data. Requirement: a transfer recipe without real data.
 
-### 1.2 Problem: how can a robot learn threading?
+Closes with the research gap (no prior work threads over many grasp-and-release cycles with a dexterous hand from simulated data alone).
 
-Three difficulties, each in its own short subsection or paragraph group. Each ends with the requirement it puts on the method.
+### 1.3 Research Questions
 
-**(a) Learning in simulation and transferring zero-shot.**
-Learning on hardware is slow and unsafe, so the skill is learned in simulation. Thread contact is among the hardest things to simulate: engaged threads produce thousands of simultaneous contacts, and faithful simulation is too expensive for the parallel rollouts that RL needs. Any simplification opens a gap in contact and perception that the transfer has to close.
-Requirement: a tractable thread model and a transfer recipe that needs no real data.
+RQ1 (long horizon), RQ2 (policy design), RQ3 (sim-to-real), each tied to the difficulty it follows from. Phrased at the level of the problem, not of the method.
 
-**(b) Threading with a dexterous hand.**
-A multi-fingered hand on an arm has a high-dimensional action space, and the task has a huge solution space: people thread with a single finger, a pinch, or a multifingered grasp depending on resistance. Exploration and reward design become hard, and the grasp has to be acquired, kept under load, and released, which parallel-jaw systems with a pre-grasped nut avoid.
-Requirement: a learned policy that controls the hand, with the solution space narrowed to one grasp strategy (pinch).
+### 1.4 Approach and Contributions
 
-**(c) Threading as a long-horizon cyclic task.**
-What a long-horizon cyclic task is: a fixed sequence of phases repeated many times while the task state advances (here approach, grasp, turn, release, return, while the nut rises by a fraction of a pitch each cycle). Why such tasks are relevant: much of assembly and everyday manipulation is repetitive (threading, screwing, cranking, winding, wiping). Why they are difficult: errors compound across cycles, transitions between phases are where failures occur, reward shaping and credit assignment over the whole horizon break down for a single RL policy, and policy chaining moves the problem to the transitions and leaves several policies at deployment.
-Requirement: a training signal that is easy to specify per phase, and one deployable policy that sustains many cycles.
+One paragraph on decompose-during-data-generation, unify-at-deployment, mapped to the four difficulties, plus the teaser figure. Exactly three contributions, each with a one-clause "how": (1) hybrid teacher for cyclic threading, (2) unified flow-matching student with ablations, (3) zero-shot sim-to-real recipe and hardware evaluation. Attribution to the advisor.
 
-Handover to 1.3: the three requirements together point to one approach, decomposing the task into a hybrid privileged teacher for data generation and unifying it in one student for deployment. No hardware and no implementation numbers (robot model, turn angle, cycle count) appear here.
-
-**[open]** Second alternative to policy chaining to name in (c). Citations for each claim; search `library.bib` first.
-
-### 1.3 Approach
-
-The three requirements lead to the method in one paragraph and the teaser figure: a simplified kinematic thread model makes PPO feasible; a privileged RL teacher learns the pinch-grasp turn; scripted release and return chain it into multi-cycle demonstrations (decompose during data generation); one flow-matching student distills them and runs the whole cycle from RGB-D (unify at deployment); a calibrated camera model, a metric point cloud, and visual randomization carry it to hardware without real data.
-
-### 1.4 Research Questions
-
-Three questions, aligned with the ablation questions of the NUTS paper (Sec. IV.C):
-
-- RQ1 (long horizon): Does one student distilled from complete multi-cycle demonstrations sustain consecutive threading cycles better than a single-cycle policy invoked repeatedly? (NUTS Q1)
-- RQ2 (student design): Which student design distills the hybrid-teacher demonstrations into a policy that sustains the cyclic task: a flow-matching action head compared with deterministic regression (LSTM, Transformer), and a point-cloud encoder compared with an image-space encoder? (NUTS Q2 and Q3 merged)
-- RQ3 (sim-to-real): Can a student trained on simulated demonstrations only transfer zero-shot to the physical system? (Replaces NUTS Q4)
-
-No mention of the exposé.
-
-**Deliberate divergence from NUTS on RQ3.** NUTS closes the sim-to-real gap with human-corrected real-world replays (its Q4). The thesis instead asks whether the gap can be closed without any real data. The thesis has to deal with the paper's evidence: there, the sim-only student (ablation e) completed only 2.1 ± 1.4 cycles on hardware. Chapter 3.4 must state what changed in the sim-only pipeline since then (camera calibration, visual randomization, metric crop, encoder pretraining), and Chapter 5 must report the new zero-shot trials against that baseline, whatever the outcome.
-
-**[open]** All NUTS ablation numbers for (a) to (d) used the real-world-augmented data set and must be rerun on the sim-only data before they can answer RQ1 and RQ2 (already a TODO in Chapter 4).
-
-### 1.5 Contributions
-
-1. A formulation of cyclic nut threading as a phase sequence with cyclic and episodic tracking errors, and a hybrid teacher that generates multi-cycle demonstrations with physically gated phase boundaries.
-2. A unified visuomotor student distilled by conditional flow matching, with a systematic ablation of its components.
-3. A zero-shot sim-to-real recipe: calibrated camera model, metric point cloud, visual randomization, shared Cartesian action path.
-4. An evaluation in simulation and on hardware across nut sizes and geometries.
-
-Plus attribution to the semester thesis and the advisor.
-
-### 1.6 Outline
-
-One paragraph per chapter.
-
-Handover: the reader knows why threading matters, the three difficulties, the approach, and the questions.
+### 1.5 Outline
 
 ## 2. State of the Art
 
-Goal: background needed for the method, and the related work ordered along the three difficulties.
+Goal: only the theories the method uses, then related work along the four difficulties. Operational-space control is engineering and lives in Appendix A (`sec:app-osc`); the impedance law itself is stated in 3.3.2.
 
 ### 2.1 Theoretical Background
 
-- Threaded joints and the thread geometry needed later (pitch, axial advance per revolution, self-locking friction). Short, only what the thread model uses.
-- RL with privileged information: PPO, asymmetric actor-critic.
-- Imitation learning and compounding error: behavior cloning, DAgger.
-- Generative action heads: diffusion and conditional flow matching.
-- Visual representations for manipulation: point clouds versus image encoders; the DP3 point-cloud encoder (`Ze2024`).
-- Operational-space control: the impedance law of the action path, from the textbooks: Modern Robotics, Ch. 11.4 "Motion Control with Torque or Force Inputs" (`Lynch2017`), and the Springer Handbook of Robotics, Ch. 8 "Motion Control" (`Chung2016`) and Ch. 9 "Force Control" (`Villani2016`); null space projections (`Dietrich2015`). This also grounds the difference between the dynamically consistent projector in simulation and the damped pseudoinverse projector on the real robot (Chapter 5).
+- 2.1.1 Reinforcement Learning for the Privileged Teacher: MDP, policy gradient, actor-critic, GAE, asymmetric critic, PPO, reward shaping.
+- 2.1.2 Imitation Learning and Policy Distillation: BC, compounding error, DAgger, teacher-student distillation (offline vs online), action chunking and temporal ensembling, multimodality.
+- 2.1.3 Conditional Flow Matching and Its Relation to Diffusion Policy: generative heads, Diffusion Policy, flow-matching objective, straight vs curved paths, head on a backbone.
+- 2.1.4 Simulation of Threaded Contact: pitch and axial advance, contact count, SDF contact, penetration-based resolution, hand-over to the kinematic thread model of 3.3.1.
 
 ### 2.2 Related Work
 
-- Robotic assembly and threading: classical automation, Factory, FORGE, IndustReal, dexterous threading and screwing (DexScrew, Play2Perfect).
-- Dexterous manipulation with learned policies.
-- Sim-to-real transfer for contact-rich manipulation.
-- Long-horizon tasks and policy chaining.
-- Teacher-student and visuomotor distillation.
-
-Handover: no prior work threads a nut over many cycles with learned grasping and re-grasping on a dexterous hand.
+- 2.2.1 Learning-Based Robotic Assembly and Fastening
+- 2.2.2 Dexterous Manipulation with Multi-Fingered Hands
+- 2.2.3 Visual Representations for Visuomotor Policies
+- 2.2.4 Policy Chaining in Long-Horizon Tasks
+- 2.2.5 Distillation of Privileged Teachers into Visuomotor Policies
+- 2.2.6 Research Gap
 
 ## 3. Methodology
 
-Goal: present the method so that each part visibly answers one difficulty of Section 1.2.
+Mirrors the NUTS paper (Sec. III). No hardware description here; the platform is in 4.2.
 
-### 3.1 Problem Formulation
+- 3.1 Problem Formulation: phase sequence, cyclic and episodic tracking errors, objective, POMDP.
+- 3.2 Overview of the Distillation Pipeline: the three steps and the pipeline figure.
+- 3.3 Privileged Teacher Policy Training: 3.3.1 Simplified Thread Simulation, 3.3.2 Action Contract and Controller (impedance law `eq:osc`, derivation in Appendix A), 3.3.3 Observations, Reward, and Training.
+- 3.4 Dataset Construction with the Hybrid Teacher: cyclic rollout, disturbance augmentation, vision data collection, dataset format.
+- 3.5 Student Policy Distillation by Conditional Flow Matching: objective, architecture, offline training.
 
-Phase sequence, cyclic and episodic tracking errors, objective, partial observability.
+## 4. Experiments
 
-### 3.2 System
+Mirrors the NUTS paper (Sec. IV).
 
-Hand-arm platform; simplified thread simulation (answers difficulty a); shared action contract and impedance controller.
+- 4.1 Evaluation Metrics: evaluation ladder, metrics.
+- 4.2 Experimental Setup: hand-arm platform, perception and calibration, deployment controller, test objects and angle measurement, training and inference hardware, zero-shot transfer protocol.
+- 4.3 Ablations: teacher and demonstrations, ablated students (a)-(e).
+- 4.4 Results: ablations in simulation, zero-shot transfer on the training nut, generalization across nut sizes and geometries, long-horizon stress.
+- 4.5 Summary.
 
-**[open]** The simulation uses a model of the real robot. Under the level-of-detail rule, either describe it generically here (seven-DoF arm, five-fingered hand, three commanded pinch DoF) and name the products in 5.1, or accept naming them here as part of the simulated system.
+## 5. Discussion
 
-### 3.3 Privileged Teacher
+- 5.1 Interpretation per RQ.
+- 5.2 Action and observation contracts.
+- 5.3 What this means for robotic assembly.
+- 5.4 Limitations.
 
-Asymmetric recurrent PPO for the pinch-grasp turn: observations, reward, domain randomization, curriculum (answers difficulty b).
-
-### 3.4 Hybrid Teacher and Demonstration Generation
-
-Cyclic rollout with scripted release and return, physical phase gating, disturbance augmentation, dataset (answers difficulty c, data side). Sim-to-real design choices: camera model, metric representation, visual randomization, shared action path (answers difficulty a, transfer side).
-
-### 3.5 Student Distillation by Conditional Flow Matching
-
-Why offline distillation, flow-matching objective, architecture (point-cloud encoder, fusion, progress and phase conditioning, Transformer velocity network, chunking, temporal ensembling), offline training, online DAgger variant, baselines (answers difficulty c, deployment side).
-
-**[open]** Online DAgger here or only in the experiments.
-
-### 3.6 Evaluation Protocol
-
-Evaluation ladder and metrics.
-
-Handover: every component is defined; Chapter 4 tests them.
-
-## 4. Experiments in Simulation
-
-- 4.1 Setup: data set, budgets.
-- 4.2 Teacher training: turn teachers, hybrid rollout (32 of 32 ten-cycle runs).
-- 4.3 Main ablations (RQ1 and RQ2): single-cycle, ResNet, LSTM regression, Transformer regression, full method (10.0 cycles, cyclic error -1.77 degrees). Results (a) to (d) pending.
-- 4.4 Design ablations: action contract, progress and phase conditioning, encoder and pretraining, sweeps, robustness.
-- 4.5 Offline versus online distillation.
-
-Handover: the method works in simulation; does it transfer?
-
-**[open]** Single-seed design ablations: main text, appendix, or rerun. Ablation inventory to the appendix.
-
-## 5. Experiments on Real Hardware (RQ3)
-
-- 5.1 Hardware setup: robot, camera calibration, controller, angle measurement, test objects.
-- 5.2 Zero-shot transfer protocol.
-- 5.3 Training nut sizes: M24, M30, M36 hexagonal.
-- 5.4 Unseen geometries: octagonal, rectangular, round.
-- 5.5 Long-horizon stress.
-
-All results pending.
-
-## 6. Discussion
-
-- 6.1 Interpretation per RQ.
-- 6.2 Offline flow distillation versus online DAgger.
-- 6.3 Action and observation contracts.
-- 6.4 What this means for robotic assembly: how far the result is from industrial threading (engaged start, no tightening torque, one grasp strategy, cycle time).
-- 6.5 Limitations.
-
-Drop the "Answers to the Questions of the Exposé" section.
-
-## 7. Conclusion and Future Work
+## 6. Conclusion and Future Work
 
 Conclusion returns to the assembly motivation: what a dexterous robot can now do in threading and what is missing. Future work: autonomous engagement of a loose nut, tightening to a preload with force feedback, longer horizon with learned phase inference, measured sensor randomization, other grasp topologies.
 
