@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="170mm"
+   height="60mm"
+   viewBox="0 0 170 60"
+   version="1.1"
+   id="svgMetricThread"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <title>ISO metric thread profile and tolerance zones</title>
+  <sodipodi:namedview id="namedview" pagecolor="#ffffff" bordercolor="#666666" inkscape:document-units="mm" inkscape:pagecheckerboard="false"/>
+  <defs id="defs">
+    <marker id="ArrowDim" orient="auto" refX="0" refY="0" markerUnits="strokeWidth" style="overflow:visible">
+      <path d="M 0,0 L -4.5,-1.8 L -4.5,1.8 Z" style="fill:#000000;stroke:none"/>
+    </marker>
+  </defs>
+
+  <!-- axial section; nut (internal thread, light blue) above, bolt (external thread, light gray) below.
+       Not to scale: P = 28.0 drawing units, tolerance zones exaggerated. -->
+
+  <!-- ============ (a) Basic profile ============ -->
+  <g id="panelA">
+    <text x="47" y="4.5" style="font-family:'TeX Gyre Heros';font-size:3px;text-anchor:middle;fill:#000000">(a) Basic profile</text>
+    <path d="M 19,38.176 L 19.35,38.161 L 19.7,38.115 L 20.05,38.037 L 20.4,37.926 L 20.75,37.778 L 21.1,37.588 L 21.45,37.349 L 21.8,37.049 L 22.15,36.667 L 22.5,36.155 L 31.25,21 L 34.75,21 L 43.5,36.155 L 43.85,36.667 L 44.2,37.049 L 44.55,37.349 L 44.9,37.588 L 45.25,37.778 L 45.6,37.926 L 45.95,38.037 L 46.3,38.115 L 46.65,38.161 L 47,38.176 L 47.35,38.161 L 47.7,38.115 L 48.05,38.037 L 48.4,37.926 L 48.75,37.778 L 49.1,37.588 L 49.45,37.349 L 49.8,37.049 L 50.15,36.667 L 50.5,36.155 L 59.25,21 L 62.75,21 L 71.5,36.155 L 71.85,36.667 L 72.2,37.049 L 72.55,37.349 L 72.9,37.588 L 73.25,37.778 L 73.6,37.926 L 73.95,38.037 L 74.3,38.115 L 74.65,38.161 L 75,38.176 L 75,47 L 19,47 Z" style="fill:#dcdcdc;stroke:none"/>
+    <path d="M 19,36.155 L 22.5,36.155 L 31.25,21 L 33,21 L 34.75,21 L 43.5,36.155 L 47,36.155 L 50.5,36.155 L 59.25,21 L 61,21 L 62.75,21 L 71.5,36.155 L 75,36.155 L 75,14.5 L 19,14.5 Z" style="fill:#cfdcef;stroke:none"/>
+    <path d="M 19,38.176 L 19.35,38.161 L 19.7,38.115 L 20.05,38.037 L 20.4,37.926 L 20.75,37.778 L 21.1,37.588 L 21.45,37.349 L 21.8,37.049 L 22.15,36.667 L 22.5,36.155 L 31.25,21 L 34.75,21 L 43.5,36.155 L 43.85,36.667 L 44.2,37.049 L 44.55,37.349 L 44.9,37.588 L 45.25,37.778 L 45.6,37.926 L 45.95,38.037 L 46.3,38.115 L 46.65,38.161 L 47,38.176 L 47.35,38.161 L 47.7,38.115 L 48.05,38.037 L 48.4,37.926 L 48.75,37.778 L 49.1,37.588 L 49.45,37.349 L 49.8,37.049 L 50.15,36.667 L 50.5,36.155 L 59.25,21 L 62.75,21 L 71.5,36.155 L 71.85,36.667 L 72.2,37.049 L 72.55,37.349 L 72.9,37.588 L 73.25,37.778 L 73.6,37.926 L 73.95,38.037 L 74.3,38.115 L 74.65,38.161 L 75,38.176" style="fill:none;stroke:#000000;stroke-width:0.35"/>
+    <path d="M 19,36.155 L 22.5,36.155 L 31.25,21 L 33,21 L 34.75,21 L 43.5,36.155 L 47,36.155 L 50.5,36.155 L 59.25,21 L 61,21 L 62.75,21 L 71.5,36.155 L 75,36.155" style="fill:none;stroke:#000000;stroke-width:0.35"/>
+    <text x="74" y="17.6" style="font-family:'TeX Gyre Heros';font-size:2.4px;text-anchor:end;fill:#555555">nut</text>
+    <text x="74" y="45.6" style="font-family:'TeX Gyre Heros';font-size:2.4px;text-anchor:end;fill:#555555">bolt</text>
+    <path d="M 33,17.969 L 61,17.969 L 47,42.218 Z" style="fill:none;stroke:#000000;stroke-width:0.2;stroke-dasharray:1.2,0.6"/>
+    <path d="M 31.25,21 L 33,17.969" style="fill:none;stroke:#000000;stroke-width:0.2;stroke-dasharray:1.2,0.6"/>
+    <path d="M 19,30.093 L 86.8,30.093" style="fill:none;stroke:#000000;stroke-width:0.18;stroke-dasharray:2.4,0.7,0.5,0.7"/>
+    <path d="M 36.5,24.031 A 7,7 0 0 1 29.5,24.031" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <text x="33" y="27.7" style="font-family:'TeX Gyre Heros';font-size:2.8px;text-anchor:middle;fill:#000000">60°</text>
+    <path d="M 33,17.369 L 33,10.7" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 61,17.369 L 61,10.7" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 47,11.7 L 61,11.7" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <path d="M 47,11.7 L 33,11.7" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <rect x="45.6" y="9.8" width="2.8" height="3.6" style="fill:#ffffff;stroke:none"/>
+    <text x="47" y="12.6" style="text-anchor:middle;fill:#000000"><tspan style="font-family:'Latin Modern Math';font-size:3.4px">𝜌</tspan></text>
+    <path d="M 33,17.969 L 7,17.969" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 19,21 L 7,21" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 19,36.155 L 7,36.155" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 47,42.218 L 7,42.218" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 14.5,30.093 L 14.5,17.969" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <path d="M 14.5,30.093 L 14.5,42.218" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="13.6" y="31.193" style="text-anchor:end;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.4px">H</tspan></text>
+    <path d="M 8,19.484 L 8,17.969" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <path d="M 8,19.484 L 8,21" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="7.1" y="20.584" style="text-anchor:end;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3px">H</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:3px">/8</tspan></text>
+    <path d="M 8,39.187 L 8,36.155" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <path d="M 8,39.187 L 8,42.218" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="7.1" y="40.287" style="text-anchor:end;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3px">H</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:3px">/4</tspan></text>
+    <path d="M 19,53.5 L 104.8,53.5" style="fill:none;stroke:#6f6f6f;stroke-width:0.25;stroke-dasharray:2.4,0.7,0.5,0.7"/>
+    <text x="19" y="52.5" style="font-family:'TeX Gyre Heros';font-size:2.4px;fill:#555555">bolt axis</text>
+    <path d="M 62.75,21 L 79.6,21" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 79,53.5 L 79,21" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="79.8" y="22.1" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">d</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:3.2px">, </tspan><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">D</tspan></text>
+    <path d="M 86.2,53.5 L 86.2,30.093" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="87" y="31.193" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">d</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.304px">2</tspan><tspan dy="-0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:3.2px">, </tspan><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">D</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.304px">2</tspan></text>
+    <path d="M 71.5,36.155 L 94,36.155" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 93.4,53.5 L 93.4,36.155" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="94.2" y="37.255" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">d</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.304px">1</tspan><tspan dy="-0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:3.2px">, </tspan><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">D</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.304px">1</tspan></text>
+    <path d="M 75,38.176 L 102.4,38.176" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 101.8,53.5 L 101.8,38.176" style="fill:none;stroke:#000000;stroke-width:0.22;marker-end:url(#ArrowDim)"/>
+    <text x="102.6" y="39.276" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:3.2px">d</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.304px">3</tspan></text>
+    <path d="M 77.65,48.6 L 79.65,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 78.35,48.6 L 80.35,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 84.85,48.6 L 86.85,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 85.55,48.6 L 87.55,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 92.05,48.6 L 94.05,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 92.75,48.6 L 94.75,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 100.45,48.6 L 102.45,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+    <path d="M 101.15,48.6 L 103.15,47.4" style="fill:none;stroke:#000000;stroke-width:0.15"/>
+  </g>
+
+  <!-- ============ (b) Tolerance zones 6H/6g ============ -->
+  <g id="panelB">
+    <text x="135" y="4.5" style="font-family:'TeX Gyre Heros';font-size:3px;text-anchor:middle;fill:#000000">(b) Tolerance zones, 6H/6g</text>
+    <path d="M 119.6,24.668 L 124.5,33.155 L 128,33.155 L 131.5,33.155 L 138.518,21 L 142,21 L 145.482,21 L 150.4,29.518 L 150.4,14.5 L 119.6,14.5 Z" style="fill:#cfdcef;stroke:none"/>
+    <path d="M 119.6,27.668 L 124.5,36.155 L 128,36.155 L 131.5,36.155 L 140.25,21 L 142,21 L 143.75,21 L 150.4,32.518 L 150.4,29.518 L 145.482,21 L 142,21 L 138.518,21 L 131.5,33.155 L 128,33.155 L 124.5,33.155 L 119.6,24.668 Z" style="fill:#93acd6;stroke:none"/>
+    <path d="M 119.6,33.668 L 123.935,41.176 L 128,41.176 L 132.065,41.176 L 140.25,27 L 143.75,27 L 150.4,38.518 L 150.4,47 L 119.6,47 Z" style="fill:#dcdcdc;stroke:none"/>
+    <path d="M 119.6,30.668 L 124.5,39.155 L 124.85,39.667 L 125.2,40.049 L 125.55,40.349 L 125.9,40.588 L 126.25,40.778 L 126.6,40.926 L 126.95,41.037 L 127.3,41.115 L 127.65,41.161 L 128,41.176 L 128.35,41.161 L 128.7,41.115 L 129.05,41.037 L 129.4,40.926 L 129.75,40.778 L 130.1,40.588 L 130.45,40.349 L 130.8,40.049 L 131.15,39.667 L 131.5,39.155 L 140.25,24 L 143.75,24 L 150.4,35.518 L 150.4,38.518 L 143.75,27 L 140.25,27 L 132.065,41.176 L 128,41.176 L 123.935,41.176 L 119.6,33.668 Z" style="fill:#a9a9a9;stroke:none"/>
+    <path d="M 119.6,24.668 L 124.5,33.155 L 128,33.155 L 131.5,33.155 L 138.518,21 L 142,21 L 145.482,21 L 150.4,29.518" style="fill:none;stroke:#000000;stroke-width:0.2"/>
+    <path d="M 119.6,30.668 L 124.5,39.155 L 124.85,39.667 L 125.2,40.049 L 125.55,40.349 L 125.9,40.588 L 126.25,40.778 L 126.6,40.926 L 126.95,41.037 L 127.3,41.115 L 127.65,41.161 L 128,41.176 L 128.35,41.161 L 128.7,41.115 L 129.05,41.037 L 129.4,40.926 L 129.75,40.778 L 130.1,40.588 L 130.45,40.349 L 130.8,40.049 L 131.15,39.667 L 131.5,39.155 L 140.25,24 L 143.75,24 L 150.4,35.518" style="fill:none;stroke:#000000;stroke-width:0.2"/>
+    <path d="M 119.6,33.668 L 123.935,41.176 L 128,41.176 L 132.065,41.176 L 140.25,27 L 143.75,27 L 150.4,38.518" style="fill:none;stroke:#000000;stroke-width:0.2"/>
+    <path d="M 119.6,27.668 L 124.5,36.155 L 128,36.155 L 131.5,36.155 L 140.25,21 L 142,21 L 143.75,21 L 150.4,32.518" style="fill:none;stroke:#000000;stroke-width:0.3;stroke-dasharray:1.2,0.6"/>
+    <path d="M 149,27.093 L 153.4,27.093" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 152.6,27.093 L 154.2,27.093" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 149,30.093 L 153.4,30.093" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 152.6,30.093 L 154.2,30.093" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 149,33.093 L 153.4,33.093" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 152.6,33.093 L 154.2,33.093" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 149,36.093 L 153.4,36.093" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 152.6,36.093 L 154.2,36.093" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 153.4,27.093 L 153.4,36.093" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <text x="154.8" y="29.543" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.9px">T</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.088px">D</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.088px">2</tspan><tspan dy="-0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">/2</tspan></text>
+    <text x="154.8" y="32.543" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">|</tspan><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.9px">es</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">|/2</tspan></text>
+    <text x="154.8" y="35.543" style="text-anchor:start;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.9px">T</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.088px">d</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.088px">2</tspan><tspan dy="-0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">/2</tspan></text>
+    <path d="M 140.25,21 L 116.6,21" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 115.8,21 L 117.4,21" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 140.25,24 L 116.6,24" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 115.8,24 L 117.4,24" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 140.25,27 L 116.6,27" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 115.8,27 L 117.4,27" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 116.6,21 L 116.6,27" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <text x="115.2" y="23.45" style="text-anchor:end;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">|</tspan><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.9px">es</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">|/2</tspan></text>
+    <text x="115.2" y="26.45" style="text-anchor:end;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.9px">T</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.088px">d</tspan><tspan dy="-0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">/2</tspan></text>
+    <path d="M 124.5,33.155 L 116.6,33.155" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 115.8,33.155 L 117.4,33.155" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 124.5,36.155 L 116.6,36.155" style="fill:none;stroke:#000000;stroke-width:0.15;stroke-dasharray:0.6,0.5"/>
+    <path d="M 115.8,36.155 L 117.4,36.155" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <path d="M 116.6,33.155 L 116.6,36.155" style="fill:none;stroke:#000000;stroke-width:0.22"/>
+    <text x="115.2" y="35.605" style="text-anchor:end;fill:#000000"><tspan style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.9px">T</tspan><tspan dy="0.75" style="font-family:'Latin Modern Roman';font-style:italic;font-size:2.088px">D</tspan><tspan style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.088px">1</tspan><tspan dy="-0.75" style="font-family:'Latin Modern Roman';font-style:normal;font-size:2.9px">/2</tspan></text>
+    <rect x="117.6" y="48.5" width="3.6" height="2.4" style="fill:#93acd6;stroke:none;stroke:#000000;stroke-width:0.15"/>
+    <text x="122.2" y="50.5" style="font-family:'TeX Gyre Heros';font-size:2.4px;fill:#000000">6H zone, nut</text>
+    <rect x="139.6" y="48.5" width="3.6" height="2.4" style="fill:#a9a9a9;stroke:none;stroke:#000000;stroke-width:0.15"/>
+    <text x="144.2" y="50.5" style="font-family:'TeX Gyre Heros';font-size:2.4px;fill:#000000">6g zone, bolt</text>
+    <path d="M 117.6,53.7 H 121.2" style="fill:none;stroke:#000000;stroke-width:0.3;stroke-dasharray:1.2,0.6"/>
+    <text x="122.2" y="54.5" style="font-family:'TeX Gyre Heros';font-size:2.4px;fill:#000000">basic profile</text>
+    <text x="139.6" y="54.5" style="font-family:'TeX Gyre Heros';font-size:2.4px;fill:#555555">zones not to scale</text>
+  </g>
+</svg>
