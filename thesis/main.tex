@@ -19,6 +19,11 @@
 \usepackage{multirow}%
 \usepackage{subcaption}%
 \usepackage{tabularx}%
+\usepackage{colortbl}%
+\colorlet{cellbetter}{green!15}%
+\colorlet{cellworse}{red!15}%
+\newcommand{\cbetter}{\cellcolor{cellbetter}}%
+\newcommand{\cworse}{\cellcolor{cellworse}}%
 \usepackage{acro}%
 \acsetup{list/display=all,list/template=tabular}%
 \input{source/acronyms}%
