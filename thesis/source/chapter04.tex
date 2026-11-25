@@ -1,7 +1,7 @@
 % !TeX spellcheck = en_US
 \chapter{Experiments}\label{ch:experiments}%
 
-This chapter evaluates the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions, and on the physical system, where the student is deployed zero-shot. It answers the three research questions of Section~\ref{sec:research-questions}. Section~\ref{sec:evaluation} defines the evaluation ladder and the metrics. Section~\ref{sec:setup} describes the experimental setup, including the hand--arm platform, the camera, the test objects, the deployment controller, and the zero-shot transfer protocol. Section~\ref{sec:ablations} defines the ablation studies, the question each of them answers, and how they relate to the research questions. Section~\ref{sec:results} reports the results, starting with the teacher as the simulation baseline, followed by the ablations in simulation and on hardware and the generalization across nut sizes and geometries. Section~\ref{sec:exp-summary} summarizes the chapter.
+This chapter evaluates the method of Chapter~\ref{ch:method} in simulation, where every component can be varied under matched conditions, and on the physical system, where the student is deployed zero-shot. It answers the three research questions of Section~\ref{sec:research-questions}. Section~\ref{sec:evaluation} defines the evaluation ladder and the metrics. Section~\ref{sec:setup} describes the experimental setup, including the hand--arm platform, the camera, the test objects, the deployment controller, and the zero-shot transfer protocol. Section~\ref{sec:ablations} states the questions that the ablation studies answer and defines the students designed to answer them. Section~\ref{sec:results} reports the results, starting with the teacher as the simulation baseline, followed by the ablations in simulation and on hardware and the generalization across nut sizes and geometries. Section~\ref{sec:exp-summary} summarizes the chapter.
 
 \section{Evaluation Protocol}\label{sec:evaluation}
 
@@ -69,40 +69,36 @@ The metrics of Section~\ref{sec:evaluation} require the nut angle. It is read fr
     \label{fig:nut-family}%
 \end{figure}%
 
-\begin{figure}[htb]%
-    \centering%
-    \includegraphics[width=0.19\textwidth]{figures/photos/real_approach.png}\hfill
-    \includegraphics[width=0.19\textwidth]{figures/photos/real_grasp.png}\hfill
-    \includegraphics[width=0.19\textwidth]{figures/photos/real_rotate.png}\hfill
-    \includegraphics[width=0.19\textwidth]{figures/photos/real_goal.png}\hfill
-    \includegraphics[width=0.19\textwidth]{figures/photos/real_release.png}\\[1mm]
-    \hspace*{0.2\textwidth}\includegraphics[width=0.19\textwidth]{figures/photos/dial_grasp.png}\hfill
-    \includegraphics[width=0.19\textwidth]{figures/photos/dial_rotate.png}\hfill
-    \includegraphics[width=0.19\textwidth]{figures/photos/dial_goal.png}\hspace*{0.2\textwidth}
-    \caption{One threading cycle on the physical robot. Top, from left to right: approach, grasp, rotation, goal reaching, and release with return to the reset pose. Bottom: top-down views of the angular scale under the bolt during grasp, rotation, and goal reaching. The scale is read at the end of every goal-reaching phase to compute the cyclic and ten-cycle tracking errors.}%
-    \label{fig:real-phases}%
-\end{figure}%
-% TODO(figure): these photos were taken during the earlier hardware trials; retake them with the zero-shot student, or confirm that they are suitable as an illustration of the phases.
-
 Robot commands use the same Cartesian impedance law as in simulation, so the student's bounded action reaches the arm through the shared action path of Appendix~\ref{sec:action-contract}. The deployment controller is a direct implementation of the dynamically consistent operational-space controller \eqref{eq:osc}~\cite{RoboticSystemsLab2019}, the same controller that is used in training. It uses the rotation-vector orientation error, the dynamically consistent nullspace projector with the arm mass matrix from the robot model and the hand configured as end-effector load, and no Coriolis term. The student's commands are therefore executed with the stiffness under which the teacher learned its contact behavior. Gravity is compensated by libfranka, which matches the simulation, where gravity is disabled for the arm. The controller runs at the 1\,kHz rate of the Franka control interface, while the student commands targets at 15\,Hz. The hand receives its pinch targets once per policy step. The task-space gains equal those of the simulation, 565\,N/m and 28\,N\,m/rad with critical damping, and the nullspace stiffness is 10 with critical damping. The targets pass through the same action smoothing as in training and no further low-pass filter, and the controller applies the step limit of Table~\ref{tab:controller} against the measured grasp pose in every 1\,kHz cycle. Further details on the deployment controller are given in Appendix~\ref{sec:app-ctrl-additions}.
 
 \section{Ablation Studies}\label{sec:ablations}
 
-The student of Chapter~\ref{ch:method} rests on three design choices. It is distilled from complete multi-cycle demonstrations, it perceives the scene through a point-cloud encoder, and it predicts action chunks with a flow-matching head. Each choice has a simpler or more common alternative. The ablation studies justify each choice by replacing it with that alternative and measuring what the cyclic task loses. Every ablated student changes one component of the full method (e), is trained on the simulated dataset of Section~\ref{sec:hybrid}, and is evaluated over $N_{\mathrm{tr}}=10$ trials on the M24 hexagonal nut. Table~\ref{tab:ablation-design} summarizes the five students, and the questions they answer follow.
-
+The student described in Chapter~\ref{ch:method} rests on three design choices:
+\begin{itemize}
+  \item It is distilled from complete multi-cycle demonstrations.
+  \item It perceives the scene through a point-cloud encoder.
+  \item It predicts action chunks with a flow-matching head.
+\end{itemize}
+Each choice has a simpler or more common alternative. The ablation studies are designed to answer the following questions:
 \begin{enumerate}
-  \item[(a)] The first question is whether long-horizon distillation is needed at all, or whether a policy that masters one cycle can be invoked repeatedly. A single-cycle student is the cheaper alternative. Its demonstrations are shorter, it needs no context across cycles, and the teacher of Section~\ref{sec:teacher} already solves one turn. The single-cycle student (a) is trained on demonstrations of one cycle, and a state machine invokes it ten times in a trial. Its temporal context is reset after every cycle. The full method (e) instead executes all ten cycles as one policy. The comparison therefore tests whether a policy distilled from the complete multi-cycle behavior sustains more consecutive cycles than a single-cycle policy that is repeated. The ablation answers RQ1.
-
-  \item[(b)] The second question is whether the point-cloud encoder adds value over an image-space encoder. Image-space encoders with a pretrained backbone are a common choice for visuomotor policies. They process the camera image directly, need no back-projection or crop box, and start from features learned on large image datasets. The ResNet student (b) replaces the \ac{DP3} point-cloud encoder with a one-branch image-space encoder. Its backbone is a ResNet-18~\cite{He2016} pretrained on ImageNet image classification and truncated after its second stage. It processes RGB, log depth, and a depth-validity mask jointly in one branch. An embedding of the calibrated camera-frame XYZ coordinates is added to its feature map, and attention pooling reduces the result to a 64-D feature, the size of the point-cloud feature. Policy, objective, and data are unchanged. The comparison therefore tests whether the point-cloud representation serves the student better than an image-space representation of the same camera data.
-
-A representation probe complements the closed-loop comparison. One shared decoder is trained on the frozen feature of each encoder to predict the position and the orientation of the nut, which shows what each feature encodes. The ablation and the probe together answer the encoder part of RQ2.
-
-  \item[(c)] The third question is whether the generative objective is needed, or whether deterministic regression of the teacher's actions suffices. Two regression students address it at different granularity. The \ac{LSTM} student (c) tests the established recipe. It keeps the point-cloud encoder but replaces the flow-matching Transformer with the recurrent backbone of DextrAH-RGB~\cite{Singh2025}, a layer-normalized 512-unit \ac{LSTM} followed by a 512--512--256 ELU \acs{MLP}, and it is trained by deterministic action regression on the same data. It changes the backbone, removes action chunking, and removes the generative objective at once. It therefore asks whether a recurrent regression student, as used to distill a privileged teacher into a vision-based student, carries over to the long-horizon task.
-  \item[(d)] The Transformer regression student (d) is inspired by \ac{ACT}~\cite{Zhao2023} and is compared to the full method. Like the full method, it keeps the point-cloud encoder, uses a Transformer of the same size, and predicts eight-step chunks that are executed with the same temporal ensembling. It differs in how it produces the chunk. It regresses the chunk deterministically from learned action queries, whereas the full method generates it with flow matching. The comparison therefore tests whether the generative objective is needed when backbone and chunking are kept. Regression fits the average of different actions that the demonstrations show for similar observations, such as a nominal motion and a recovery (Section~\ref{sec:il-background}), whereas flow matching samples one of them. The two regression students answer the action-head part of RQ2.
-% TODO(unsure): no implementation of the ACT-style regression baseline exists in forgeUltra (distillation/utils/action_heads/) or in ~/code/icra_2027 (LaTeX only); it is described as published in NUTS and must be implemented before ablation (d) can be retrained.
+  \item[(i)] Is repeating a single-cycle student enough, or does a student distilled from complete multi-cycle demonstrations sustain more consecutive cycles?
+  \item[(ii)] Can an image-space encoder of the same camera data replace the point-cloud encoder? Image-space encoders with a pretrained backbone are a common choice for visuomotor policies (Section~\ref{sec:related-visuomotor}).
+  \item[(iii)] Is deterministic action regression enough, or does a flow-matching head let the student sustain more consecutive cycles? Deterministic regression of the teacher's actions is the established recipe for distilling a privileged teacher into a vision-based student~\cite{Singh2025}.
 \end{enumerate}
 
-The simulated comparisons hold under matched conditions, but the physical system adds sensor noise, calibration error, and real contact. The full method (e), the single-cycle student (a), and the ResNet student (b) are therefore also deployed zero-shot on the M24 hexagonal nut, with the setup of Section~\ref{sec:setup} and the same protocol. The full method answers RQ3 directly. The two ablations ask whether the comparisons of RQ1 and RQ2 carry over to the physical system. For (a), the question is whether the advantage of multi-cycle distillation persists under real contact. For (b), it is whether the image-space representation transfers as well as the point cloud. The encoder is the component most exposed to the transfer gap. Inside the crop box, the point geometry agrees between the two domains up to depth noise and calibration error, whereas an image-space encoder faces the appearance gap of the full image. The regression students (c) and (d) are evaluated in simulation only.
+To answer these questions, five students are compared. Each ablated student replaces one of the three design choices of the full method (e), is trained on the simulated dataset of Section~\ref{sec:hybrid}, and is evaluated over $N_{\mathrm{tr}}=10$ trials on the M24 hexagonal nut. Table~\ref{tab:ablation-design} summarizes the five students.
+\begin{enumerate}
+  \item[(a)] \textbf{Single-cycle student.} It is trained on demonstrations of one cycle, and a state machine invokes it ten times in a trial. Its temporal context is reset after every cycle.
+  \item[(b)] \textbf{ResNet student.} It replaces the \ac{DP3} point-cloud encoder with a one-branch image-space encoder. Its backbone is a ResNet-18~\cite{He2016} pretrained on ImageNet image classification and truncated after its second stage. It processes RGB, log depth, and a depth-validity mask jointly in one branch. An embedding of the calibrated camera-frame XYZ coordinates is added to its feature map, and attention pooling reduces the result to a 64-D feature, the size of the point-cloud feature.
+  \item[(c)] \textbf{\acs{LSTM} regression student.} It keeps the point-cloud encoder. In place of the flow-matching Transformer, it uses the recurrent backbone of DextrAH-RGB~\cite{Singh2025}. This backbone is a layer-normalized 512-unit \ac{LSTM} followed by a 512--512--256 ELU \acs{MLP}. It is trained by deterministic action regression on the same data.
+  \item[(d)] \textbf{Transformer regression student.} It is inspired by \ac{ACT}~\cite{Zhao2023}. Like the full method, it keeps the point-cloud encoder, uses a Transformer of the same size, and predicts eight-step chunks that are executed with the same temporal ensembling. It regresses the chunk deterministically from learned action queries, whereas the full method generates it with flow matching.
+% TODO(unsure): no implementation of the ACT-style regression baseline exists in forgeUltra (distillation/utils/action_heads/) or in ~/code/icra_2027 (LaTeX only); it is described as published in NUTS and must be implemented before ablation (d) can be retrained.
+  \item[(e)] \textbf{Full method.} The student described in Chapter~\ref{ch:method}, the reference for all comparisons.
+\end{enumerate}
+
+A representation probe complements the closed-loop comparison of question (ii). One shared decoder is trained on the frozen feature of each encoder to predict the position and the orientation of the nut, which shows what each feature encodes.
+
+The simulated comparisons hold under matched conditions, but the physical system adds sensor noise, calibration error, and real contact. The full method (e), the single-cycle student (a), and the ResNet student (b) are therefore also deployed zero-shot on the M24 hexagonal nut, with the setup of Section~\ref{sec:setup} and the same protocol. The full method answers RQ3 directly. The two ablations ask whether the answers to questions (i) and (ii) carry over to the physical system. For (a), the question is whether the advantage of multi-cycle distillation persists under real contact. For (b), it is whether the image-space representation transfers as well as the point cloud. The encoder is the component most exposed to the transfer gap. Inside the crop box, the point geometry agrees between the two domains up to depth noise and calibration error, whereas an image-space encoder faces the appearance gap of the full image. The regression students (c) and (d) are evaluated in simulation only.
 
 \begin{table}[htb]%
     \centering%
@@ -124,6 +120,10 @@ The simulated comparisons hold under matched conditions, but the physical system
 
 \section{Results}\label{sec:results}
 
+The results start with the teacher, continue with the ablations of Section~\ref{sec:ablations}, and end with the generalization of the full method across nut sizes and profiles.
+
+\subsection{Teacher}\label{sec:results-teacher}
+
 Every student is distilled from the demonstrations of the hybrid teacher, so the results start with the teacher. Table~\ref{tab:teacher-results} summarizes the last ten of the 200 training epochs of the teacher of Section~\ref{sec:teacher}. The values are training statistics of the stochastic policy under the full randomization of Table~\ref{tab:dr}, not a separate evaluation.
 
 \begin{table}[htb]%
@@ -144,6 +144,25 @@ Every student is distilled from the demonstrations of the hybrid teacher, so the
 \end{table}%
 
 The teacher threads one turn with a success rate of 0.87 under the full curriculum randomization. A completed episode lasts 112 steps, or 7.5\,s at 15\,Hz. Chained into the hybrid teacher, this policy collects the demonstration dataset of Section~\ref{sec:hybrid}, 36 complete ten-cycle demonstrations. The hybrid teacher thus reaches ten cycles only with privileged state and with retries, whereas the students have neither.
+
+\subsection{Ablations}\label{sec:results-ablations}
+
+Figure~\ref{fig:real-phases} shows the phases of one threading cycle on the physical robot and the angular scale from which the nut angle is read.
+
+\begin{figure}[htb]%
+    \centering%
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_approach.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_grasp.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_rotate.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_goal.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/real_release.png}\\[1mm]
+    \hspace*{0.2\textwidth}\includegraphics[width=0.19\textwidth]{figures/photos/dial_grasp.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/dial_rotate.png}\hfill
+    \includegraphics[width=0.19\textwidth]{figures/photos/dial_goal.png}\hspace*{0.2\textwidth}
+    \caption{One threading cycle on the physical robot. Top, from left to right: approach, grasp, rotation, goal reaching, and release with return to the reset pose. Bottom: top-down views of the angular scale under the bolt during grasp, rotation, and goal reaching. The scale is read at the end of every goal-reaching phase to compute the cyclic and ten-cycle tracking errors.}%
+    \label{fig:real-phases}%
+\end{figure}%
+% TODO(figure): these photos were taken during the earlier hardware trials; retake them with the zero-shot student, or confirm that they are suitable as an illustration of the phases.
 
 Table~\ref{tab:ablation} reports the ablations of Section~\ref{sec:ablations} on the M24 hexagonal nut in simulation and on hardware. The full method (e) completes all ten cycles in every trial in both domains. It lags the $60\degree$ target by less than two degrees per cycle in simulation and by about four degrees on hardware, and the spread of the lag stays small. Every ablation falls short of ten cycles.
 % NOTE(provenance): simulation values (a)-(d) vendored from NUTS Table I(a). Per the author, the thesis students give the same results.
@@ -173,12 +192,20 @@ Table~\ref{tab:ablation} reports the ablations of Section~\ref{sec:ablations} on
     \end{tabular}
 \end{table}%
 
-The single-cycle student (a) completes 5.5 cycles in simulation and 5.2 cycles on hardware on average, and none of its trials reaches ten cycles. In its typical failure on hardware, the fingers slip off the edge of the nut after a few cycles. The student masters the single turn but does not sustain the cyclic task, which favors distilling one policy from the complete multi-cycle behavior.
+The single-cycle student (a) completes 5.5 cycles in simulation and 5.2 cycles on hardware on average, and none of its trials reaches ten cycles. In its typical failure on hardware, the fingers slip off the edge of the nut after a few cycles.
 
 The ResNet student (b) completes 2.3 cycles in simulation and 1.1 cycles on hardware, and it overshoots the target turn by more than $20\degree$ per cycle in both domains. The representation probe locates the difference in the orientation of the nut. The point-cloud feature yields a position error of 8\,mm and an orientation error of $15.16\degree$ in simulation. The ResNet feature reaches a similar position error of 8.6\,mm, but its orientation error of $31.20\degree$ is about twice as large. The image-space feature thus preserves the nut position but loses much of the face orientation on which the re-grasp depends.
 % NOTE(provenance): probe values vendored from NUTS Section IV-D (Q2).
 
-The two regression students fail first. The \ac{LSTM} student (c) diverges before it completes the first cycle. The Transformer regression student (d) completes 1.4 cycles and overshoots the target turn by more than $120\degree$ per cycle. Because (d) keeps the backbone and the chunking of the full method, the generative objective accounts for the difference.
+The two regression students fail first. The \ac{LSTM} student (c) diverges before it completes the first cycle. The Transformer regression student (d) completes 1.4 cycles and overshoots the target turn by more than $120\degree$ per cycle.
+
+The comparison of the five students answers the questions of Section~\ref{sec:ablations}:
+\begin{enumerate}
+  \item[(i)] Repeating a single-cycle student is not enough. The single-cycle student masters the single turn but completes about half the cycles of the full method in both domains. Repeating a single-cycle policy therefore does not sustain the cyclic task.
+  \item[(ii)] An image-space encoder cannot replace the point-cloud encoder. Replacing it with the image-space encoder costs most of the cycles in both domains, and the probe locates the loss in the orientation of the nut, on which the re-grasp depends. The gap to the full method widens from 7.7 cycles in simulation to 8.9 cycles on hardware.
+  \item[(iii)] Deterministic regression is not enough. Both regression students complete fewer than two cycles on average. Because (d) keeps the backbone and the chunking of the full method, the generative objective accounts for the difference.
+\end{enumerate}
+The students rank in the same order in simulation and on hardware.
 
 \subsection{Generalization}\label{sec:geometry}
 
@@ -216,7 +243,7 @@ The student completes all ten cycles in every trial on the three hexagonal nuts.
 
 \section{Summary}\label{sec:exp-summary}
 
-This chapter evaluated the student of Chapter~\ref{ch:method} in simulation and zero-shot on the physical system, over ten trials of up to ten threading cycles per condition. Five students were compared on the M24 hexagonal nut, the full method (e) and four ablations that each replace one of its design choices. The full method was then evaluated on twelve nuts of three sizes and four profiles.
+This chapter evaluated the student described in Chapter~\ref{ch:method} in simulation and zero-shot on the physical system, over ten trials of up to ten threading cycles per condition. Five students were compared on the M24 hexagonal nut, the full method (e) and four ablations that each replace one of its design choices. The full method was then evaluated on twelve nuts of three sizes and four profiles.
 
 In simulation, the full method completes all ten cycles in every trial with a cyclic error of $-1.77\pm1.02\degree$ and a ten-cycle error of $-17.7\pm3.23\degree$. Every ablation fails before the tenth cycle in every trial. For RQ1, the single-cycle student (a) completes $5.5\pm0.8$ cycles in simulation and $5.2\pm1.2$ cycles on hardware. For RQ2, the ResNet student (b) completes $2.3\pm0.9$ and $1.1\pm0.9$ cycles and overshoots the target turn by more than $20\degree$ per cycle in both domains. Its feature predicts the nut position about as well as the point-cloud feature, with 8.6\,mm against 8\,mm, but its orientation error is $31.20\degree$ against $15.16\degree$. In simulation, the \ac{LSTM} regression student (c) completes no cycle, and the Transformer regression student (d) completes $1.4\pm0.8$ cycles with an overshoot of $+124.21\pm18.50\degree$ per cycle.
 

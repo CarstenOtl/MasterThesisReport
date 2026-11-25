@@ -43,7 +43,7 @@ Three properties make such tasks hard. First, errors compound across cycles. A g
 
 The common answer is to decompose the task into skills, train one policy per skill, and chain the policies at deployment~\cite{Chen2023}. In a chain, the final state of one policy has to lie in the region where the next policy succeeds. This requires additional mechanisms that fine-tune the sub-policies for their neighbors~\cite{Chen2023,Lee2022}, and several policies together with a switching logic have to be deployed. A second answer is to imitate complete long-horizon demonstrations with one generative policy~\cite{Chi2024,Black2026}. This avoids the reward problem, but it needs demonstrations of the whole task, and teleoperated demonstrations of forceful dexterous manipulation are hard to collect~\cite{Kedia2026}. The method should therefore combine the strengths of both answers. Its training signal should be as easy to specify phase by phase as in a decomposition, and it should deploy one policy that sustains many cycles without switching between separate policies.
 
-\subsection{Zero-Shot Sim-to-Real Transfer}\label{sec:difficulty-transfer}
+\subsection{Zero-Shot Sim-to-Real Transfer for Visuomotor Policies}\label{sec:difficulty-transfer}
 
 A skill that is learned in simulation has to survive the transfer to hardware. The policy acts on the physical system with the same commands that it learned in simulation, so the simulation has to reproduce the physical system wherever the outcome of a command depends on it.
 
@@ -68,12 +68,12 @@ The difficulties of dexterous threading are addressed separately in prior work. 
 The gap of Section~\ref{sec:problem-setup} is a policy that sustains cyclic threading with a dexterous hand from sensor data, learned in simulation and deployed on hardware. Three research questions follow from it.
 
 \begin{description}
-  \item[RQ1 (long horizon).] Does one policy learned from complete multi-cycle demonstrations sustain consecutive threading cycles better than a single-cycle policy that is invoked repeatedly?
-  \item[RQ2 (policy design).] Which visuomotor policy design, in its visual representation and in its action head, turns such demonstrations into a policy that sustains the cyclic task?
-  \item[RQ3 (sim-to-real).] Can a policy trained on simulated demonstrations only transfer zero-shot to a physical dexterous hand--arm system?
+  \item[RQ1 (long horizon).] In long-horizon cyclic manipulation such as nut threading, does a visuomotor policy distilled from complete multi-cycle demonstrations outperform a single-cycle policy that is invoked repeatedly?
+  \item[RQ2 (policy design).] Does a point-cloud encoder condense the task-relevant scene information better than an image-space encoder, and does a conditional flow-matching action head transfer the teacher's skill better than deterministic action regression, when a privileged teacher is distilled into a visuomotor student?
+  \item[RQ3 (sim-to-real).] Does a visuomotor policy distilled from simulated demonstrations keep its task success and tracking accuracy when deployed zero-shot on a physical dexterous hand--arm system?
 \end{description}
 
-RQ1 addresses the compounding error of the cyclic task (Section~\ref{sec:difficulty-horizon}). RQ2 addresses the dimensionality of the hand (Section~\ref{sec:motivation}), because the deployed policy has to control hand and arm from perception alone over the whole horizon. RQ3 addresses the transfer difficulty (Section~\ref{sec:difficulty-transfer}) and, through the simplified thread model, the contact difficulty (Section~\ref{sec:difficulty-contact}). Chapter~\ref{ch:experiments} answers RQ1 and RQ2 in simulation and RQ3 on hardware.
+RQ1 addresses the compounding error of the cyclic task (Section~\ref{sec:difficulty-horizon}). RQ2 addresses the dimensionality of the hand (Section~\ref{sec:motivation}), because the deployed policy has to control hand and arm from perception alone over the whole horizon. RQ3 addresses the transfer difficulty (Section~\ref{sec:difficulty-transfer}) and, through the simplified thread model, the contact difficulty (Section~\ref{sec:difficulty-contact}). Chapter~\ref{ch:experiments} answers RQ1 and RQ2 with ablations in simulation, two of which are repeated on hardware, and RQ3 on hardware.
 
 \section{Approach and Contributions}\label{sec:approach-contributions}
 

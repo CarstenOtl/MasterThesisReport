@@ -77,7 +77,7 @@ with revolute velocity $\omega_t$, Coulomb torque $\tau_c$, viscous coefficient 
     \label{fig:thread-model}%
 \end{figure}%
 
-\subsection{PPO Training}\label{sec:teacher-training}
+\subsection{PPO Training and Reward Shaping}\label{sec:teacher-training}
 
 The teacher for the learned phases in $\MRL$ is a recurrent policy, whose hidden state $\vec{h}_t$ integrates the history of past observations. It is trained with \ac{PPO} (Section~\ref{sec:rl-background}) in an asymmetric actor--critic~\cite{Pinto2017}. The actor observation $\vec{z}^{\pi}_t=g_\pi(\vec{x}_t,\vec{\xi}_t)$ selects the actor-visible components of the simulator state and applies observation noise $\vec{\xi}_t$. It contains the poses of the fingertips relative to the bolt and to the nut, the nut orientation, the error to the turning target, a grasp-phase flag, the previous filtered action, and a force group of two fingertip forces and seven arm joint torques that mirrors the sensors of the physical system. The critic observes noise-free absolute poses of the fingertips, the nut, and the bolt instead of the actor's relative vectors, together with the turning target, the force group, and the previous filtered action, and in addition the arm joint positions and the randomized controller parameters of the episode. It is discarded after training, so this privileged state shapes the update of the actor without ever being an input to it. Table~\ref{tab:teacher-obs} in the appendix lists all components and their noise.
 
