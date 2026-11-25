@@ -38,7 +38,7 @@ Here $V$ is the set of pixels covered by the rendered finger and not occluded by
 
 Table~\ref{tab:hand-fit-params} lists the fitted parameters next to those of the vendor model. The couplings of the thumb flexion chain and of the index differ from the vendor ratios by 6 to 26\,\%, and the register maps of all three actuated joints carry offsets. The thumb flexion coupling is nearly exactly linear, with a residual of 0.009\,rad. The distal thumb coupling is the weakest fit, with a residual of 0.031\,rad and $R^2=0.92$. For the actuated joints, opening and closing passes at the same register differ by at most 0.008\,rad, so the drives show no measurable hysteresis in free space.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption{Finger kinematics of the vendor model and of the model fitted to the physical hand. The register maps give the joint angle as a function of $\tilde{r}=(1-r/1000)\,q_{\max}$, with $q_{\max}$ the URDF upper limit of the joint. The vendor maps are those of the hand driver before the fit. The residual is the standard deviation of the coupling fit. Angles in rad.}%
     \label{tab:hand-fit-params}%
@@ -70,32 +70,32 @@ Table~\ref{tab:hand-fit-params} lists the fitted parameters next to those of the
 
 Figures~\ref{fig:hand-fit-yaw} to~\ref{fig:hand-fit-index} overlay both models on the camera images of six stops per sweep, and Table~\ref{tab:hand-fit-tips} summarizes the fingertip errors. The thumb abduction has the largest error. The vendor map places the open thumb at 0\,rad, whereas the camera measures 0.258\,rad, and the gap closes toward full abduction, where the vendor map gives 1.246\,rad and the camera 1.263\,rad. Over the six stops, the vendor model misplaces the thumb tip by 18.3\,mm on average, and the fitted map stays within 0.016\,rad of the camera and within 4.8\,mm at the tip. In thumb flexion (Figure~\ref{fig:hand-fit-thumb}), the actuated joint of the physical thumb spans $-0.097$ to 0.374\,rad, whereas the vendor map covers 0 to 0.32\,rad, and the vendor coupling bends the outermost joint $q_{\mathrm{t}3}$ too far. The fitted model reduces the mean tip error from 8.9 to 2.1\,mm.
 
-\begin{figure}[htbp]%
+\begin{figure}[!htbp]%
     \centering%
-    \includegraphics[width=\textwidth]{figures/hand_fit/thumb_yaw.jpg}%
+    \includegraphics[width=0.8\textwidth]{figures/hand_fit/thumb_yaw.jpg}%
     \caption{Thumb abduction sweep on the physical hand, six stops from open (top left, register 979) to fully abducted (bottom right, register 242). Magenta outlines show the vendor model and cyan outlines the fitted model at the register of each stop, both projected into the camera image. Each label gives the fingertip distance of the vendor and the fitted model from the camera fit. Mean over the stops: 18.3\,mm for the vendor model, 3.7\,mm for the fitted model.}%
     \label{fig:hand-fit-yaw}%
 \end{figure}%
 
-\begin{figure}[htbp]%
+\begin{figure}[!htbp]%
     \centering%
-    \includegraphics[width=0.85\textwidth]{figures/hand_fit/thumb_flexion.jpg}%
+    \includegraphics[width=0.7\textwidth]{figures/hand_fit/thumb_flexion.jpg}%
     \caption{Thumb flexion sweep at abduction register 250, six stops from open (register 994) toward closed and back to open (register 991). Magenta outlines show the vendor model and cyan outlines the fitted model. Mean fingertip distance from the camera fit over the stops: 8.9\,mm for the vendor model, 2.1\,mm for the fitted model.}%
     \label{fig:hand-fit-thumb}%
 \end{figure}%
 
 The index (Figure~\ref{fig:hand-fit-index}) shows the smallest register-map error. Its actuated joint lies 0.03 to 0.05\,rad below the vendor map over the closing range and 0.10\,rad below it when fully open. The vendor coupling of 1.12 overbends the distal joint, whereas the fitted coupling is 0.89. Above $q_{\mathrm{i}0}=0.8$\,rad, the measured distal angle departs from the line: at $q_{\mathrm{i}0}=1.03$\,rad the camera measures $q_{\mathrm{i}1}=1.02$\,rad where the fit predicts 0.94\,rad, and at full closure, $q_{\mathrm{i}0}=1.29$\,rad, it measures 1.42\,rad where the fit predicts 1.17\,rad. The coupling is therefore fitted below 0.8\,rad. On the pinch path of the fitting sweep, the index reached at most $q_{\mathrm{i}0}=0.52$\,rad, inside the fitted range.
 
-\begin{figure}[htbp]%
+\begin{figure}[!htbp]%
     \centering%
-    \includegraphics[width=\textwidth]{figures/hand_fit/index_flexion.jpg}%
+    \includegraphics[width=0.8\textwidth]{figures/hand_fit/index_flexion.jpg}%
     \caption{Index flexion sweep, six stops from register 800 through register 401 and back to open (register 999). Magenta outlines show the vendor model and cyan outlines the fitted model. Mean fingertip distance from the camera fit over the stops: 6.9\,mm for the vendor model, 1.4\,mm for the fitted model.}%
     \label{fig:hand-fit-index}%
 \end{figure}%
 
 The coupling check in the lower half of Table~\ref{tab:hand-fit-tips} keeps the measured leading joints and changes the couplings. The vendor variant is also limited to the joint ranges of the vendor model. On the held-out sweep, the fitted couplings reduce the mean thumb tip error from 5.5 to 3.9\,mm, and this gain comes from the vendor joint limits, which clip the thumb, rather than from the coupling ratios. The mean index tip error rises from 1.3 to 1.7\,mm, while its maximum falls from 4.2 to 3.8\,mm. With the measured leading joints, both index couplings thus place the fingertip within a few millimeters. The 6.9\,mm index error of the vendor model in Figure~\ref{fig:hand-fit-index} arises from its register map and its coupling together. At the six index stops, the vendor register map alone with the measured distal joint gives a mean error of 3.1\,mm, and the vendor coupling alone with the measured leading joint gives 2.6\,mm.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption{Fingertip distance from the camera fit in mm, mean / maximum over $n$ stops. Upper part: full models, each driven by the commanded registers, at the six stops of Figures~\ref{fig:hand-fit-yaw} to~\ref{fig:hand-fit-index}. Lower part: couplings only, applied to the measured leading joints, on the thumb flexion stops at abduction register 250 (fitting sweep) and 266 (held-out sweep), the index stops with $q_{\mathrm{i}0}\le0.85$\,rad, and the pinch stops of the fitting sweep and of the held-out sweep.}%
     \label{tab:hand-fit-tips}%
@@ -128,12 +128,12 @@ The fit has three limits. It covers free motion only, so the compliance of the l
 
 The deployment controller is a ros2\_control plugin whose control law reproduces \eqref{eq:osc}. Table~\ref{tab:ctrl-fixed} lists the settings that all measurements in this appendix share. Two terms were added to the law for deployment: a task-wrench dead zone in ros-sim and joint friction compensation on hardware.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Settings of the deployment Cartesian impedance controller]{Settings of the deployment Cartesian impedance controller shared by all measurements in this appendix. Hardware runs without friction compensation differ only in that term. ros-sim differs in the model source (built-in kinematic model instead of libfranka), in gravity (off in the scene instead of compensated), in friction compensation (off by default), and in the dead zone, which can only be set there.}%
     \label{tab:ctrl-fixed}%
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{ll}
+    \small
+    \begin{tabularx}{\textwidth}{lY}
         \toprule
         Quantity & Value \\
         \midrule
@@ -149,7 +149,7 @@ The deployment controller is a ros2\_control plugin whose control law reproduces
         friction compensation $c_j$ / $v_s$ / $\tau_s$ & 0.3\,N\,m on every joint / 0.05\,rad/s / 0.3\,N\,m \\
         task-wrench dead zone & 0 on hardware, selectable in ros-sim \\
         \bottomrule
-    \end{tabular}}
+    \end{tabularx}
 \end{table}%
 
 \paragraph{Dead zone in ros-sim.} The controller implements \eqref{eq:dead-zone} component-wise and applies it to the task wrench before $\vec{\tau}_{\mathrm{task}}=\mat{J}^{\mathrm{T}}\tilde{\vec{w}}$. The thresholds default to zero and can only be set in ros-sim, either to $\vec{d}_{\max}$ (the worst case) or to six explicit values. Training redraws the thresholds at every reset and every 2\,s, whereas ros-sim holds them fixed for a whole run, so the worst case is the upper end of the training distribution. Training expresses the wrench in a world frame that is the robot base rotated by $\pi$ about $z$. This flips the signs of $x$ and $y$ but not the magnitudes, so the base-frame dead zone gives the same result. Two unit tests check that the controller's dead zone matches the training implementation component-wise and that it is off by default.
@@ -186,24 +186,26 @@ The rest band is the quantity a stalled return meets. The bias contains payload 
 
 \paragraph{Results on hardware.} Of six hardware sessions, three ended before the first probe leg with an error. The other three completed. Table~\ref{tab:ctrl-probe} lists their rest bands next to the ros-sim known-answer runs.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Rest band of the static probe]{Rest band of the static probe per base axis, in N or N\,m with the corresponding stall distance in mm or degrees in parentheses. Pose o0 places the grasp point at $(0.30,0.20,0.30)$\,m. The return pose is probed once with the arm in the reset posture and once in the posture in which a return had stalled. Friction compensation, where activated, is 0.3\,N\,m per joint.}%
     \label{tab:ctrl-probe}%
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{lllcccccc}
+    \small
+    \begin{tabularx}{\textwidth}{Ycccccc}
         \toprule
-        System & Pose & Condition & $x$ & $y$ & $z$ & $r_x$ & $r_y$ & $r_z$ \\
+        Pose, condition & $x$ & $y$ & $z$ & $r_x$ & $r_y$ & $r_z$ \\
         \midrule
-        hardware & o0 & no friction compensation & 1.72 (3.0) & 1.25 (2.2) & 1.94 (3.4) & 0.80 (1.6) & 0.82 (1.7) & 0.77 (1.6) \\
-        hardware & o0 & friction compensation activated & 0.92 (1.6) & 1.12 (2.0) & 1.84 (3.3) & 0.86 (1.8) & 0.71 (1.4) & 0.52 (1.1) \\
-        hardware & return, reset posture & friction compensation activated & 0.90 (1.6) & 0.82 (1.5) & 1.61 (2.8) & 1.14 (2.3) & 0.43 (0.9) & 0.37 (0.8) \\
-        hardware & return, drifted posture & friction compensation activated & 1.10 (1.9) & 0.97 (1.7) & 2.11 (3.7) & 1.01 (2.1) & 0.47 (1.0) & 0.34 (0.7) \\
+        \multicolumn{7}{l}{\emph{hardware}} \\
+        o0, no friction compensation & 1.72 (3.0) & 1.25 (2.2) & 1.94 (3.4) & 0.80 (1.6) & 0.82 (1.7) & 0.77 (1.6) \\
+        o0, friction compensation activated & 0.92 (1.6) & 1.12 (2.0) & 1.84 (3.3) & 0.86 (1.8) & 0.71 (1.4) & 0.52 (1.1) \\
+        return, reset posture, friction compensation activated & 0.90 (1.6) & 0.82 (1.5) & 1.61 (2.8) & 1.14 (2.3) & 0.43 (0.9) & 0.37 (0.8) \\
+        return, drifted posture, friction compensation activated & 1.10 (1.9) & 0.97 (1.7) & 2.11 (3.7) & 1.01 (2.1) & 0.47 (1.0) & 0.34 (0.7) \\
         \midrule
-        ros-sim & o0 & worst-case dead zone & 2.88 (5.1) & 2.82 (5.0) & 3.08 (5.5) & 1.30 (2.7) & 1.17 (2.4) & 1.19 (2.4) \\
-        ros-sim & return, reset posture & no dead zone & 1.18 (2.1) & 0.28 (0.5) & 0.46 (0.8) & 0.46 (0.9) & 0.55 (1.1) & 0.64 (1.3) \\
+        \multicolumn{7}{l}{\emph{ros-sim}} \\
+        o0, worst-case dead zone & 2.88 (5.1) & 2.82 (5.0) & 3.08 (5.5) & 1.30 (2.7) & 1.17 (2.4) & 1.19 (2.4) \\
+        return, reset posture, no dead zone & 1.18 (2.1) & 0.28 (0.5) & 0.46 (0.8) & 0.46 (0.9) & 0.55 (1.1) & 0.64 (1.3) \\
         \bottomrule
-    \end{tabular}}
+    \end{tabularx}
 \end{table}%
 
 At both poses the physical arm holds 0.8--2.1\,N and 0.34--1.14\,N\,m, which is 1.5--3.7\,mm and 0.7--2.3\degree. With friction compensation, the band at o0 shrinks on $x$ from 1.72 to 0.92\,N and on $r_z$ from 0.77 to 0.52\,N\,m, and changes by at most 0.13 on the other axes. The drifted posture raises the translational band by 0.15--0.50\,N over the reset posture. Every hardware run has a positive $z$ bias at rest, $+1.27$ to $+2.07$\,N. Without friction compensation, the creep wrench minus the damping share is 1.71--2.23\,N and 0.43--0.60\,N\,m, larger than the breakaway of the same session, 0.86--1.29\,N and 0.45--0.79\,N\,m.
@@ -228,12 +230,12 @@ Three sessions completed: ros-sim without the dead zone, and hardware without an
 
 \paragraph{Results.} Table~\ref{tab:ctrl-sweep} lists the fitted terms, and Figure~\ref{fig:ctrl-sweep} shows the binned losses with the fits for the $x$ and $r_x$ axes. Without friction compensation, the physical arm loses 0.13\,N on $x$ at 0.15\,mm/s, 1.65\,N at 0.76\,mm/s, 2.82\,N at 1.3\,mm/s, 3.63\,N at 4.9\,mm/s, 5.06\,N at 17\,mm/s, and 6.97\,N at 44\,mm/s, with 6.32\,N on $y$ at 44\,mm/s. ros-sim loses 1.59\,N and 1.76\,N on $x$ and $y$ at 51\,mm/s. With friction compensation, the physical arm loses 4.93\,N on $x$ at 43\,mm/s and 3.92\,N on $y$ at 45\,mm/s.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Fitted loss curve per axis]{Fit of \eqref{eq:loss-curve} to the lost wrench per axis at pose o0. $F_c$ in N or N\,m, $v_0$ in mm/s or deg/s, $b$ in N\,s/m or N\,m\,s/rad. The $z$ axis is left out: on hardware its fitted $v_0$ sits at the lower bound of the search grid, and its slowest bin already reads 2.8\,N, a static offset rather than friction (Section~\ref{sec:app-ctrl-probe}). The last row gives the training dead zone for comparison.}%
     \label{tab:ctrl-sweep}%
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{llccccc}
+    \small
+    \begin{tabularx}{\textwidth}{Ylccccc}
         \toprule
         Condition & Term & $x$ & $y$ & $r_x$ & $r_y$ & $r_z$ \\
         \midrule
@@ -251,10 +253,10 @@ Three sessions completed: ros-sim without the dead zone, and hardware without an
         \midrule
         training, worst-case dead zone & $F_c$, $v_0$, $b$ & 5, 0, 0 & 5, 0, 0 & 1, 0, 0 & 1, 0, 0 & 1, 0, 0 \\
         \bottomrule
-    \end{tabular}}
+    \end{tabularx}
 \end{table}%
 
-\begin{figure}[htb]%
+\begin{figure}[!htbp]%
     \centering%
     \includegraphics[width=\textwidth]{figures/controller/loss_curves.pdf}%
     \caption[Lost wrench against speed]{Lost wrench \eqref{eq:lost-wrench} against speed at pose o0, translation along $x$ (left) and rotation about $x$ (right), on hardware without and with friction compensation and in ros-sim without the dead zone. Markers are bin medians, bars the 25th to 75th percentile, lines the fits of \eqref{eq:loss-curve}. Dashed: the worst-case training dead zone, which removes its full threshold at any speed.}%
@@ -275,7 +277,7 @@ The joint friction fit of Section~\ref{sec:app-ctrl-fit} does not account for th
 
 \paragraph{Results.} In the second run, the arm settled 3.7\,s into the return at 16--17\,mm and $7\degree$ with all joints below 0.006\,rad/s, and then crept to 14.5\,mm and $5.9\degree$. Averaged over the rest, the error is 15.8\,mm and $6.4\degree$, the spring force $(8.33,-3.18,0.82)$\,N, and the spring torque $(-0.60,1.86,2.46)$\,N\,m. Table~\ref{tab:ctrl-stall} gives the joint torques.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Joint torques at a return stall]{Joint torques at the return stall of the second run, from the position spring and the rotation spring separately, their sum, and the commanded torque recorded at rest, in N\,m.}%
     \label{tab:ctrl-stall}%
@@ -304,7 +306,7 @@ The two springs oppose each other on j1--j6. What remains is 1.6\,N\,m on j4 and
 
 \paragraph{ros-sim.} Five ros-sim runs were made, all without the dead zone. Three completed, one stopped near a singularity, and one was rejected because a joint ended 0.22\,rad from the start posture. Table~\ref{tab:ctrl-repeat} lists the completed runs.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Accuracy and repeatability in ros-sim]{Accuracy and repeatability of the controller in ros-sim without the dead zone, two positions $\times$ four orientations, each approached from both sides. All arrivals ended inside 5\,mm and $5\degree$.}%
     \label{tab:ctrl-repeat}%
@@ -322,12 +324,12 @@ The two springs oppose each other on j1--j6. What remains is 1.6\,N\,m on j4 and
 
 \paragraph{Hardware runs.} Three early hardware attempts stopped before their first arrival. In one, the controller rejected a goto step of 3.03\,rad, one was interrupted, and one was rejected because the start posture was 0.71\,rad from the checked one. Of five later runs, four completed and one was rejected at the start, because the forward kinematics of the measured joints disagreed with the robot's end-effector pose. The two runs used for accuracy were made about ten minutes apart, one without and one with friction compensation. Each has 40 arrivals, two positions $\times$ orientations o0 (flange down) and o1 ($30\degree$ yaw) $\times$ two sides $\times$ five repeats, and every arrival settled. Two earlier runs, again one without and one with friction compensation, have 80 arrivals at four orientations with a fixed 2\,s hold. They are used below only for arrival speed, not for accuracy. Table~\ref{tab:ctrl-repeat-hw} gives the results of the two settled runs. The error 1\,s after the goal stopped and the median speed of the grasp point while the position clip was active were computed from the 50\,Hz pose samples.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Accuracy and repeatability of the physical arm]{Accuracy and repeatability of the physical arm, 40 settled arrivals per run at A and B, orientations o0 and o1, both sides, five repeats. Per-target values are listed as A/o0, A/o1, B/o0, B/o1. Friction compensation, where activated, is 0.3\,N\,m per joint.}%
     \label{tab:ctrl-repeat-hw}%
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{lcc}
+    \small
+    \begin{tabularx}{\textwidth}{lCC}
         \toprule
         Quantity & No friction compensation & Friction compensation activated \\
         \midrule
@@ -343,7 +345,7 @@ The two springs oppose each other on j1--j6. What remains is 1.6\,N\,m on j4 and
         error 1\,s after the goal stopped (median) & 18.2\,mm & 6.9\,mm \\
         speed while the position clip is active (median) & 95\,mm/s & 128\,mm/s \\
         \bottomrule
-    \end{tabular}}
+    \end{tabularx}
 \end{table}%
 
 Within a target and side, the rest error changes from the first to the fifth repeat by $-0.5$ to $+2.6$\,mm without friction compensation and by $-0.6$ to $+2.1$\,mm with it, and grows in six of eight cases in both runs. Over the same five repeats, the rest posture drifts by $-0.24$ to $-0.42$\,rad on j1 and $+0.20$ to $+0.37$\,rad on j3. The earlier runs give the same order between the two settings. The median error 1\,s after the goal stopped is 19.9\,mm without and 7.6\,mm with friction compensation, and the median speed with the position clip active is 86 and 126\,mm/s. In ros-sim (run 1 of Table~\ref{tab:ctrl-repeat}) it is 178\,mm/s.
@@ -364,11 +366,12 @@ with Coulomb friction $\tau_{c,j}$, viscous coefficient $b_j$, and offset $o_j$.
 
 \paragraph{Results.} Table~\ref{tab:ctrl-fit} lists the Coulomb terms of 56 runs on seven days over two weeks.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Joint Coulomb friction fitted from rollouts]{Coulomb friction $\tau_c$ per joint of the physical \ac{FR3}, in N\,m, fitted from hardware rollouts per day with \eqref{eq:friction-fit}. Days are numbered in chronological order over two weeks. The last row gives the correlation between the lost torque and $\operatorname{sign}(\dot{q})$ over the days. For j1 it is undefined on two days.}%
     \label{tab:ctrl-fit}%
-    \resizebox{\textwidth}{!}{%
+    \small
+    \setlength{\tabcolsep}{3pt}%
     \begin{tabular}{lcccccccc}
         \toprule
         Day & Runs & j1 & j2 & j3 & j4 & j5 & j6 & j7 \\
@@ -383,7 +386,7 @@ with Coulomb friction $\tau_{c,j}$, viscous coefficient $b_j$, and offset $o_j$.
         \midrule
         correlation & & 0.70--0.87 & 0.93--0.97 & 0.58--0.88 & 0.54--0.96 & 0.90--0.98 & 0.55--0.93 & 0.79--0.95 \\
         \bottomrule
-    \end{tabular}}
+    \end{tabular}
 \end{table}%
 
 The Coulomb friction is 0.21--0.97\,N\,m depending on the joint. It is largest on j2 (0.82--0.97\,N\,m), and on j1 it roughly doubled from 0.31--0.35\,N\,m on days 1--3 to 0.54--0.61\,N\,m from day 4 on. The other joints vary by at most 0.19\,N\,m over the seven days. The viscous coefficients scatter between $-0.01$ and 4.86\,N\,m\,s/rad. They are not used as a friction model, only for the rough comparison in Section~\ref{sec:app-ctrl-sweep}.
@@ -402,12 +405,12 @@ Three rollout comparisons test which of these properties matter for deployment. 
 
 \paragraph{Results.} The hardware runs completed 3 and 6 cycles, which gives 9 hardware cycles. In ros-sim, five of six runs ended with a re-home failure (a 15\,s timeout of the controller manager), so the comparison has 3 cycles without the dead zone, none of them completed, and 4 cycles with the dead zone, one of them completed. Table~\ref{tab:ctrl-dz-rollout} summarizes the cycle metrics, Table~\ref{tab:ctrl-dz-distance} the observation distances, and Figure~\ref{fig:ctrl-dz-overlay} the traces.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Per-cycle metrics with and without the dead zone in ros-sim]{Per-cycle metrics of the proprio-friction student $S_1$ on hardware and in ros-sim with and without the worst-case dead zone. Ranges are over cycles. The return error is taken at the last sample of the return, when the re-home gate of 30\,mm and $25\degree$ is met. Grip width is the median fingertip separation over the last 30 policy steps.}%
     \label{tab:ctrl-dz-rollout}%
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{lccc}
+    \small
+    \begin{tabularx}{\textwidth}{lCCC}
         \toprule
         Metric & Hardware & ros-sim, worst-case dead zone & ros-sim, no dead zone \\
         \midrule
@@ -418,15 +421,15 @@ Three rollout comparisons test which of these properties matter for deployment. 
         grip width & 31.7--35.2\,mm & 6.1--8.0\,mm (28.2 in one cycle) & 6.2\,mm \\
         peak j5 angle & 1.89--1.98\,rad & 2.05--2.20\,rad & 1.68--1.69\,rad \\
         \bottomrule
-    \end{tabular}}
+    \end{tabularx}
 \end{table}%
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Observation distances to the hardware mean]{RMS distance of observation groups to the hardware mean over the first 69 policy steps of every cycle. ``Hardware spread'' is the distance of the hardware cycles to their own mean. Joint positions in rad, velocities in rad/s, previous actions in normalized units, pad forces divided by 20\,N, torques divided by the joint limit.}%
     \label{tab:ctrl-dz-distance}%
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{lccc}
+    \small
+    \begin{tabularx}{\textwidth}{lCCC}
         \toprule
         Channel & Hardware spread & ros-sim, no dead zone & ros-sim, worst-case dead zone \\
         \midrule
@@ -438,16 +441,16 @@ Three rollout comparisons test which of these properties matter for deployment. 
         pad forces & 0.112 & 0.434 & 0.405 \\
         arm torques & 0.016 & 0.060 & 0.060 \\
         \bottomrule
-    \end{tabular}}
+    \end{tabularx}
 \end{table}%
 
 With the worst-case dead zone, the policy phase lasts as long as on hardware. The arm joint positions and the previous actions are two to three times closer to the hardware mean than without it, the joint velocities 1.4 times. Joints q2, q4, and q6 come within 0.032--0.035\,rad of the hardware mean, q7 improves only from 0.128 to 0.105\,rad, and q3 is closer without the dead zone. At the end of the return, the joint offsets from the reset posture agree with hardware on j2, j4, j5, and j6 (hardware $-0.28$ to $-0.30$, $-0.47$ to $-0.50$, $0.29$ to $0.37$, $0.36$ to $0.43$\,rad, dead zone $-0.31$ to $-0.32$, $-0.49$, $0.33$ to $0.35$, $0.40$ to $0.42$\,rad), but have the opposite sign on j1 and j3 (hardware $-0.19$ to $-0.21$ and $+0.19$ to $+0.21$\,rad, dead zone $+0.20$ to $+0.23$ and $-0.18$ to $-0.21$\,rad). Without the dead zone, the return reaches the orientation bound of the gate early and ends at 3.2\,mm and 14--15\degree. With it and on hardware, the return ends exactly at the $25\degree$ bound, with 11.5--12.9\,mm on hardware and 17.2--17.8\,mm in ros-sim.
 
 The dead zone does not reproduce the grasp. With it, the lowest grasp height is 8--14\,mm above hardware, and in six of seven ros-sim cycles, with or without the dead zone, the grip closes to 6--8\,mm, whereas hardware holds 32--35\,mm. The pad forces are as far from hardware with the dead zone as without it. The torque observations are not comparable, because hardware logs the external-torque estimate and ros-sim logs the commanded torque.
 
-\begin{figure}[p]%
+\begin{figure}[!htbp]%
     \centering%
-    \includegraphics[width=\textwidth]{figures/controller/deadzone_proprio_overlay.png}%
+    \includegraphics[width=0.8\textwidth]{figures/controller/deadzone_proprio_overlay.png}%
     \caption[Observations per cycle on hardware and in ros-sim]{Observations of the proprio-friction student $S_1$ per cycle, aligned on the first policy step (one step is 1/15\,s). Black: nine hardware cycles of two runs. Blue: ros-sim without the dead zone. Red: ros-sim with the worst-case dead zone of 5\,N and 1\,N\,m. Panels show the student's proprioception (joint positions and velocities, previous action, pad forces, arm torques divided by the joint limit) and, in the last row, grasp height, fingertip separation, controller tracking error, the turn proxy, and the process phase.}%
     \label{fig:ctrl-dz-overlay}%
 \end{figure}%
@@ -462,7 +465,7 @@ The dead zone does not reproduce the grasp. With it, the lowest grasp height is 
 
 \paragraph{Results.} On hardware, the first grip held from step 24 to about step 60 and was lost at step 63, after which the run was interrupted at step 100. The windows of the comparison are approach (steps 0--21), contact and hold (22--62), and after the slip (63--98). During the approach, the policy actions of all three ros-sim runs differ from hardware by at most 0.035 in normalized units per channel. Table~\ref{tab:ctrl-returndz} gives the grasp height and the vertical tracking error, and Figure~\ref{fig:ctrl-returndz} shows the grasp position.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Grasp height and vertical error of the return-dead-zone student]{Grasp height and vertical controller error (target minus measured) of the return-dead-zone student $S_2$ per window, hardware against the ros-sim runs of the same checkpoint. Ranges over the steps of each window.}%
     \label{tab:ctrl-returndz}%
@@ -480,7 +483,7 @@ The dead zone does not reproduce the grasp. With it, the lowest grasp height is 
     \end{tabular}
 \end{table}%
 
-\begin{figure}[htb]%
+\begin{figure}[!htbp]%
     \centering%
     \includegraphics[width=\textwidth]{figures/controller/returndz_grasp_pos.png}%
     \caption[Grasp position of the return-dead-zone student]{Grasp position of the return-dead-zone student $S_2$ in the robot base frame on hardware (black) against ros-sim without the dead zone (blue) and with the worst-case dead zone (red and orange, two runs), aligned on the policy step. Dotted lines mark the first finger contact on hardware (step 22) and the slip (step 63).}%
@@ -503,7 +506,7 @@ After the slip step, the simulated hand is held at 123.7--128.8\,mm while its ve
 
 \paragraph{Results.} Table~\ref{tab:ctrl-tclip} gives the transition phases of runs 2 and 3, and Figure~\ref{fig:ctrl-tclip} shows run 2. In earlier runs with the policy clip in the transitions, orientation had stopped at 16--20\degree\ during the return. With the transition clip, every return of runs 1--5 that passed the gate did so within 2.0--2.7\,s, and no run hit a tracking fault. With re-homing, 12 of 12 cycles completed in runs 3--5. Without re-homing, the position error at the end of the return grew from cycle to cycle, 13.0, 15.6, and 17.3\,mm in run 2, while the arm posture drifted within every cycle, about $-0.2$\,rad on j1 and $+0.2$\,rad on j3, and the drift carried into the next cycle. With re-homing it stayed at 12.5--13.5\,mm. In run 1, cycle 2 did not pass the 15\,mm gate and stopped at 15.2\,mm and $6.7\degree$ after 16.9\,s. Run 6 ended in cycle 1 when the grip collapsed during the turn.
 
-\begin{table}[htb]%
+\begin{table}[!htbp]%
     \centering%
     \caption[Transition phases with the transition clip]{Transition phases with the transition clip (0.05\,m, 0.25\,rad, fault limits 0.1\,m and 0.5\,rad) on hardware, runs 2 and 3, three cycles each. Ranges over cycles. Errors are against the clipped target.}%
     \label{tab:ctrl-tclip}%
@@ -521,9 +524,9 @@ After the slip step, the simulated hand is held at 123.7--128.8\,mm while its ve
     \end{tabular}
 \end{table}%
 
-\begin{figure}[htb]%
+\begin{figure}[!htbp]%
     \centering%
-    \includegraphics[width=0.9\textwidth]{figures/controller/transition_clip_hw_run2.png}%
+    \includegraphics[width=0.75\textwidth]{figures/controller/transition_clip_hw_run2.png}%
     \caption[Transition clip on hardware]{Transition clip on hardware, run 2 (three cycles without re-homing), from the 1\,kHz controller state. From top to bottom: orientation error against the clipped target and against the goal with the fault limit, position error with the fault limit, clip flags and the orientation clip in effect, and the task torque. Green bands mark waypoint following, orange bands the return to reset.}%
     \label{fig:ctrl-tclip}%
 \end{figure}%

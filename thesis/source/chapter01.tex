@@ -68,9 +68,9 @@ The difficulties of dexterous threading are addressed separately in prior work. 
 The gap of Section~\ref{sec:problem-setup} is a policy that sustains cyclic threading with a dexterous hand from sensor data, learned in simulation and deployed on hardware. Three research questions follow from it.
 
 \begin{description}
-  \item[RQ1 (long horizon).] In long-horizon cyclic manipulation such as nut threading, does a visuomotor policy distilled from complete multi-cycle demonstrations outperform a single-cycle policy that is invoked repeatedly?
-  \item[RQ2 (policy design).] Does a point-cloud encoder condense the task-relevant scene information better than an image-space encoder, and does a conditional flow-matching action head transfer the teacher's skill better than deterministic action regression, when a privileged teacher is distilled into a visuomotor student?
-  \item[RQ3 (sim-to-real).] Does a visuomotor policy distilled from simulated demonstrations keep its task success and tracking accuracy when deployed zero-shot on a physical dexterous hand--arm system?
+  \item[RQ1 (long horizon).] \RQone
+  \item[RQ2 (policy design).] \RQtwo
+  \item[RQ3 (sim-to-real).] \RQthree
 \end{description}
 
 RQ1 addresses the compounding error of the cyclic task (Section~\ref{sec:difficulty-horizon}). RQ2 addresses the dimensionality of the hand (Section~\ref{sec:motivation}), because the deployed policy has to control hand and arm from perception alone over the whole horizon. RQ3 addresses the transfer difficulty (Section~\ref{sec:difficulty-transfer}) and, through the simplified thread model, the contact difficulty (Section~\ref{sec:difficulty-contact}). Chapter~\ref{ch:experiments} answers RQ1 and RQ2 with ablations in simulation, two of which are repeated on hardware, and RQ3 on hardware.

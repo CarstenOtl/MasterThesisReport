@@ -19,6 +19,8 @@
 \usepackage{multirow}%
 \usepackage{subcaption}%
 \usepackage{tabularx}%
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}% wrapping left-aligned column
+\newcolumntype{C}{>{\centering\arraybackslash}X}% wrapping centered column
 \usepackage{colortbl}%
 \colorlet{cellbetter}{green!15}%
 \colorlet{cellworse}{red!15}%
@@ -42,6 +44,10 @@
 % Typewriter paths and identifiers that may break after / _ - . (no escaping of _ needed)
 \DeclareUrlCommand\cpath{\urlstyle{tt}\def\UrlBreaks{\do\/\do\_\do\-\do\.}}%
 \newcommand{\degree}[0]{\ensuremath{^\circ}}%
+% Research questions: stated in Section 1.3 and recalled in Chapter 5.
+\newcommand{\RQone}{In long-horizon cyclic manipulation such as nut threading, does a visuomotor policy distilled from complete multi-cycle demonstrations outperform a single-cycle policy that is invoked repeatedly?}%
+\newcommand{\RQtwo}{Does a point-cloud encoder condense the task-relevant scene information better than an image-space encoder, and does a conditional flow-matching action head transfer the teacher's skill better than deterministic action regression, when a privileged teacher is distilled into a visuomotor student?}%
+\newcommand{\RQthree}{Does a visuomotor policy distilled from simulated demonstrations keep its task success and tracking accuracy when deployed zero-shot on a physical dexterous hand--arm system?}%
 % Draft placeholders: every missing number, figure, or citation is marked with \tbd
 % and a "% TODO(...)" comment. All of them are collected in thesis/TODO_draft.md.
 \newcommand{\tbd}{\textcolor{red}{TBD}}%
