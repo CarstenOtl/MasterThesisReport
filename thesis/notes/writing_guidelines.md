@@ -36,3 +36,16 @@
 - No dashes as sentence punctuation. Use a comma or split the sentence.
 - No semicolons. Never join two clauses with ";". Write two sentences. Do not use semicolons to separate list items either. Rewrite the list as sentences or an itemized list.
 - Keep tense consistent: past for what was done, present for what the thesis shows or states.
+
+## Abstract
+The abstract follows four moves in this order: identify the problem, explain our work, emphasize our results, and close with one sentence that states the novelty.
+
+- **Problem.** Open by placing the task in its research field. Then state each challenge in its own sentence, together with its consequence for learning (e.g. "..., which limits ..."). Name only the challenges that the method answers.
+- **Our work.** Introduce the method with its name and type before any detail: "We therefore propose <name>, a framework that combines <A> and <B> to <goal>." Then give one sentence per component, with parallel openings that name it ("In the teacher training phase, ...", "In the student training phase, ...").
+- **Results.** Report the headline numbers with units, first in simulation, then on the physical system. Include the strongest comparison. Summarize generalization in one sentence instead of listing every condition.
+- **Novelty.** End with a single claim of what is new, hedged as "To the best of our knowledge, ...". The claim must be backed by the related work chapter.
+- Write in the first person plural ("we propose", "we train").
+- Use the field's vocabulary instead of everyday words: "challenging" instead of "hard", "must" instead of "has to". Drop "is able to".
+- Make the logic explicit with connectives ("Therefore", "Additionally"). Complete paired connectives: "On the one hand" needs "On the other hand".
+- Use no vague qualifiers such as "a certain degree of precision". State the number instead.
+- Define every acronym at first use. Name an established component (e.g. the DP3 visual encoder) only together with what it does.
