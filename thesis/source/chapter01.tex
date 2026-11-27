@@ -43,7 +43,7 @@ Three properties make such tasks hard. First, errors compound across cycles. A g
 
 The common answer is to decompose the task into skills, train one policy per skill, and chain the policies at deployment~\cite{Chen2023}. In a chain, the final state of one policy has to lie in the region where the next policy succeeds. This requires additional mechanisms that fine-tune the sub-policies for their neighbors~\cite{Chen2023,Lee2022}, and several policies together with a switching logic have to be deployed. A second answer is to imitate complete long-horizon demonstrations with one generative policy~\cite{Chi2024,Black2026}. This avoids the reward problem, but it needs demonstrations of the whole task, and teleoperated demonstrations of forceful dexterous manipulation are hard to collect~\cite{Kedia2026}. The method should therefore combine the strengths of both answers. Its training signal should be as easy to specify phase by phase as in a decomposition, and it should deploy one policy that sustains many cycles without switching between separate policies.
 
-\subsection{Zero-Shot Sim-to-Real Transfer for Visuomotor Policies}\label{sec:difficulty-transfer}
+\subsection{Sim-to-Real Transfer for Visuomotor Policies}\label{sec:difficulty-transfer}
 
 A skill that is learned in simulation has to survive the transfer to hardware. The policy acts on the physical system with the same commands that it learned in simulation, so the simulation has to reproduce the physical system wherever the outcome of a command depends on it.
 
@@ -55,11 +55,11 @@ No simulation reproduces the physical system exactly. Domain randomization there
 \begin{figure}[htb]%
     \centering%
     \includegraphics[width=0.55\textwidth]{figures/domain_randomization_amplified.png}%
-    \caption{Illustration of domain randomization. A single calibrated simulation (red circle) may not match reality (green triangle), but a sufficiently wide distribution of randomized simulations (dashed ellipses) can encompass the real-world conditions and enable zero-shot transfer. Figure from~\cite{Weng2019DR}.}%
+    \caption{Illustration of domain randomization. A single calibrated simulation (red circle) may not match reality (green triangle), but a sufficiently wide distribution of randomized simulations (dashed ellipses) can encompass the real-world conditions and enable sim-to-real transfer without real-world data. Figure from~\cite{Weng2019DR}.}%
     \label{fig:domain-randomization}%
 \end{figure}%
 
-Perception has to be matched in the same way, because rendered images differ from real ones in lighting, texture, and depth noise~\cite{Tobin2017,Handa2024}. The policy of this thesis should transfer zero-shot, so that it runs on the robot as it was trained in simulation. For this, the perception, the action path, and the randomization of the simulation have to be matched to the physical system.
+Perception has to be matched in the same way, because rendered images differ from real ones in lighting, texture, and depth noise~\cite{Tobin2017,Handa2024}. The policy of this thesis should transfer sim-to-real without real-world data, so that it runs on the robot as it was trained in simulation. For this, the perception, the action path, and the randomization of the simulation have to be matched to the physical system.
 
 The difficulties of dexterous threading are addressed separately in prior work. Simulation-based assembly learning makes thread contact tractable and transfers insertion and threading to hardware, but with a parallel-jaw gripper and a part that is already held when contact begins~\cite{Narang2022,Noseworthy2025,Tang2023industreal}. Learned dexterous screwing covers a spinning gait for an installed nut~\cite{Hsieh2026} and goal-conditioned screwing of a furniture leg~\cite{Lum2026}. Policy chaining reaches long horizons at the cost of transitions between separately trained policies~\cite{Lee2022,Chen2023}, and teacher--student distillation yields deployable visuomotor policies for single skills~\cite{Lum2024,Singh2025}. No prior work threads a nut over many grasp-and-release cycles with a dexterous hand, and none does so with a policy trained on simulated data alone. Chapter~\ref{ch:sota} reviews this work in detail. The gap raises the research questions of the next section.
 
@@ -91,7 +91,7 @@ The thesis makes three contributions.
 \begin{enumerate}
   \item \emph{A hybrid teacher for cyclic nut threading.} Cyclic threading is formulated as an ordered sequence of phases with cyclic and episodic tracking errors. A privileged \ac{RL} policy, trained in a simplified thread simulation that couples axial travel to rotation, is chained with scripted release and return into a teacher that generates multi-cycle demonstrations.
   \item \emph{A unified visuomotor student distilled by conditional flow matching.} One student predicts action chunks from a point cloud and proprioception for every phase of every cycle. In simulation, it completes all ten cycles in every trial, and every ablated student fails earlier.
-  \item \emph{Zero-shot sim-to-real transfer.} A calibrated camera model, visual randomization, and a Cartesian action path shared with the robot transfer the student to a physical dexterous hand--arm system without real-world data. On hardware, it completes all ten cycles in every trial on hexagonal nuts of three sizes and on unseen octagonal and round profiles, and it fails on a rectangular profile.
+  \item \emph{Sim-to-real transfer.} A calibrated camera model, visual randomization, and a Cartesian action path shared with the robot transfer the student to a physical dexterous hand--arm system without real-world data. On hardware, it completes all ten cycles in every trial on hexagonal nuts of three sizes and on unseen octagonal and round profiles, and it fails on a rectangular profile.
 \end{enumerate}
 
 This work was carried out together with the advisor, who developed substantial parts of the hybrid teacher, the distillation stack, and the hardware experiments. The acknowledgments state this attribution.
